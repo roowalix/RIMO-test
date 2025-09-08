@@ -166,7 +166,22 @@ document.getElementById('today').textContent =
   new Date().toLocaleDateString('ko-KR',{month:'long',day:'numeric',weekday:'short'});
 
 /* 데이터 (time: "M월 D일 HH:MM") */
-let crews = [
+// 기존 crews 배열 선언 자리에 ↓
+const LS_CREWS = 'rimo_crews_v1';
+let crews = [];
+try {
+  crews = JSON.parse(localStorage.getItem(LS_CREWS) || '[]');
+} catch(e) { crews = []; }
+
+// (선택) 초기 카드가 하나도 없으면 안내용 더미를 보여주고 싶다면:
+if (!crews.length) {
+  crews = [{
+    id:"demo1", theme:"blue", title:"<예시 카드 — 관리자에서 발행하세요>",
+    time:"10월 10일 19:00", from:"출발지", to:"도착지",
+    lat:37.5665, lng:126.9780, toLat:37.55, toLng:127.0,
+    peopleNow:0, peopleMax:4, styles:["Urban","Easy"], cc:"", msg:"관리자 페이지에서 발행하면 이 예시는 사라집니다."
+  }];
+}
   { id:"crew1", theme:"red", title:"<가을맞이 카페 라이딩>", time:"9월 9일 01:00",
     from:"GS25 한강르네상스 반포2호", to:"RSG 성수",
     lat:37.5086371, lng:126.9941734, toLat:37.541193, toLng:127.056428,
