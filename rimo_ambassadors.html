@@ -114,6 +114,51 @@
   .callout .cta{margin-left:auto;padding:8px 12px;border-radius:999px;
            background:#2a5bff;color:#fff;font-weight:800;border:0;cursor:pointer}
   .hidden{display:none}
+  <script>
+    const LS_KEY='rimo_profile_v1';
+
+  function loadProfileSafe(){
+    try{ return JSON.parse(localStorage.getItem(LS_KEY)||'null'); }
+    catch(e){ return null; }
+  }
+  function needsProfile(p){
+    // 필수값: 이름, 지역, 기종(메인/엠버서더에서 표시용)
+    return !p || !p.name || !p.region || !p.bike;
+  }
+  function showProfileCalloutIfNeeded(){
+    const p = loadProfileSafe();
+    const box = document.getElementById('profileCallout');
+    if(!box) return;
+    if(needsProfile(p)) box.classList.remove('hidden');
+    else box.classList.add('hidden');
+    return p;
+  }
+
+  // ✅ 메인/엠버서더 공통으로 초기화 시 호출
+  const currentProfile = showProfileCalloutIfNeeded();
+
+  const LS_KEY='rimo_profile_v1';
+
+  function loadProfileSafe(){
+    try{ return JSON.parse(localStorage.getItem(LS_KEY)||'null'); }
+    catch(e){ return null; }
+  }
+  function needsProfile(p){
+    // 필수값: 이름, 지역, 기종(메인/엠버서더에서 표시용)
+    return !p || !p.name || !p.region || !p.bike;
+  }
+  function showProfileCalloutIfNeeded(){
+    const p = loadProfileSafe();
+    const box = document.getElementById('profileCallout');
+    if(!box) return;
+    if(needsProfile(p)) box.classList.remove('hidden');
+    else box.classList.add('hidden');
+    return p;
+  }
+
+  // ✅ 메인/엠버서더 공통으로 초기화 시 호출
+  const currentProfile = showProfileCalloutIfNeeded();
+</script>
 </style>
 </head>
 <body>
