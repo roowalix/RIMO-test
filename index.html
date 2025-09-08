@@ -88,6 +88,17 @@
   .alert-sheet{max-width:520px}
   .alert-title{margin:2px 0 8px;font-size:18px}
   .alert-text{color:#d7dbff;margin:0 0 12px;line-height:1.5}
+  
+    /* 하단 네비 (메인/프로필과 동일) */
+  .tabbar{
+    position:fixed; left:0; right:0; bottom:16px; z-index:2500;
+    display:flex; gap:12px; justify-content:center;
+  }
+  .tabbar .tab{
+    background:var(--tab-bg); border:1px solid var(--tab-bd); color:var(--tab-ink);
+    padding:12px 18px; border-radius:22px; font-weight:800; text-decoration:none; font-size:14px;
+  }
+  .tabbar .tab.primary{background:var(--tab-pri); border-color:var(--tab-pri-bd)}
 </style>
 </head>
 <body>
