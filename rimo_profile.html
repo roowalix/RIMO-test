@@ -34,10 +34,10 @@
   /* 작성 패널 */
   .panel{background:var(--tile);padding:12px;border-radius:14px;border:1px solid var(--line);
          display:flex;flex-direction:column;gap:10px}
-  .form-row{display:flex;align-items:center;gap:10px;margin-left:6px}
+  .form-row{display:flex;align-items:center;gap:0px;margin-bottom:0}
   .form-row.top{align-items:flex-start}
   .form-row label{width:var(--label-width);font-size:14px;font-weight:700;white-space:nowrap}
-  .field{flex:0.95}
+  .field{flex:1}
   input[type="text"],select,textarea{
     width:100%;padding:8px 12px; border-radius:8px;border:1px solid #2c2f48;
     background:#0f1020;color:#fff;font-size:14px;
@@ -47,23 +47,13 @@
   /* 토글(필) */
   .toggles{display:flex;gap:4px;flex-wrap:wrap;margin:4px 0}
   .toggle{
-    display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;
-    border:1px solid #2b2e54;background:#1a1c2f;color:#e6e9ff;font-size:12px;cursor:pointer;
-    user-select:none;white-space:nowrap;transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease, background-color .15s ease, color .15s ease;
-  }
-  .toggle[role="button"]{outline:none}
-  .toggle:focus-visible{
-    outline:1px solid var(--accent);
-    outline-offset:2px;
+    display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;
+    border:1px solid #2b2e54;background:#1a1c2f;color:#e6e9ff;font-size:13px;cursor:pointer;
+    user-select:none;white-space:nowrap;transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease, background-color .15s ease;
   }
   .toggle.active{
-    border-color:var(--accent);
-    border-width:1px;
-    background:rgba(122,167,255,.16);
-    color:#ffffff;
-    box-shadow:0 0 10px rgba(122,167,255,.55), 0 0 0 1px rgba(122,167,255,.25) inset;
-    transform:translateY(-1px) scale(1.03);
-    font-weight:500;
+    border-color:var(--accent);border-width:2px;background:rgba(122,167,255,.16);
+    box-shadow:0 0 10px rgba(122,167,255,.45);transform:translateY(-1px) scale(1.03);font-weight:800;
   }
   .style-pill.pill-urban{border-color:#2c4484}
   .style-pill.pill-curve{border-color:#40307a}
@@ -75,22 +65,9 @@
   /* 아이콘 (5×2) + 소개 폭 동일 */
   .profile-icons{display:flex;flex-direction:column;align-items:center;gap:10px;margin:0px 0 0}
   .icons{display:grid;grid-template-columns:repeat(5,48px);grid-auto-rows:48px;gap:10px;justify-content:center}
-  .icon-btn{
-    width:50px;height:50px;border-radius:50%;
-    display:flex;align-items:center;justify-content:center;
-    font-size:28px;cursor:pointer;background:#1a1c2f;border:1px solid #2c2f48;transition:.15s ease;color:#fff;
-    outline:none;
-  }
-  .icon-btn:focus-visible{
-    outline:2px solid var(--accent);
-    outline-offset:2px;
-  }
-  .icon-btn.active{
-    border-color:var(--accent);
-    box-shadow:0 0 12px rgba(122,167,255,.55), 0 0 0 2px rgba(122,167,255,.25) inset;
-    transform:scale(1.06);
-  }
-
+  .icon-btn{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:28px;cursor:pointer;background:#1a1c2f;border:1px solid #2c2f48;transition:.15s ease;color:#fff}
+  .icon-btn.active{border-color:var(--accent);box-shadow:0 0 10px rgba(122,167,255,.4);transform:scale(1.05)}
   .intro-box{width:calc(48px*5 + 10px*4);margin:8px 0 0}
   #intro{width:100%;text-align:center;font-size:13px}
 
@@ -132,7 +109,7 @@
 <header>
   <div class="bar">
     <div class="logo">🏍️ RIMO</div>
-    <div class="title">라이더 프로필</div>
+    <div class="title">엠버서더 라이더 카드</div>
   </div>
 </header>
 
@@ -191,34 +168,34 @@
     <div class="form-row">
       <label>스타일</label>
       <div class="toggles" data-group="style">
-        <span class="toggle style-pill pill-urban" role="button" tabindex="0" aria-pressed="false" data-value="Urban">🏙️ Urban</span>
-        <span class="toggle style-pill pill-curve" role="button" tabindex="0" aria-pressed="false" data-value="Curve">🌀 Curve</span>
-        <span class="toggle style-pill pill-tour" role="button" tabindex="0" aria-pressed="false" data-value="Tour">🗺️ Tour</span>
+        <span class="toggle style-pill pill-urban"  data-value="Urban">🏙️ Urban</span>
+        <span class="toggle style-pill pill-curve"  data-value="Curve">🌀 Curve</span>
+        <span class="toggle style-pill pill-tour"   data-value="Tour">🗺️ Tour</span>
       </div>
     </div>
 
     <div class="form-row">
       <label>페이스</label>
       <div class="toggles" data-group="speed">
-        <span class="toggle pace-pill pill-easy" role="button" tabindex="0" aria-pressed="false" data-value="Easy">🟢 Easy</span>
-        <span class="toggle pace-pill pill-balanced" role="button" tabindex="0" aria-pressed="false" data-value="Balanced">⚖️ Balanced</span>
-        <span class="toggle pace-pill pill-dynamic" role="button" tabindex="0" aria-pressed="false" data-value="Dynamic">⚡ Dynamic</span>
+        <span class="toggle pace-pill pill-easy"     data-value="Easy">🟢 Easy</span>
+        <span class="toggle pace-pill pill-balanced" data-value="Balanced">⚖️ Balanced</span>
+        <span class="toggle pace-pill pill-dynamic"  data-value="Dynamic">⚡ Dynamic</span>
       </div>
     </div>
 
     <!-- 아이콘 + 소개 -->
     <div class="profile-icons">
       <div class="icons" id="iconSelect">
-        <button type="button" class="icon-btn" aria-pressed="false" data-icon="🏍️">🏍️</button>
-        <button type="button" class="icon-btn" aria-pressed="false" data-icon="🛵">🛵</button>
-        <button type="button" class="icon-btn" aria-pressed="false" data-icon="🔥">🔥</button>
-        <button type="button" class="icon-btn" aria-pressed="false" data-icon="🌊">🌊</button>
-        <button type="button" class="icon-btn" aria-pressed="false" data-icon="☕">☕</button>
-        <button type="button" class="icon-btn" aria-pressed="false" data-icon="⭐">⭐</button>
-        <button type="button" class="icon-btn" aria-pressed="false" data-icon="🏁">🏁</button>
-        <button type="button" class="icon-btn" aria-pressed="false" data-icon="🐶">🐶</button>
-        <button type="button" class="icon-btn" aria-pressed="false" data-icon="⚡">⚡</button>
-        <button type="button" class="icon-btn" aria-pressed="false" data-icon="🎱">🎱</button>
+        <div class="icon-btn" data-icon="🏍️">🏍️</div>
+        <div class="icon-btn" data-icon="🛵">🛵</div>
+        <div class="icon-btn" data-icon="🔥">🔥</div>
+        <div class="icon-btn" data-icon="🌊">🌊</div>
+        <div class="icon-btn" data-icon="☕">☕</div>
+        <div class="icon-btn" data-icon="⭐">⭐</div>
+        <div class="icon-btn" data-icon="🏁">🏁</div>
+        <div class="icon-btn" data-icon="🐶">🐶</div>
+        <div class="icon-btn" data-icon="⚡">⚡</div>
+        <div class="icon-btn" data-icon="🎱">🎱</div>
       </div>
       <div class="intro-box">
         <textarea id="intro" maxlength="25" placeholder="간단한 자기소개 (25자 이내)"></textarea>
@@ -270,9 +247,7 @@ let selectedIcon="🏍️";
 const iconWrap=document.getElementById("iconSelect");
 function updateIconActive(){
   iconWrap.querySelectorAll(".icon-btn").forEach(b => {
-    const on = (b.dataset.icon === selectedIcon);
-    b.classList.toggle("active", on);
-    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    b.classList.toggle("active", b.dataset.icon === selectedIcon);
   });
 }
 
@@ -310,16 +285,8 @@ function showPreview(p){
   document.getElementById('timePreview').textContent = p.time || '-';
   document.getElementById('tandemPreview').textContent = `탠덤 ${p.tandem||'-'}`;
 
-  const STYLE_META = {
-    Urban:{emoji:'🏙️',cls:'pill-urban'},
-    Curve:{emoji:'🌀',cls:'pill-curve'},
-    Tour:{emoji:'🗺️',cls:'pill-tour'}
-  };
-  const PACE_META = {
-    Easy:{emoji:'🟢',cls:'pill-easy'},
-    Balanced:{emoji:'⚖️',cls:'pill-balanced'},
-    Dynamic:{emoji:'⚡',cls:'pill-dynamic'}
-  };
+  const STYLE_META = { Urban:{emoji:'🏙️',cls:'pill-urban'}, Curve:{emoji:'🌀',cls:'pill-curve'}, Tour:{emoji:'🗺️',cls:'pill-tour'} };
+  const PACE_META = { Easy:{emoji:'🟢',cls:'pill-easy'}, Balanced:{emoji:'⚖️',cls:'pill-balanced'}, Dynamic:{emoji:'⚡',cls:'pill-dynamic'} };
 
   const styleGrid = document.getElementById('styleGrid');
   styleGrid.innerHTML = (p.styles?.length?p.styles:['-']).map(s=>{
@@ -336,52 +303,30 @@ function showPreview(p){
   document.getElementById('previewModal').classList.add('show');
 }
 
-/* ===== 이벤트 바인딩 ===== */
-
-/* 토글(필) 클릭/키보드 */
+/* 이벤트 */
 document.querySelectorAll('.toggles').forEach(group=>{
   group.addEventListener('click', e=>{
     const t=e.target.closest('.toggle'); if(!t) return;
-    t.classList.toggle('active');
-    t.setAttribute('aria-pressed', t.classList.contains('active') ? 'true' : 'false');
-    saveProfile();
-  });
-
-  // 키보드 스페이스/엔터 활성화
-  group.addEventListener('keydown', e=>{
-    const t=e.target.closest('.toggle'); if(!t) return;
-    if(e.key === ' ' || e.key === 'Enter'){
-      e.preventDefault();
-      t.click();
-    }
+    t.classList.toggle('active'); saveProfile();
   });
 });
-
-/* 아이콘 클릭/키보드 */
 iconWrap.addEventListener("click", e=>{
   const btn=e.target.closest(".icon-btn"); if(!btn) return;
-  selectedIcon=btn.dataset.icon;
-  updateIconActive(); 
-  saveProfile();
+  selectedIcon=btn.dataset.icon; updateIconActive(); saveProfile();
 });
-iconWrap.addEventListener("keydown", e=>{
-  const btn=e.target.closest(".icon-btn"); if(!btn) return;
-  if(e.key===' '||e.key==='Enter'){ e.preventDefault(); btn.click(); }
-});
-
-/* 입력 변경 저장 */
 ['handle','bike','region','time','tandem','intro'].forEach(id=>{
   const el=document.getElementById(id);
   el.addEventListener('input', saveProfile);
   el.addEventListener('change', saveProfile);
 });
-
-/* 저장 → 미리보기 */
 document.getElementById('saveBtn').addEventListener('click',()=>{
   const p=saveProfile(); showPreview(p);
 });
+
+/* ✅ 확인 → 메인으로 이동 */
 document.getElementById('confirmBtn').addEventListener('click',()=>{
   document.getElementById('previewModal').classList.remove('show');
+  location.href = 'index.html';
 });
 document.getElementById('editBtn').addEventListener('click',()=>{
   document.getElementById('previewModal').classList.remove('show');
@@ -390,7 +335,7 @@ document.getElementById('previewModal').addEventListener('click',(e)=>{
   if(e.target.id==='previewModal'){ e.currentTarget.classList.remove('show'); }
 });
 
-/* 초기 로드 → 값/상태 복원 */
+/* 초기 로드 → 값 채우기 */
 (function init(){
   const p=loadProfile();
   if(p.name) document.getElementById('handle').value=p.name;
@@ -403,13 +348,13 @@ document.getElementById('previewModal').addEventListener('click',(e)=>{
   if(Array.isArray(p.styles)){
     p.styles.forEach(v=>{
       const el=[...document.querySelectorAll('.toggles[data-group="style"] .toggle')].find(x=>x.dataset.value===v);
-      if(el){ el.classList.add('active'); el.setAttribute('aria-pressed','true'); }
+      if(el) el.classList.add('active');
     });
   }
   if(Array.isArray(p.pace)){
     p.pace.forEach(v=>{
       const el=[...document.querySelectorAll('.toggles[data-group="speed"] .toggle')].find(x=>x.dataset.value===v);
-      if(el){ el.classList.add('active'); el.setAttribute('aria-pressed','true'); }
+      if(el) el.classList.add('active');
     });
   }
   if(p.icon){ selectedIcon=p.icon; }
