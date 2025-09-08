@@ -302,6 +302,28 @@ function openJoinModal(crew){
   document.getElementById('goAdmin').onclick = ()=>{ location.href = ADMIN_DM; };
   document.getElementById('copyProfileBtn').onclick = ()=> copyText(text);
 }
+   const LS_KEY='rimo_profile_v1';
+
+  function loadProfileSafe(){
+    try{ return JSON.parse(localStorage.getItem(LS_KEY)||'null'); }
+    catch(e){ return null; }
+  }
+  function needsProfile(p){
+    // 필수값: 이름, 지역, 기종(메인/엠버서더에서 표시용)
+    return !p || !p.name || !p.region || !p.bike;
+  }
+  function showProfileCalloutIfNeeded(){
+    const p = loadProfileSafe();
+    const box = document.getElementById('profileCallout');
+    if(!box) return;
+    if(needsProfile(p)) box.classList.remove('hidden');
+    else box.classList.add('hidden');
+    return p;
+  }
+
+  // ✅ 메인/엠버서더 공통으로 초기화 시 호출
+  const currentProfile = showProfileCalloutIfNeeded();
+</script>
 </script>
 </body>
 </html>
