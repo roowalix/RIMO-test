@@ -108,6 +108,22 @@
   }
   .tabbar .tab.primary{background:var(--tab-pri); border-color:var(--tab-pri-bd)}
 </style>
+  
+   <!-- ✅ 캐시 문제 해결 코드 -->
+  <script>
+    // HTML, CSS, JS가 캐시에 남아 업데이트가 반영되지 않는 문제 해결용
+    (function() {
+      const currentVersion = 'v1.0.2';  // ★ 버전 번호 (업데이트할 때마다 변경)
+      const savedVersion = localStorage.getItem('rimo_profile_version');
+
+      if (savedVersion !== currentVersion) {
+        // 캐시된 파일 무효화 → 새로고침
+        localStorage.setItem('rimo_profile_version', currentVersion);
+        const cleanUrl = window.location.pathname + '?v=' + currentVersion;
+        window.location.replace(cleanUrl);
+      }
+    })();
+  </script>
 </head>
 <body>
 <header>
