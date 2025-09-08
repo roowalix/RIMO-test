@@ -69,7 +69,7 @@
   .pin{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;
        font-weight:900;font-size:12px;color:#0b0b0f;border:2px solid rgba(255,255,255,.9);box-shadow:0 1px 6px rgba(0,0,0,.35)}
 
-  /* 모달(합류 안내) — 바깥 클릭 닫힘 */
+  /* 합류 안내 모달 — 바깥 클릭 닫힘 */
   .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:3000;
          background:rgba(0,0,0,.45);padding:22px 12px}
   .modal.show{display:flex}
@@ -84,11 +84,10 @@
   .modal-actions button:hover{background:var(--btnHover)}
   #copyProfileBtn{padding:8px 12px;font-size:12px;min-width:100px;max-width:140px}
 
-  /* 하단 네비 (공통) */
-  .tabbar{position:fixed;left:0;right:0;bottom:16px;z-index:2500;display:flex;gap:12px;justify-content:center}
-  .tabbar .tab{background:var(--tab-bg);border:1px solid var(--tab-bd);color:var(--tab-ink);
-               padding:12px 18px;border-radius:22px;font-weight:800;text-decoration:none;font-size:14px}
-  .tabbar .tab.primary{background:var(--tab-pri);border-color:var(--tab-pri-bd)}
+  /* 🚨 프로필 필요 모달 (경고) */
+  .alert-sheet{max-width:520px}
+  .alert-title{margin:2px 0 8px;font-size:18px}
+  .alert-text{color:#d7dbff;margin:0 0 12px;line-height:1.5}
 </style>
 </head>
 <body>
@@ -124,6 +123,18 @@
       <button id="goAdmin">이대로 신청하기</button>
       <button id="editProfile">프로필 수정</button>
       <button id="copyProfileBtn">다시 복사</button>
+    </div>
+  </div>
+</div>
+
+<!-- 🚨 프로필 필요 모달 -->
+<div class="modal" id="needProfileModal" role="dialog" aria-modal="true" aria-labelledby="needProfileTitle">
+  <div class="sheet alert-sheet" id="needProfileSheet">
+    <h4 id="needProfileTitle" class="alert-title">프로필이 필요합니다</h4>
+    <p class="alert-text">합류 신청 전에 <b>프로필</b>을 먼저 작성해 주세요.</p>
+    <div class="modal-actions">
+      <button id="goMakeProfile">프로필 작성</button>
+      <button id="closeNeedProfile">닫기</button>
     </div>
   </div>
 </div>
@@ -231,7 +242,7 @@ function renderCards(){
       </div>
       <button class="join">👥 ${c.peopleNow}/${c.peopleMax} · ✅ 합류 신청</button>
     `;
-    el.querySelector('.join').addEventListener('click',()=>openJoinModal(c));
+    el.querySelector('.join').addEventListener('click',()=>onJoinClick(c));
     el.addEventListener('click',(e)=>{ if(!e.target.classList.contains('join')) focusCrew(c.id); });
     listEl.appendChild(el);
   });
@@ -258,6 +269,10 @@ document.getElementById('editProfile').onclick = ()=> location.href='rimo_profil
 function loadProfile(){
   try{ return JSON.parse(localStorage.getItem(LS_KEY)||'{}'); }
   catch(e){ return {}; }
+}
+function hasProfile(p){
+  // 최소 필드: 이름, 지역, 시간대
+  return p && p.name && p.region && p.time;
 }
 function composeText(crew, profile){
   const styles = (profile.styles || []).join(' · ') || '-';
@@ -291,6 +306,36 @@ function openJoinModal(crew){
   modal.classList.add('show');
   document.getElementById('goAdmin').onclick = ()=>{ location.href = ADMIN_DM; };
   document.getElementById('copyProfileBtn').onclick = ()=> copyText(text);
+}
+
+/* 🚨 프로필 필요 모달 로직 */
+const needProfileModal = document.getElementById('needProfileModal');
+const needProfileSheet = document.getElementById('needProfileSheet');
+needProfileModal.addEventListener('click', ()=> needProfileModal.classList.remove('show'));
+needProfileSheet.addEventListener('click', (e)=> e.stopPropagation());
+document.getElementById('goMakeProfile').onclick = ()=> location.href='rimo_profile.html';
+document.getElementById('closeNeedProfile').onclick = ()=> needProfileModal.classList.remove('show');
+
+function showNeedProfile(){
+  needProfileModal.classList.add('show');
+}
+
+/* 진입 시 프로필 확인 → 없으면 경고 모달 */
+(function checkProfileOnLoad(){
+  const p = loadProfile();
+  if(!hasProfile(p)){
+    showNeedProfile();
+  }
+})();
+
+/* 합류 버튼 클릭 시에도 체크 */
+function onJoinClick(crew){
+  const p = loadProfile();
+  if(!hasProfile(p)){
+    showNeedProfile();
+    return;
+  }
+  openJoinModal(crew);
 }
 </script>
 </body>
