@@ -3,220 +3,322 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>RIMO — 메인</title>
+<title>RIMO — 오늘의 라이딩 크루</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin />
 <style>
   :root{
-    --bg:#0b0b0f; --fg:#e8e8ef; --muted:#b9b9cc; --line:#23243a;
-    --tile:#101223; --tileBd:#23243a; --accent:#7aa7ff;
+    --bg:#0b0b0f; --fg:#e8e8ef; --muted:#b9b9cc; --line:#232333;
+    --chip:#1a1a24; --chipBd:#2f3247;
+    --btn:#2A2F4F; --btnHover:#3C4380;
+    --imminent-bg: rgba(255,199,94,.16);
+    --imminent-bd: rgba(255,199,94,.45);
+
     --tab-bg:#182039; --tab-bd:#2d3559; --tab-ink:#e6e8ef;
     --tab-pri:#26346d; --tab-pri-bd:#3b53a8;
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--fg);
        font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Helvetica,Arial,sans-serif}
+
+  /* 헤더 */
   header{position:sticky;top:0;z-index:5;background:rgba(11,11,15,.9);
-         backdrop-filter:blur(8px);border-bottom:1px solid #232333}
+         backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
   .bar{display:flex;gap:10px;align-items:center;padding:14px 16px;height:56px}
-  .logo{font-weight:900}.title{font-weight:800;opacity:.9}
+  .logo{font-weight:900}
+  .title{font-weight:800;opacity:.9}
+  .pill{margin-left:auto;padding:6px 10px;border-radius:999px;background:#151525;color:#b9b9cc;font-size:12px}
 
-  main{padding:16px;max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:12px;padding-bottom:100px}
-
-  .callout{background:#101223;border:1px solid #23243a;border-radius:12px;padding:12px 14px;display:flex;gap:10px;align-items:center;font-size:14px}
+  /* 상단 프로필 콜아웃 */
+  .callout{margin:12px 16px 0;padding:10px 12px;border-radius:10px;background:#101223;border:1px solid #23243a;
+           display:flex;align-items:center;gap:10px}
   .callout .cta{margin-left:auto;padding:8px 12px;border-radius:999px;background:#2a5bff;color:#fff;font-weight:800;border:0;cursor:pointer}
   .hidden{display:none}
 
-  .card{background:var(--tile);border:1px solid var(--tileBd);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px;margin-bottom:12px}
-  .head{display:flex;gap:14px;align-items:center}
-  .avatar{width:72px;height:72px;border-radius:50%;background:#1a1c2f;font-size:36px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
-  .idcol{min-width:0;flex:1}
-  .nameRow{display:flex;align-items:center;gap:10px}
-  .name{margin:0;font-size:16px;font-weight:800;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .intro{margin:4px 0 0;font-weight:600;font-size:13px;color:var(--fg)}
-  .sub{margin:6px 0 0;color:var(--muted);font-size:13px}
+  /* 본문 */
+  main{padding:16px; padding-bottom:100px; max-width:900px; margin:0 auto;}
+  #map{height:360px;border-radius:14px;outline:1px solid #232333;margin-bottom:16px}
+  .leaflet-container{z-index:1}
 
-  .traits{display:grid;grid-template-columns:repeat(6,max-content);gap:6px;justify-content:flex-start}
-  .tag{display:inline-flex;align-items:center;justify-content:center;padding:6px 9px;border-radius:999px;background:#1a1c2f;border:0;font-size:10px;font-weight:500;color:#e6e9ff;white-space:nowrap}
-  .tag.style.pill-urban{background:#1e2d55}.tag.style.pill-curve{background:#2a1f56}.tag.style.pill-tour{background:#1e3b3a}
-  .tag.pace.pill-easy{background:#1f3a1f}.tag.pace.pill-balanced{background:#3a341e}.tag.pace.pill-dynamic{background:#3a1f1f}
+  /* 카드 캐러셀 */
+  .carousel{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:8px 4px 0}
+  .carousel::-webkit-scrollbar{display:none}
+  .card{scroll-snap-align:start;width:304px;flex:0 0 auto;border-radius:14px;padding:14px;
+        display:flex;flex-direction:column;gap:8px;border:1px solid transparent;position:relative}
+  .card h3{margin:0 0 2px;font-size:18px}
+  .meta{font-size:14px;color:var(--muted)}
+  .msg{font-size:14px}
+  .pillrow{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+  .chip{padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.06);
+        border:1px solid rgba(255,255,255,.12);font-size:12px;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center}
 
+  /* 출발 임박 배지 */
+  .imminent{
+    position:absolute; top:10px; right:10px; display:inline-flex; align-items:center; gap:6px;
+    padding:8px 10px; border-radius:10px; font-size:12px; font-weight:700;
+    background:var(--imminent-bg); border:1px solid var(--imminent-bd); color:#ffe7a6;
+    box-shadow:0 0 0 0 rgba(255,199,94,.35); animation:pulse 2.2s ease-in-out infinite; z-index:2;
+  }
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,199,94,.35)}70%{box-shadow:0 0 0 8px rgba(255,199,94,0)}100%{box-shadow:0 0 0 0 rgba(255,199,94,0)}}
+
+  /* 합류 버튼 */
+  .join{margin-top:2px;width:100%;padding:14px;border-radius:12px;border:none;color:#fff;font-weight:800;
+        background:rgba(255,255,255,.16);cursor:pointer}
+  .card.selected{box-shadow:0 0 0 2px rgba(255,255,255,.12) inset}
+
+  /* 핀 아이콘 */
+  .pin{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+       font-weight:900;font-size:12px;color:#0b0b0f;border:2px solid rgba(255,255,255,.9);box-shadow:0 1px 6px rgba(0,0,0,.35)}
+
+  /* 모달(합류 안내) */
+  .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:3000;
+         background:rgba(0,0,0,.45);padding:22px 12px}
+  .modal.show{display:flex}
+  .sheet{width:100%;max-width:680px;background:#0e1222;border:1px solid #2b304f;border-radius:18px;
+         box-shadow:0 14px 40px rgba(0,0,0,.55);padding:16px}
+  .sheet h4{margin:4px 0 10px;font-size:18px}
+  .hint{color:#cfd2ff;line-height:1.5;margin-bottom:10px}
+  .pre{background:#0b1020;border:1px solid #293059;border-radius:12px;padding:12px;white-space:pre-wrap;line-height:1.4}
+  .modal-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+  .modal-actions button{flex:1;min-width:110px;max-width:160px;padding:12px 18px;border-radius:12px;border:none;
+                        background:var(--btn);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+  .modal-actions button:hover{background:var(--btnHover)}
+  #copyProfileBtn{padding:8px 12px;font-size:13px;min-width:100px;max-width:140px}
+
+  /* 하단 네비 */
   .tabbar{position:fixed;left:0;right:0;bottom:16px;z-index:2500;display:flex;gap:12px;justify-content:center}
-  .tabbar .tab{background:var(--tab-bg);border:1px solid var(--tab-bd);color:var(--tab-ink);padding:12px 18px;border-radius:22px;font-weight:800;text-decoration:none;font-size:14px}
+  .tabbar .tab{background:var(--tab-bg);border:1px solid var(--tab-bd);color:var(--tab-ink);
+               padding:12px 18px;border-radius:22px;font-weight:800;text-decoration:none;font-size:14px}
   .tabbar .tab.primary{background:var(--tab-pri);border-color:var(--tab-pri-bd)}
-
-  /* 에러 메세지 박스 */
-  #errorBox{background:#2a1f1f;border:1px solid #5a2f2f;color:#ffdede;border-radius:10px;padding:10px 12px;font-size:13px;white-space:pre-wrap}
 </style>
 </head>
 <body>
 <header>
   <div class="bar">
     <div class="logo">🏍️ RIMO</div>
-    <div class="title">메인</div>
+    <div class="title">오늘의 라이딩 크루</div>
+    <div class="pill" id="today"></div>
   </div>
 </header>
 
+<!-- 프로필 작성 유도 배너 -->
+<div id="profileCallout" class="callout hidden" role="alert">
+  <span>프로필이 없어요. 합류 신청 전, 먼저 프로필을 작성해 주세요.</span>
+  <button class="cta" onclick="location.href='rimo_profile.html'">프로필 작성</button>
+</div>
+
 <main>
-  <noscript>
-    <div class="callout">이 페이지는 자바스크립트가 필요합니다. 브라우저 설정에서 JavaScript를 활성화해 주세요.</div>
-  </noscript>
-
-  <div id="profileCallout" class="callout hidden" role="alert">
-    <span>프로필이 아직 없습니다. 먼저 프로필을 작성해 주세요.</span>
-    <button class="cta" onclick="location.href='rimo_profile.html'">프로필 작성</button>
-  </div>
-
-  <div id="errorBox" class="hidden"></div>
-  <section id="list" aria-label="라이더 목록"></section>
+  <div id="map"></div>
+  <section id="list" class="carousel"></section>
 </main>
 
+<!-- 하단 네비 -->
 <nav class="tabbar" aria-label="하단 네비게이션">
   <a href="index.html" class="tab primary">메인</a>
   <a href="rimo_profile.html" class="tab">프로필</a>
   <a href="rimo_ambassadors.html" class="tab">엠버서더</a>
 </nav>
 
+<!-- 합류 안내 모달 -->
+<div class="modal" id="joinModal" role="dialog" aria-modal="true" aria-labelledby="joinTitle">
+  <div class="sheet" id="joinSheet">
+    <h4 id="joinTitle">✅ 합류 신청 준비 완료</h4>
+    <div class="hint">
+      프로필을 복사했습니다. 아래 버튼으로 <b>운영자 1:1 채팅</b>을 열어 <b>붙여넣기</b>해 주세요.<br/>
+      승인되면 크루 채팅방으로 초대됩니다.
+    </div>
+    <div id="preview" class="pre"></div>
+    <div class="modal-actions">
+      <button id="goAdmin">이대로 신청하기</button>
+      <button id="editProfile">프로필 수정</button>
+      <button id="copyProfileBtn">다시 복사</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin></script>
 <script>
-(function(){
-  const LS_KEY='rimo_profile_v1';
-  const listEl = document.getElementById('list');
-  const calloutEl = document.getElementById('profileCallout');
-  const errorBox = document.getElementById('errorBox');
+/* 날짜 뱃지 */
+document.getElementById('today').textContent =
+  new Date().toLocaleDateString('ko-KR',{month:'long',day:'numeric',weekday:'short'});
 
-  const STYLE_META = {
-    Urban:{cls:'pill-urban',label:'Urban'},
-    Curve:{cls:'pill-curve',label:'Curve'},
-    Tour:{cls:'pill-tour',label:'Tour'}
-  };
-  const PACE_META = {
-    Easy:{cls:'pill-easy',label:'Easy'},
-    Balanced:{cls:'pill-balanced',label:'Balanced'},
-    Dynamic:{cls:'pill-dynamic',label:'Dynamic'}
-  };
+/* 운영자 DM */
+const ADMIN_DM = "http://pf.kakao.com/_ceUDn/chat";
 
-  const demo = [
-    { id:'a2', icon:'🛵', name:'Mira',  region:'서울 성동구', bike:'Vespa Primavera', styles:['Urban'],       pace:['Easy'],     intro:'성수·강남 카페투어 좋아요' },
-    { id:'a3', icon:'🏍️', name:'Owen',  region:'서울 마포구', bike:'Yamaha MT-07',   styles:['Curve','Tour'],pace:['Balanced'], intro:'가양대교~북악 팔각정 즐겨요' },
-    { id:'a4', icon:'🐶', name:'Nabi',  region:'서울 송파구', bike:'Honda Grom',      styles:['Urban'],       pace:['Dynamic'],  intro:'심야 한강 순환 밤바리러!' }
-  ];
+/* 테마 */
+const THEMES = {
+  red:{ base:'#ff4d4d', cardBg:'rgba(255,77,77,.14)', border:'rgba(255,77,77,.55)'},
+  yellow:{ base:'#ffd24d', cardBg:'rgba(255,210,77,.16)', border:'rgba(255,210,77,.55)'},
+  blue:{ base:'#5b8cff', cardBg:'rgba(91,140,255,.16)', border:'rgba(91,140,255,.55)'}
+};
 
-  function loadProfile(){
-    try{ return JSON.parse(localStorage.getItem(LS_KEY)||'{}'); }
-    catch(e){ return {}; }
+/* 데이터 (time은 "M월 D일 HH:MM") */
+let crews = [
+  { id:"crew1", theme:"red", title:"<가을맞이 카페 라이딩>", time:"9월 7일 23:50",
+    from:"GS25 한강르네상스 반포2호", to:"RSG 성수",
+    lat:37.5086371, lng:126.9941734, toLat:37.541193, toLng:127.056428,
+    peopleNow:0, peopleMax:4, styles:["Urban","Easy"],
+    msg:"잠수교 밤바리 후 알슥은 국룰이쥬~" },
+  { id:"crew2", theme:"yellow", title:"<은평구민 와인딩 한마당>", time:"9월 20일 19:00",
+    from:"서울혁신파크", to:"북악팔각정",
+    lat:37.6079794, lng:126.9331676, toLat:37.603512, toLng:126.981851,
+    peopleNow:0, peopleMax:3, styles:["Curve","Balanced"],
+    msg:"저배기로 즐기는 쫀득한 와인딩 ★안전운전★" },
+  { id:"crew3", theme:"blue", title:"<물안개 피는 양만장>", time:"9월 22일 05:00",
+    from:"문화비축기지", to:"양평 만남의 광장",
+    lat:37.5705673, lng:126.8942802, toLat:37.489, toLng:127.491,
+    peopleNow:0, peopleMax:5, styles:["Tour","Dynamic"],
+    msg:"찌뿌둥한 몸은 해장국 → 시원한 아아!" }
+];
+
+/* ---- 지도 ---- */
+const map = L.map('map',{scrollWheelZoom:true});
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
+const group = L.featureGroup().addTo(map);
+const arcs = L.layerGroup().addTo(map);
+
+function makePin(color,label){return L.divIcon({className:'pin',
+  html:`<div class="pin" style="background:${color}">${label}</div>`,
+  iconSize:[28,28],iconAnchor:[14,14]});}
+
+function arcCoords(aLat,aLng,bLat,bLng,k=0.18){
+  const x1=aLng,y1=aLat,x2=bLng,y2=bLat,mx=(x1+x2)/2,my=(y1+y2)/2;
+  const vx=x2-x1,vy=y2-y1,len=Math.hypot(vx,vy)||1;
+  const nx=-vy/len,ny=vx/len; let off=len*k; if(off<0.01) off=0.01;
+  const cx=mx+nx*off,cy=my+ny*off; return [[y1,x1],[cy,cx],[y2,x2]];
+}
+
+function renderMap(){
+  group.clearLayers(); arcs.clearLayers();
+  const bounds=L.latLngBounds([]);
+  crews.forEach(c=>{
+    const t=THEMES[c.theme]||THEMES.blue;
+    const ms=L.marker([c.lat,c.lng],{icon:makePin(t.base,'S')}).addTo(group);
+    const md=L.marker([c.toLat,c.toLng],{icon:makePin(t.base,'D')}).addTo(group);
+    const a=L.polyline(arcCoords(c.lat,c.lng,c.toLat,c.toLng),{color:t.base,weight:2.5,dashArray:"6 8",opacity:.9}).addTo(arcs);
+    [ms,md].forEach(m=>bounds.extend(m.getLatLng()));
+    a.getLatLngs().forEach(p=>bounds.extend(p));
+  });
+  if(bounds.isValid()) map.fitBounds(bounds.pad(0.25));
+}
+renderMap();
+
+/* ---- 유틸: "9월 20일 23:00" → Date ---- */
+function parseKoreanDate(str){
+  const m = str.match(/(\d+)\s*월\s*(\d+)\s*일\s*(\d{1,2}):(\d{2})/);
+  if(!m) return null;
+  const year = new Date().getFullYear();
+  const month = parseInt(m[1],10)-1;
+  const day = parseInt(m[2],10);
+  const hour = parseInt(m[3],10);
+  const min = parseInt(m[4],10);
+  return new Date(year, month, day, hour, min, 0, 0);
+}
+
+/* ---- 카드 ---- */
+const listEl=document.getElementById('list');
+const chip=s=>`<span class="chip">${s}</span>`;
+
+/* 프로필 저장소 */
+const LS_KEY='rimo_profile_v1';
+function loadProfile(){
+  try{ return JSON.parse(localStorage.getItem(LS_KEY)||'{}'); }
+  catch(e){ return {}; }
+}
+function hasProfile(p){
+  return p && p.name && p.region !== undefined; // 최소 기준
+}
+
+function renderCards(){
+  const me=loadProfile();
+  // 프로필 콜아웃 표시 제어
+  document.getElementById('profileCallout').classList.toggle('hidden', hasProfile(me));
+
+  listEl.innerHTML="";
+  crews.forEach(c=>{
+    const t=THEMES[c.theme]||THEMES.blue;
+    const el=document.createElement('article');
+    el.className="card"; el.dataset.id=c.id;
+    el.style.background=t.cardBg; el.style.border=`1px solid ${t.border}`;
+
+    const departAt = parseKoreanDate(c.time);
+    const now = new Date();
+    const diffMin = departAt ? Math.floor((departAt - now)/60000) : null;
+    const imminent = (diffMin !== null && diffMin >= 0 && diffMin <= 30);
+
+    el.innerHTML=`
+      <h3>${c.title}</h3>
+      <div class="meta">⏰ ${c.time}</div>
+      <div class="meta">📍 ${c.from} → ${c.to}</div>
+      <div class="msg">💬 ${c.msg}</div>
+      ${imminent ? `<div class="imminent">🚦 출발 임박</div>` : ``}
+      <div class="pillrow">
+        ${c.styles.map(chip).join("")}
+      </div>
+      <button class="join">👥 ${c.peopleNow}/${c.peopleMax} · ✅ 합류 신청</button>
+    `;
+
+    el.querySelector('.join').addEventListener('click',()=>openJoinModal(c));
+    el.addEventListener('click',(e)=>{ if(!e.target.classList.contains('join')) focusCrew(c.id); });
+    listEl.appendChild(el);
+  });
+}
+renderCards();
+
+function focusCrew(id){
+  const c=crews.find(x=>x.id===id); if(!c) return;
+  document.querySelectorAll('.card').forEach(el=>el.classList.remove('selected'));
+  const card=[...document.querySelectorAll('.card')].find(el=>el.dataset.id===id);
+  if(card){card.classList.add('selected');card.scrollIntoView({behavior:'smooth',inline:'start'});}
+  map.setView([c.lat,c.lng],13,{animate:true});
+}
+
+/* ---- 합류 모달 & 프로필 복사 ---- */
+const modal = document.getElementById('joinModal');
+const sheet = document.getElementById('joinSheet');
+const preview = document.getElementById('preview');
+
+/* 바깥 클릭 → 닫기 */
+modal.addEventListener('click', ()=> modal.classList.remove('show'));
+sheet.addEventListener('click', (e)=> e.stopPropagation());
+
+document.getElementById('editProfile').onclick = ()=> location.href='rimo_profile.html';
+
+function composeText(crew, profile){
+  const styles = (profile.style || profile.styles || []).join(' · ') || '-';
+  const paces  = (profile.speed || profile.pace   || []).join(' · ') || '-';
+
+  return (
+`[✅ 합류 신청] ${crew.title}
+⏰ ${crew.time}
+📍 출발 → 도착
+${crew.from} → ${crew.to}
+
+👤 라이더: ${profile.name || '이름 미입력'} ${profile.icon || ''}
+🏍️ 바이크: ${profile.bike || '미입력'}
+📌 지역: ${profile.region || '-'}
+
+🎯 스타일/페이스
+${styles} · ${paces}`
+  );
+}
+
+async function copyText(txt){
+  try{ await navigator.clipboard.writeText(txt); return true; }
+  catch(e){
+    const ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy'); ta.remove(); return true;
   }
-  function needsProfile(p){
-    return !p || !p.name || !p.region || !p.bike;
-  }
-  function tagEl(cls, text){
-    const div = document.createElement('div');
-    div.className = 'tag ' + cls;
-    div.textContent = text;
-    return div;
-  }
+}
 
-  function render(){
-    try{
-      const me = loadProfile();
-      // 프로필 유도 배너
-      if(needsProfile(me)) calloutEl.classList.remove('hidden');
-      else calloutEl.classList.add('hidden');
-
-      // 항상 데모 + (프로필이 완성된 경우에만 내 카드 추가)
-      const list = [];
-      if(!needsProfile(me)){
-        list.push({
-          id:'me', icon: me.icon || '🏍️',
-          name: me.name + ' (나)',
-          region: me.region || '',
-          bike: me.bike || '바이크 미입력',
-          styles: Array.isArray(me.styles) ? me.styles : [],
-          pace: Array.isArray(me.pace) ? me.pace : [],
-          intro: (me.intro || '').slice(0,25)
-        });
-      }
-      const data = list.concat(demo);
-
-      listEl.innerHTML = '';
-      data.forEach(a=>{
-        const card = document.createElement('article');
-        card.className = 'card';
-
-        const head = document.createElement('div');
-        head.className = 'head';
-
-        const avatar = document.createElement('div');
-        avatar.className = 'avatar';
-        avatar.textContent = a.icon || '🏍️';
-
-        const idcol = document.createElement('div');
-        idcol.className = 'idcol';
-
-        const nameRow = document.createElement('div');
-        nameRow.className = 'nameRow';
-
-        const name = document.createElement('h3');
-        name.className = 'name';
-        name.textContent = a.name || '라이더';
-        nameRow.appendChild(name);
-
-        const sub = document.createElement('p');
-        sub.className = 'sub';
-        sub.textContent = `${a.region? a.region+' · ' : ''}${a.bike || ''}`;
-
-        idcol.appendChild(nameRow);
-        idcol.appendChild(sub);
-
-        if(a.intro){
-          const intro = document.createElement('p');
-          intro.className = 'intro';
-          intro.textContent = `"${(a.intro || '').slice(0,25)}"`;
-          idcol.appendChild(intro);
-        }
-
-        head.appendChild(avatar);
-        head.appendChild(idcol);
-
-        const traits = document.createElement('div');
-        traits.className = 'traits';
-        const styles = (a.styles && a.styles.length) ? a.styles : [];
-        const pace   = (a.pace && a.pace.length) ? a.pace : [];
-        const all    = [
-          ...styles.map(s => ({type:'style', key:s})),
-          ...pace.map(p => ({type:'pace', key:p}))
-        ];
-        if(all.length === 0){
-          traits.appendChild(tagEl('style','-'));
-        }else{
-          all.forEach(it=>{
-            if(it.type==='style' && STYLE_META[it.key]){
-              const m=STYLE_META[it.key];
-              traits.appendChild(tagEl(`style ${m.cls}`, m.label));
-            }else if(it.type==='pace' && PACE_META[it.key]){
-              const m=PACE_META[it.key];
-              traits.appendChild(tagEl(`pace ${m.cls}`, m.label));
-            }else{
-              traits.appendChild(tagEl(it.type, it.key));
-            }
-          });
-        }
-
-        card.appendChild(head);
-        card.appendChild(traits);
-        listEl.appendChild(card);
-      });
-
-      // 에러박스 숨김
-      errorBox.classList.add('hidden');
-      errorBox.textContent='';
-    }catch(err){
-      // 화면에 에러 출력
-      errorBox.classList.remove('hidden');
-      errorBox.textContent = '렌더 중 오류가 발생했습니다:\\n' + (err && err.message ? err.message : String(err));
-    }
-  }
-
-  // DOM 준비 후 렌더
-  document.addEventListener('DOMContentLoaded', render);
-})();
+function openJoinModal(crew){
+  const profile = loadProfile();
+  const text = composeText(crew, profile);
+  preview.textContent = text;
+  copyText(text);
+  modal.classList.add('show');
+  document.getElementById('goAdmin').onclick = ()=>{ location.href = ADMIN_DM; };
+  document.getElementById('copyProfileBtn').onclick = ()=> copyText(text);
+}
 </script>
 </body>
 </html>
