@@ -7,160 +7,44 @@
 <style>
   :root{
     --bg:#0b0b0f; --fg:#e8e8ef; --muted:#b9b9cc; --line:#23243a;
-    --tile:#101223; --tileBd:#23243a;
-    --accent:#7aa7ff;
+    --tile:#101223; --tileBd:#23243a; --accent:#7aa7ff;
     --tab-bg:#182039; --tab-bd:#2d3559; --tab-ink:#e6e8ef;
     --tab-pri:#26346d; --tab-pri-bd:#3b53a8;
   }
-
   *{box-sizing:border-box}
-  body{
-    margin:0;
-    background:var(--bg);
-    color:var(--fg);
-    font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Helvetica,Arial,sans-serif;
-  }
+  body{margin:0;background:var(--bg);color:var(--fg);
+       font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Helvetica,Arial,sans-serif}
+  header{position:sticky;top:0;z-index:5;background:rgba(11,11,15,.9);
+         backdrop-filter:blur(8px);border-bottom:1px solid #232333}
+  .bar{display:flex;gap:10px;align-items:center;padding:14px 16px;height:56px}
+  .logo{font-weight:900}.title{font-weight:800;opacity:.9}
 
-  /* 헤더 */
-  header{
-    position:sticky;
-    top:0;
-    z-index:5;
-    background:rgba(11,11,15,.9);
-    backdrop-filter:blur(8px);
-    border-bottom:1px solid #232333;
-  }
-  .bar{display:flex; gap:10px; align-items:center; padding:14px 16px; height:56px}
-  .logo{font-weight:900}
-  .title{font-weight:800; opacity:.9}
+  main{padding:16px;max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:12px;padding-bottom:100px}
 
-  main{
-    padding:16px;
-    max-width:720px;
-    margin:0 auto;
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-    padding-bottom:100px; /* 탭바와 겹치지 않도록 */
-  }
-
-  /* ✅ 프로필 작성 유도 콜아웃 */
-  .callout{
-    background:#101223;
-    border:1px solid #23243a;
-    border-radius:12px;
-    padding:12px 14px;
-    display:flex;
-    gap:10px;
-    align-items:center;
-    font-size:14px;
-  }
-  .callout .cta{
-    margin-left:auto;
-    padding:8px 12px;
-    border-radius:999px;
-    background:#2a5bff;
-    color:#fff;
-    font-weight:800;
-    border:0;
-    cursor:pointer;
-    transition:background 0.2s;
-  }
-  .callout .cta:hover{
-    background:#3a6fff;
-  }
+  .callout{background:#101223;border:1px solid #23243a;border-radius:12px;padding:12px 14px;display:flex;gap:10px;align-items:center;font-size:14px}
+  .callout .cta{margin-left:auto;padding:8px 12px;border-radius:999px;background:#2a5bff;color:#fff;font-weight:800;border:0;cursor:pointer}
   .hidden{display:none}
 
-  /* 카드 */
-  .card{
-    background:var(--tile);
-    border:1px solid var(--tileBd);
-    border-radius:16px;
-    padding:16px;
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-    margin-bottom:12px;
-  }
-  .head{display:flex; gap:14px; align-items:center}
-  .avatar{
-    width:72px; height:72px;
-    border-radius:50%;
-    background:#1a1c2f;
-    font-size:36px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    flex:0 0 auto;
-  }
-  .idcol{min-width:0; flex:1}
-  .nameRow{display:flex; align-items:center; gap:10px}
-  .name{
-    margin:0;
-    font-size:16px;
-    font-weight:800;
-    line-height: 1.2;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-  }
-  .intro{
-    margin:4px 0 0;
-    font-weight:600;
-    font-size:13px;
-    color:var(--fg);
-  }
-  .sub{margin:6px 0 0; color:var(--muted); font-size:13px}
+  .card{background:var(--tile);border:1px solid var(--tileBd);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px;margin-bottom:12px}
+  .head{display:flex;gap:14px;align-items:center}
+  .avatar{width:72px;height:72px;border-radius:50%;background:#1a1c2f;font-size:36px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+  .idcol{min-width:0;flex:1}
+  .nameRow{display:flex;align-items:center;gap:10px}
+  .name{margin:0;font-size:16px;font-weight:800;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .intro{margin:4px 0 0;font-weight:600;font-size:13px;color:var(--fg)}
+  .sub{margin:6px 0 0;color:var(--muted);font-size:13px}
 
-  /* 핀버튼(스타일/페이스) */
-  .traits{
-    display:grid;
-    grid-template-columns:repeat(6, max-content);
-    gap:6px;
-    justify-content:flex-start;
-  }
-  .tag{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    padding:6px 9px;
-    border-radius:999px;
-    background:#1a1c2f;
-    border:0;
-    font-size:10px;
-    font-weight:500;
-    color:#e6e9ff;
-    white-space:nowrap;
-  }
-  .tag.style.pill-urban   {background:#1e2d55;border-color:#2c4484}
-  .tag.style.pill-curve   {background:#2a1f56;border-color:#40307a}
-  .tag.style.pill-tour    {background:#1e3b3a;border-color:#2f5f5d}
-  .tag.pace.pill-easy     {background:#1f3a1f;border-color:#2f5a2f}
-  .tag.pace.pill-balanced {background:#3a341e;border-color:#5a4f2f}
-  .tag.pace.pill-dynamic  {background:#3a1f1f;border-color:#5a2f2f}
+  .traits{display:grid;grid-template-columns:repeat(6,max-content);gap:6px;justify-content:flex-start}
+  .tag{display:inline-flex;align-items:center;justify-content:center;padding:6px 9px;border-radius:999px;background:#1a1c2f;border:0;font-size:10px;font-weight:500;color:#e6e9ff;white-space:nowrap}
+  .tag.style.pill-urban{background:#1e2d55}.tag.style.pill-curve{background:#2a1f56}.tag.style.pill-tour{background:#1e3b3a}
+  .tag.pace.pill-easy{background:#1f3a1f}.tag.pace.pill-balanced{background:#3a341e}.tag.pace.pill-dynamic{background:#3a1f1f}
 
-  /* 하단 네비 */
-  .tabbar{
-    position:fixed;
-    left:0;
-    right:0;
-    bottom:16px;
-    z-index:2500;
-    display:flex;
-    gap:12px;
-    justify-content:center;
-  }
-  .tabbar .tab{
-    background:var(--tab-bg);
-    border:1px solid var(--tab-bd);
-    color:var(--tab-ink);
-    padding:12px 18px;
-    border-radius:22px;
-    font-weight:800;
-    text-decoration:none;
-    font-size:14px;
-  }
-  .tabbar .tab.primary{background:var(--tab-pri); border-color:var(--tab-pri-bd)}
+  .tabbar{position:fixed;left:0;right:0;bottom:16px;z-index:2500;display:flex;gap:12px;justify-content:center}
+  .tabbar .tab{background:var(--tab-bg);border:1px solid var(--tab-bd);color:var(--tab-ink);padding:12px 18px;border-radius:22px;font-weight:800;text-decoration:none;font-size:14px}
+  .tabbar .tab.primary{background:var(--tab-pri);border-color:var(--tab-pri-bd)}
+
+  /* 에러 메세지 박스 */
+  #errorBox{background:#2a1f1f;border:1px solid #5a2f2f;color:#ffdede;border-radius:10px;padding:10px 12px;font-size:13px;white-space:pre-wrap}
 </style>
 </head>
 <body>
@@ -172,16 +56,19 @@
 </header>
 
 <main>
-  <!-- ✅ 프로필 작성 콜아웃 -->
+  <noscript>
+    <div class="callout">이 페이지는 자바스크립트가 필요합니다. 브라우저 설정에서 JavaScript를 활성화해 주세요.</div>
+  </noscript>
+
   <div id="profileCallout" class="callout hidden" role="alert">
     <span>프로필이 아직 없습니다. 먼저 프로필을 작성해 주세요.</span>
     <button class="cta" onclick="location.href='rimo_profile.html'">프로필 작성</button>
   </div>
 
+  <div id="errorBox" class="hidden"></div>
   <section id="list" aria-label="라이더 목록"></section>
 </main>
 
-<!-- 하단 네비 -->
 <nav class="tabbar" aria-label="하단 네비게이션">
   <a href="index.html" class="tab primary">메인</a>
   <a href="rimo_profile.html" class="tab">프로필</a>
@@ -189,142 +76,147 @@
 </nav>
 
 <script>
-const LS_KEY='rimo_profile_v1';
+(function(){
+  const LS_KEY='rimo_profile_v1';
+  const listEl = document.getElementById('list');
+  const calloutEl = document.getElementById('profileCallout');
+  const errorBox = document.getElementById('errorBox');
 
-function loadProfile(){
-  try{ return JSON.parse(localStorage.getItem(LS_KEY)||'{}'); }
-  catch(e){ return {}; }
-}
+  const STYLE_META = {
+    Urban:{cls:'pill-urban',label:'Urban'},
+    Curve:{cls:'pill-curve',label:'Curve'},
+    Tour:{cls:'pill-tour',label:'Tour'}
+  };
+  const PACE_META = {
+    Easy:{cls:'pill-easy',label:'Easy'},
+    Balanced:{cls:'pill-balanced',label:'Balanced'},
+    Dynamic:{cls:'pill-dynamic',label:'Dynamic'}
+  };
 
-/* 프로필 필수값 체크 */
-function needsProfile(p){
-  return !p || !p.name || !p.region || !p.bike;
-}
+  const demo = [
+    { id:'a2', icon:'🛵', name:'Mira',  region:'서울 성동구', bike:'Vespa Primavera', styles:['Urban'],       pace:['Easy'],     intro:'성수·강남 카페투어 좋아요' },
+    { id:'a3', icon:'🏍️', name:'Owen',  region:'서울 마포구', bike:'Yamaha MT-07',   styles:['Curve','Tour'],pace:['Balanced'], intro:'가양대교~북악 팔각정 즐겨요' },
+    { id:'a4', icon:'🐶', name:'Nabi',  region:'서울 송파구', bike:'Honda Grom',      styles:['Urban'],       pace:['Dynamic'],  intro:'심야 한강 순환 밤바리러!' }
+  ];
 
-function showProfileCalloutIfNeeded(){
-  const p = loadProfile();
-  const box = document.getElementById('profileCallout');
-  if(!box) return;
-  if(needsProfile(p)) box.classList.remove('hidden');
-  else box.classList.add('hidden');
-  return p;
-}
-
-const listEl = document.getElementById('list');
-const STYLE_META = {
-  Urban:{cls:'pill-urban',  label:'Urban'},
-  Curve:{cls:'pill-curve',  label:'Curve'},
-  Tour: {cls:'pill-tour',   label:'Tour'},
-};
-const PACE_META = {
-  Easy:    {cls:'pill-easy',     label:'Easy'},
-  Balanced:{cls:'pill-balanced', label:'Balanced'},
-  Dynamic: {cls:'pill-dynamic',  label:'Dynamic'},
-};
-
-/* 더미 데이터 */
-const demo = [
-  { id:'a2', icon:'🛵', name:'Mira',  region:'서울 성동구', bike:'Vespa Primavera', styles:['Urban'], pace:['Easy'],  intro:'성수·강남 카페투어 좋아요' },
-  { id:'a3', icon:'🏍️', name:'Owen',  region:'서울 마포구', bike:'Yamaha MT-07',   styles:['Curve','Tour'], pace:['Balanced'], intro:'가양대교~북악 팔각정 즐겨요' },
-  { id:'a4', icon:'🐶', name:'Nabi',  region:'서울 송파구', bike:'Honda Grom',      styles:['Urban'], pace:['Dynamic'], intro:'심야 한강 순환 밤바리러!' },
-];
-
-/* 리스트 빌드 */
-function buildList(){
-  const me = loadProfile();
-  const list = [];
-  if (me && !needsProfile(me)) {
-    list.push({
-      id:'me', icon: me.icon || '🏍️',
-      name: me.name + ' (나)',
-      region: me.region || '',
-      bike: me.bike || '바이크 미입력',
-      styles: Array.isArray(me.styles) ? me.styles : [],
-      pace: Array.isArray(me.pace) ? me.pace : [],
-      intro: (me.intro || '').slice(0,25)
-    });
+  function loadProfile(){
+    try{ return JSON.parse(localStorage.getItem(LS_KEY)||'{}'); }
+    catch(e){ return {}; }
   }
-  return list.concat(demo);
-}
+  function needsProfile(p){
+    return !p || !p.name || !p.region || !p.bike;
+  }
+  function tagEl(cls, text){
+    const div = document.createElement('div');
+    div.className = 'tag ' + cls;
+    div.textContent = text;
+    return div;
+  }
 
-function tagEl(cls, text){
-  const div = document.createElement('div');
-  div.className = 'tag ' + cls;
-  div.textContent = text;
-  return div;
-}
+  function render(){
+    try{
+      const me = loadProfile();
+      // 프로필 유도 배너
+      if(needsProfile(me)) calloutEl.classList.remove('hidden');
+      else calloutEl.classList.add('hidden');
 
-function render(){
-  showProfileCalloutIfNeeded();
-  const ambs = buildList();
-  listEl.innerHTML = '';
-  ambs.forEach(a=>{
-    const card = document.createElement('article');
-    card.className = 'card';
+      // 항상 데모 + (프로필이 완성된 경우에만 내 카드 추가)
+      const list = [];
+      if(!needsProfile(me)){
+        list.push({
+          id:'me', icon: me.icon || '🏍️',
+          name: me.name + ' (나)',
+          region: me.region || '',
+          bike: me.bike || '바이크 미입력',
+          styles: Array.isArray(me.styles) ? me.styles : [],
+          pace: Array.isArray(me.pace) ? me.pace : [],
+          intro: (me.intro || '').slice(0,25)
+        });
+      }
+      const data = list.concat(demo);
 
-    const head = document.createElement('div');
-    head.className = 'head';
+      listEl.innerHTML = '';
+      data.forEach(a=>{
+        const card = document.createElement('article');
+        card.className = 'card';
 
-    const avatar = document.createElement('div');
-    avatar.className = 'avatar';
-    avatar.textContent = a.icon || '🏍️';
+        const head = document.createElement('div');
+        head.className = 'head';
 
-    const idcol = document.createElement('div');
-    idcol.className = 'idcol';
+        const avatar = document.createElement('div');
+        avatar.className = 'avatar';
+        avatar.textContent = a.icon || '🏍️';
 
-    const nameRow = document.createElement('div');
-    nameRow.className = 'nameRow';
+        const idcol = document.createElement('div');
+        idcol.className = 'idcol';
 
-    const name = document.createElement('h3');
-    name.className = 'name';
-    name.textContent = a.name || '라이더';
-    nameRow.appendChild(name);
+        const nameRow = document.createElement('div');
+        nameRow.className = 'nameRow';
 
-    const sub = document.createElement('p');
-    sub.className = 'sub';
-    sub.textContent = `${a.region? a.region+' · ' : ''}${a.bike || ''}`;
-    idcol.appendChild(nameRow);
-    idcol.appendChild(sub);
+        const name = document.createElement('h3');
+        name.className = 'name';
+        name.textContent = a.name || '라이더';
+        nameRow.appendChild(name);
 
-    if(a.intro){
-      const intro = document.createElement('p');
-      intro.className = 'intro';
-      intro.textContent = `"${(a.intro || '').slice(0,25)}"`;
-      idcol.appendChild(intro);
-    }
+        const sub = document.createElement('p');
+        sub.className = 'sub';
+        sub.textContent = `${a.region? a.region+' · ' : ''}${a.bike || ''}`;
 
-    head.appendChild(avatar);
-    head.appendChild(idcol);
+        idcol.appendChild(nameRow);
+        idcol.appendChild(sub);
 
-    const traits = document.createElement('div');
-    traits.className = 'traits';
-    const styles = (a.styles && a.styles.length) ? a.styles : [];
-    const pace   = (a.pace && a.pace.length) ? a.pace : [];
-    const all    = [...styles.map(s => ({type:'style', key:s})), ...pace.map(p => ({type:'pace', key:p}))];
-
-    if(all.length === 0){
-      traits.appendChild(tagEl('style', '-'));
-    } else {
-      all.forEach(item=>{
-        if(item.type==='style' && STYLE_META[item.key]){
-          const m = STYLE_META[item.key];
-          traits.appendChild(tagEl(`style ${m.cls}`, m.label));
-        }else if(item.type==='pace' && PACE_META[item.key]){
-          const m = PACE_META[item.key];
-          traits.appendChild(tagEl(`pace ${m.cls}`, m.label));
-        }else{
-          traits.appendChild(tagEl(item.type, item.key));
+        if(a.intro){
+          const intro = document.createElement('p');
+          intro.className = 'intro';
+          intro.textContent = `"${(a.intro || '').slice(0,25)}"`;
+          idcol.appendChild(intro);
         }
+
+        head.appendChild(avatar);
+        head.appendChild(idcol);
+
+        const traits = document.createElement('div');
+        traits.className = 'traits';
+        const styles = (a.styles && a.styles.length) ? a.styles : [];
+        const pace   = (a.pace && a.pace.length) ? a.pace : [];
+        const all    = [
+          ...styles.map(s => ({type:'style', key:s})),
+          ...pace.map(p => ({type:'pace', key:p}))
+        ];
+        if(all.length === 0){
+          traits.appendChild(tagEl('style','-'));
+        }else{
+          all.forEach(it=>{
+            if(it.type==='style' && STYLE_META[it.key]){
+              const m=STYLE_META[it.key];
+              traits.appendChild(tagEl(`style ${m.cls}`, m.label));
+            }else if(it.type==='pace' && PACE_META[it.key]){
+              const m=PACE_META[it.key];
+              traits.appendChild(tagEl(`pace ${m.cls}`, m.label));
+            }else{
+              traits.appendChild(tagEl(it.type, it.key));
+            }
+          });
+        }
+
+        card.appendChild(head);
+        card.appendChild(traits);
+        listEl.appendChild(card);
       });
+
+      // 에러박스 숨김
+      errorBox.classList.add('hidden');
+      errorBox.textContent='';
+    }catch(err){
+      // 화면에 에러 출력
+      errorBox.classList.remove('hidden');
+      errorBox.textContent = '렌더 중 오류가 발생했습니다:\\n' + (err && err.message ? err.message : String(err));
     }
+  }
 
-    card.appendChild(head);
-    card.appendChild(traits);
-    listEl.appendChild(card);
-  });
-}
-
-render();
+  // DOM 준비 후 렌더
+  document.addEventListener('DOMContentLoaded', render);
+})();
 </script>
 </body>
 </html>
