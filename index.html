@@ -154,6 +154,28 @@
 <script>
 /* 공통: 운영자 DM, 테마, 저장 키 */
 const ADMIN_DM = "http://pf.kakao.com/_ceUDn/chat";
+const LS_APPS = 'rimo_applications_v1';
+
+function saveApplication(crew, text){
+  let apps = [];
+  try { apps = JSON.parse(localStorage.getItem(LS_APPS)||'[]'); } catch(e){ apps = []; }
+  apps.unshift({
+    id: 'app'+Math.random().toString(36).slice(2,7),
+    ts: Date.now(),
+    crewId: crew.id,
+    title: crew.title,
+    from: crew.from,
+    to: crew.to,
+    text
+  });
+  localStorage.setItem(LS_APPS, JSON.stringify(apps));
+}
+
+// 모달 openJoinModal(...) 내부에서 goAdmin 버튼 핸들러를 이렇게:
+document.getElementById('goAdmin').onclick = ()=>{
+  saveApplication(crew, preview.textContent); // ← 신청 저장
+  location.href = ADMIN_DM;                    // 카톡 오픈
+};
 const LS_KEY = 'rimo_profile_v1';
 const THEMES = {
   red:{ base:'#ff4d4d', cardBg:'rgba(255,77,77,.14)', border:'rgba(255,77,77,.55)'},
