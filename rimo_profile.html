@@ -175,41 +175,61 @@
   border-color:var(--accent);
   box-shadow:0 0 0 2px rgba(122,167,255,.25) inset;
 }
-  /* ===== 폼 컨트롤 공통 세팅 (이름/기종/지역/탠덤/시간대/PIN) ===== */
-:root { --control-h: 30px } /* 7개 컨트롤의 공통 높이. 원하면 48~56px로 조정 */
+  /* ===== 폼 컨트롤 공통 (7개 전부 동일) ===== */
+:root{
+  --control-h: 52px;          /* 높이 통일: 48~56px 선호 */
+  --control-radius: 12px;
+  --control-bg: #0f1020;
+  --control-bd: #2c2f48;
+  --control-ink: #fff;
+  --control-ph: #9aa0b6;
+  --control-font: 14px;       /* 폰트 크기 통일 */
+}
 
-.panel .field input[type="text"],
-.panel .field input[type="password"],
-.panel .field select {
+/* input/select/textarea 공통 룩 */
+.panel .field input,
+.panel .field select,
+#pin,
+#intro{
   appearance: none;
   width: 100%;
   height: var(--control-h);
   padding: 12px 14px;
-  border: 1px solid #2c2f48;
-  border-radius: 12px;
-  background: #0f1020;
-  color: #fff;
-  font-size: 14px;
-  line-height: 1;            /* 플랫폼 차이 줄이기 */
+  border: 1px solid var(--control-bd);
+  border-radius: var(--control-radius);
+  background: var(--control-bg);
+  color: var(--control-ink);
+  font-size: var(--control-font);
+  font-family: inherit;        /* 본문 폰트와 동일 */
+  line-height: 1;
   box-sizing: border-box;
 }
 
-/* placeholder 톤統一 */
-.panel .field input::placeholder { color: #9aa0b6; }
+/* placeholder 톤 */
+.panel .field input::placeholder,
+#intro::placeholder{ color: var(--control-ph); }
 
-/* 포커스(활성화) 시 효과 — 모든 컨트롤 공통 */
+/* 포커스(활성화) 효과 — 7개 전부 동일 */
 .panel .field input:focus,
-.panel .field select:focus {
+.panel .field select:focus,
+#pin:focus,
+#intro:focus{
   outline: none;
   border-color: var(--accent);
-  /* 다른 폼과 동일한 빛번짐 */
-  box-shadow: 0 0 0 2px rgba(122,167,255,.25) inset, 0 0 12px rgba(122,167,255,.28);
+  box-shadow: 0 0 0 2px rgba(122,167,255,.25) inset,
+              0 0 12px rgba(122,167,255,.28);
 }
 
-/* --- PIN 전용(다른 컨트롤과 룩을 완전히 동일화) --- */
-#pin {
-  text-align: center;        /* 기존처럼 가운데 입력 원하면 유지, 좌측정렬 원하면 지우기 */
-  letter-spacing: 2px;       /* 숫자 간격 */
+/* PIN 전용(입력 정렬/간격만 추가) */
+#pin{
+  text-align: center;          /* 가운데 입력 유지 (원하면 삭제) */
+  letter-spacing: 2px;
+  caret-color: var(--control-ink);
+}
+
+/* 자기소개 textarea 동작(한 줄 높이 유지) */
+#intro{
+  resize: none;                /* 크기조절 비활성; 필요하면 vertical 로 */
 }
 </style>
 </head>
