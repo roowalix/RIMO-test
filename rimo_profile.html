@@ -182,11 +182,20 @@
   height: 36px; padding: 8px 10px;
   border:1px solid #2b2e54; border-radius:8px;
   background:#0f1020; color:#fff;
+/* 내 프로필 찾기 — 결과 카드 하단(PIN/버튼) 폭 조정 */
+#claimResults .claim-card .foot{
+  /* 왼쪽: PIN 입력칸(남는 폭), 오른쪽: 버튼 150px 고정 */
+  grid-template-columns: minmax(0, 1fr) 150px;
+  gap: 10px; /* 필요하면 8~12px로 조절 */
 }
 #claimResults .claim-card .connect{
-  height: 36px; padding: 0 14px; border:none; border-radius:8px;
-  background:#2a5bff; color:#fff; font-weight:800; cursor:pointer;
+  min-width: 150px;         /* 버튼 가로 확장 */
+  white-space: nowrap;      /* 줄바꿈 방지 */
+  padding: 0 16px;          /* 터치 여백 살짝 넓힘(선택) */
 }
+/* (선택) 버튼 글자크기 살짝 줄여 한 줄 유지하고 싶으면
+#claimResults .claim-card .connect{ font-size:14px; }
+*/
 </style>
 </head>
 <body>
