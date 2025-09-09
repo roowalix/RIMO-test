@@ -156,6 +156,25 @@
     color:#e6e9ff; box-shadow:0 0 10px var(--accent-glow), 0 0 0 2px rgba(122,167,255,.25) inset;
     transform:translateY(-1px) scale(1.03);
   }
+  /* PIN 인풋을 다른 필드와 동일한 룩으로 */
+#pin{
+  appearance:none;
+  width:100%;
+  padding:12px;
+  border:1px solid #2c2f48;
+  border-radius:10px;
+  background:#0f1020;
+  color:#fff;
+  font-size:14px;
+  letter-spacing:2px;
+  text-align:center;
+}
+#pin::placeholder{ color:#9aa0b6; }
+#pin:focus{
+  outline:none;
+  border-color:var(--accent);
+  box-shadow:0 0 0 2px rgba(122,167,255,.25) inset;
+}
 </style>
 </head>
 <body>
