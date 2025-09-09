@@ -137,7 +137,19 @@
 
 <script>
 /* ===== 설정 ===== */
-const REG_URL = "https://script.google.com/macros/s/AKfycbyA5VFehWwalOiwemyHK8i1dGr_Of_tZLQjyUWLdgblrT9lJxWQcRzACnv4O8cxkAos/exec";
+const REG_URL = "https://script.google.com/macros/s/AKfycbz28V6oZkCuFlwpN6ouGKoZKAcHQkveNMPhJZxjA2Er_WUbFh7nO1XwfqPXIZjs4OTq/exec";
+
+async function fetchAmbassadors(){
+  const res = await fetch(REG_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ action:'listProfiles' })
+  });
+  const txt = await res.text();
+  const data = JSON.parse(txt);
+  if(!data.ok) throw new Error('listProfiles failed');
+  return data.profiles; // [{name,region,bike,styles,pace,icon,intro}, ...]
+}
 const LSK_PROFILE='rimo_profile_v1';   // 내 로컬 프로필 (이름 표시/“(나)” 식별용)
 
 /* 메타(라벨만 사용) */
