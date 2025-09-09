@@ -35,10 +35,10 @@
   /* 패널 */
   .panel{padding:12px;display:flex;flex-direction:column;gap:10px}
 
-  .form-row{display:flex;align-items:center;gap:0;margin-bottom:0}
+  .form-row{display:flex;align-items:center;gap:6px;margin-bottom:0}
   .form-row.top{align-items:flex-start}
   .form-row label{width:var(--label-width);font-size:14px;font-weight:700;white-space:nowrap}
-  .field{flex:1}
+  .field{flex:1;min-width:0}
 
   /* ✅ 지역 / 탠덤 : 항상 1행 2열, 왼쪽(지역) 더 넓게, 라벨은 흰색 */
   .form-row.split{
@@ -54,7 +54,7 @@
     min-width:0; /* 좁은 화면에서도 압축 가능 */
   }
   .form-row.split .col label{
-    width:auto;                 /* 라벨 고정폭 해제 */
+    width:var(--label-width);                 /* 라벨 고정폭 해제 */
     font-size:14px; font-weight:700;
     white-space:nowrap;
     color:#fff;                 /* ✅ 흰색으로 통일 */
