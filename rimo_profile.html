@@ -9,13 +9,46 @@
 <link rel="stylesheet" href="rimo_theme.css?v=20250910" />
 
 <style>
-  :root{ --label-width:40px; }
+  :root{
+  --label-width: 40px;   /* 라벨 고정폭 */
+  --label-gap:   6px;    /* 라벨↔입력칸 간격 */
+}
 
-  *{box-sizing:border-box}
-  body{
-    margin:0;
-    font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Helvetica,Arial,sans-serif;
-  }
+/* 1) 한 줄짜리 폼: 라벨↔입력칸 간격 6px */
+.form-row{
+  display:flex;
+  align-items:center;
+  gap: var(--label-gap);     /* ✅ 6px */
+  margin-bottom:0;
+}
+.form-row label{
+  width: var(--label-width); /* ✅ 40px */
+}
+
+/* 2) 지역/탠덤 2칸짜리: 라벨↔입력칸 간격 6px로 통일 */
+.form-row.split{
+  display:grid;
+  grid-template-columns: minmax(0,1.6fr) minmax(0,1fr); /* 왼쪽(지역) 넓게 */
+  column-gap:14px;               /* 두 칸 사이 간격(필요하면 조절) */
+  align-items:center;
+}
+.form-row.split .col{
+  display:flex;
+  align-items:center;
+  gap: var(--label-gap);         /* ✅ 6px */
+  min-width:0;
+}
+.form-row.split .col label{
+  width: var(--label-width);     /* ✅ 40px */
+}
+
+/* 입력 요소는 가로 100%로 */
+.form-row .field,
+.form-row.split .field{ flex:1; min-width:0; }
+.form-row .field select,
+.form-row .field input,
+.form-row.split .field select{ width:100%; }
+
 
   /* 헤더 */
   header{
@@ -35,7 +68,7 @@
   /* 패널 */
   .panel{padding:12px;display:flex;flex-direction:column;gap:10px}
 
-  .form-row{display:flex;align-items:center;gap:12px;margin-bottom:0}
+  .form-row{display:flex;align-items:center;gap:6px;margin-bottom:0}
   .form-row.top{align-items:flex-start}
   .form-row label{width:var(--label-width);font-size:14px;font-weight:700;white-space:nowrap}
   .field{flex:1}
