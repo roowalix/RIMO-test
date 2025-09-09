@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>RIMO — 라이더 카드</title>
+<title>RIMO — 라이더 프로필</title>
 <style>
   :root{
     --bg:#0b0b0f; --ink:#f1f3ff; --muted:#b6b8cc; --line:#23243a;
@@ -50,12 +50,6 @@
     border-color:var(--accent);border-width:2px;background:rgba(122,167,255,.16);
     box-shadow:0 0 10px rgba(122,167,255,.45);transform:translateY(-1px) scale(1.03);font-weight:800;
   }
-  .style-pill.pill-urban{border-color:#2c4484}
-  .style-pill.pill-curve{border-color:#40307a}
-  .style-pill.pill-tour{border-color:#2f5f5d}
-  .pace-pill.pill-easy{border-color:#2f5a2f}
-  .pace-pill.pill-balanced{border-color:#5a4f2f}
-  .pace-pill.pill-dynamic{border-color:#5a2f2f}
 
   .profile-icons{display:flex;flex-direction:column;align-items:center;gap:10px;margin:0}
   .icons{display:grid;grid-template-columns:repeat(5,48px);grid-auto-rows:48px;gap:10px;justify-content:center}
@@ -84,12 +78,6 @@
   .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
   .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
   .tag{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 10px;border-radius:999px;background:#1a1c2f;border:1px solid #2b2e54;font-size:12px;white-space:nowrap}
-  .tag.style.pill-urban{background:#1e2d55;border-color:#2c4484}
-  .tag.style.pill-curve{background:#2a1f56;border-color:#40307a}
-  .tag.style.pill-tour{background:#1e3b3a;border-color:#2f5f5d}
-  .tag.pace.pill-easy{background:#1f3a1f;border-color:#2f5a2f}
-  .tag.pace.pill-balanced{background:#3a341e;border-color:#5a4f2f}
-  .tag.pace.pill-dynamic{background:#3a1f1f;border-color:#5a2f2f}
   .modal-actions{display:flex;gap:12px;justify-content:center;margin-top:6px}
   .modal-actions button{flex:1;padding:12px;border-radius:10px;border:none;font-size:14px;font-weight:800;cursor:pointer;color:#fff}
   .modal-actions .ok{background:#2a5bff}
@@ -100,7 +88,7 @@
 <header>
   <div class="bar">
     <div class="logo">🏍️ RIMO</div>
-    <div class="title">엠버서더 라이더 카드</div>
+    <div class="title">라이더 프로필</div>
   </div>
 </header>
 
@@ -116,32 +104,11 @@
     </div>
     <div class="form-row">
       <label>지역</label>
-      <div class="field">
-        <select id="region">
-          <option value="">지역 선택</option>
-          <option>서울 강남구</option><option>서울 강동구</option><option>서울 강북구</option>
-          <option>서울 강서구</option><option>서울 관악구</option><option>서울 광진구</option>
-          <option>서울 구로구</option><option>서울 금천구</option><option>서울 노원구</option>
-          <option>서울 도봉구</option><option>서울 동대문구</option><option>서울 동작구</option>
-          <option>서울 마포구</option><option>서울 서대문구</option><option>서울 서초구</option>
-          <option>서울 성동구</option><option>서울 성북구</option><option>서울 송파구</option>
-          <option>서울 양천구</option><option>서울 영등포구</option><option>서울 용산구</option>
-          <option>서울 은평구</option><option>서울 종로구</option><option>서울 중구</option>
-          <option>서울 중랑구</option>
-        </select>
-      </div>
+      <div class="field"><input id="region" type="text" placeholder="예: 서울 강남구"></div>
     </div>
-
     <div class="form-row">
       <label>시간대</label>
-      <div class="field">
-        <select id="time">
-          <option value="05:00–10:00 (아침)">05:00–10:00 (아침)</option>
-          <option value="14:00–17:00 (오후)">14:00–17:00 (오후)</option>
-          <option value="18:00–22:00 (저녁)">18:00–22:00 (저녁)</option>
-          <option value="23:00–03:00 (심야)">23:00–03:00 (심야)</option>
-        </select>
-      </div>
+      <div class="field"><input id="time" type="text" placeholder="예: 18:00~22:00 (저녁)"></div>
     </div>
     <div class="form-row">
       <label>탠덤</label>
@@ -155,17 +122,17 @@
     <div class="form-row">
       <label>스타일</label>
       <div class="toggles" data-group="style">
-        <span class="toggle style-pill pill-urban"  data-value="Urban">Urban</span>
-        <span class="toggle style-pill pill-curve"  data-value="Curve">Curve</span>
-        <span class="toggle style-pill pill-tour"   data-value="Tour">Tour</span>
+        <span class="toggle" data-value="Urban">Urban</span>
+        <span class="toggle" data-value="Curve">Curve</span>
+        <span class="toggle" data-value="Tour">Tour</span>
       </div>
     </div>
     <div class="form-row">
       <label>페이스</label>
       <div class="toggles" data-group="speed">
-        <span class="toggle pace-pill pill-easy"     data-value="Easy">Easy</span>
-        <span class="toggle pace-pill pill-balanced" data-value="Balanced">Balanced</span>
-        <span class="toggle pace-pill pill-dynamic"  data-value="Dynamic">Dynamic</span>
+        <span class="toggle" data-value="Easy">Easy</span>
+        <span class="toggle" data-value="Balanced">Balanced</span>
+        <span class="toggle" data-value="Dynamic">Dynamic</span>
       </div>
     </div>
 
@@ -197,17 +164,18 @@
   <a href="rimo_ambassadors.html" class="tab">엠버서더</a>
 </nav>
 
+<!-- 미리보기 모달 -->
 <div class="modal" id="previewModal">
   <div class="modal-content">
     <div class="card-head">
       <div class="avatar" id="avatarPreview">🏍️</div>
       <div class="idcol">
         <h3 class="name" id="namePreview">라이더 이름</h3>
-        <p class="sub" id="bikePreview">바이크 미입력 · 서울 지역</p>
+        <p class="sub" id="bikePreview">바이크 미입력 · 서울</p>
       </div>
     </div>
     <div class="grid-2">
-      <div class="tag" id="timePreview">18:00–22:00 (저녁)</div>
+      <div class="tag" id="timePreview">-</div>
       <div class="tag" id="tandemPreview">탠덤 허용</div>
     </div>
     <div class="grid-3" id="styleGrid"></div>
@@ -220,72 +188,115 @@
 </div>
 
 <script>
-const REG_URL = "https://script.google.com/macros/s/AKfycbz28V6oZkCuFlwpN6ouGKoZKAcHQkveNMPhJZxjA2Er_WUbFh7nO1XwfqPXIZjs4OTq/exec";
-
-async function registerProfile(profile){
-  try{
-    const res = await fetch(REG_URL, {
-      method: 'POST',
-      headers: { 'Content-Type':'text/plain;charset=utf-8' }, // ★ preflight 회피
-      body: JSON.stringify({ action:'registerProfile', profile })
-    });
-    // Apps Script가 JSON을 반환하므로 텍스트→JSON 파싱 시도
-    const txt = await res.text();
-    let j = {};
-    try { j = JSON.parse(txt); } catch(_) {}
-    if (!res.ok || !j.ok) throw new Error('Server said NO: '+txt);
-    return true;
-  }catch(err){
-    alert('네트워크/서버 오류: ' + err.message);
-    return false;
-  }
-}
+const REG_URL = "https://script.google.com/macros/s/AKfycby0QQwqAIYq-uy-HFJSZ-ZDSglSETeB-llXpUuUAN4_LJop0WfcvKbLJspJSx8pRRvu/exec";
 const LS_KEY = 'rimo_profile_v1';
-let selectedIcon="🏍️";
+const LS_UID = 'rimo_uid_v1';
+let selectedIcon = "🏍️";
 
-const iconWrap=document.getElementById("iconSelect");
+function getUID(){
+  let uid = localStorage.getItem(LS_UID);
+  if(!uid){
+    uid = "u_" + Math.random().toString(36).slice(2) + Date.now().toString(36);
+    localStorage.setItem(LS_UID, uid);
+  }
+  return uid;
+}
+
+// 아이콘 선택 토글
+const iconWrap = document.getElementById("iconSelect");
+iconWrap.addEventListener("click", e=>{
+  if(e.target.classList.contains("icon-btn")){
+    selectedIcon = e.target.dataset.icon;
+    updateIconActive();
+  }
+});
 function updateIconActive(){
   iconWrap.querySelectorAll(".icon-btn").forEach(b => {
     b.classList.toggle("active", b.dataset.icon === selectedIcon);
   });
 }
+
+// 스타일/페이스 선택 토글
+document.querySelectorAll('.toggles').forEach(group=>{
+  group.addEventListener('click',e=>{
+    if(e.target.classList.contains('toggle')){
+      e.target.classList.toggle('active');
+    }
+  });
+});
+
+// 프로필 데이터 수집
 function collectProfile(){
-  const styles=[...document.querySelectorAll('.toggles[data-group="style"] .toggle.active')].map(el=>el.dataset.value);
-  const pace=[...document.querySelectorAll('.toggles[data-group="speed"] .toggle.active')].map(el=>el.dataset.value);
-  const introVal=(document.getElementById('intro').value||'').slice(0,25);
+  const styles = [...document.querySelectorAll('.toggles[data-group="style"] .toggle.active')].map(el=>el.dataset.value);
+  const pace = [...document.querySelectorAll('.toggles[data-group="speed"] .toggle.active')].map(el=>el.dataset.value);
+  const introVal = (document.getElementById('intro').value||'').slice(0,25);
   return {
-    name:document.getElementById('handle').value||'라이더 이름',
-    bike:document.getElementById('bike').value||'바이크 미입력',
-    region:document.getElementById('region').value||'',
+    uid: getUID(),
+    name: document.getElementById('handle').value.trim(),
+    bike: document.getElementById('bike').value.trim(),
+    region: document.getElementById('region').value.trim(),
     styles, pace,
-    time:document.getElementById('time').value,
-    tandem:document.getElementById('tandem').value,
-    icon:selectedIcon,
-    intro:introVal
+    time: document.getElementById('time').value,
+    tandem: document.getElementById('tandem').value,
+    icon: selectedIcon,
+    intro: introVal
   };
 }
+
+// 로컬 저장
 function saveProfileLocal(profile){
   localStorage.setItem(LS_KEY, JSON.stringify(profile));
 }
-async function registerProfile(profile){
+
+// 구글 시트 저장
+async function saveProfileRemote(profile){
   try{
     const res = await fetch(REG_URL, {
-      method:'POST',
-      headers:{'Content-Type':'application/json;charset=utf-8'},
-      body: JSON.stringify({ action:'registerProfile', profile })
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ action:"registerProfile", profile })
     });
-    const text = await res.text();
-    console.log("등록결과:", text);
-    return res.ok;
+    const out = await res.json();
+    return out.ok;
   }catch(err){
-    alert('네트워크 오류: ' + err.message);
+    alert("서버 오류: "+err.message);
     return false;
   }
 }
+
+// 프리뷰 표시
 function showPreview(p){
   document.getElementById('avatarPreview').textContent = p.icon || '🏍️';
   document.getElementById('namePreview').textContent = p.name || '라이더 이름';
   document.getElementById('bikePreview').textContent = `${p.region? p.region+' · ' : ''}${p.bike||'바이크 미입력'}`;
   document.getElementById('timePreview').textContent = p.time || '-';
   document.getElementById('tandemPreview').textContent = `탠덤 ${p.tandem||'-'}`;
-  const STYLE_META = { Urban:{emoji:'',cls:'pill-urban'},
+  document.getElementById('styleGrid').innerHTML = p.styles.map(s=>`<div class="tag">${s}</div>`).join('');
+  document.getElementById('paceGrid').innerHTML = p.pace.map(s=>`<div class="tag">${s}</div>`).join('');
+  document.getElementById('previewModal').classList.add('show');
+}
+
+// 버튼 이벤트
+document.getElementById("saveBtn").addEventListener("click", async ()=>{
+  const profile = collectProfile();
+  if(!profile.name){
+    alert("라이더 이름을 입력해주세요.");
+    return;
+  }
+  saveProfileLocal(profile);
+  const ok = await saveProfileRemote(profile);
+  if(ok){
+    showPreview(profile);
+  }else{
+    alert("프로필 저장 실패");
+  }
+});
+document.getElementById("confirmBtn").addEventListener("click",()=>{
+  document.getElementById('previewModal').classList.remove('show');
+});
+document.getElementById("editBtn").addEventListener("click",()=>{
+  document.getElementById('previewModal').classList.remove('show');
+});
+</script>
+</body>
+</html>
