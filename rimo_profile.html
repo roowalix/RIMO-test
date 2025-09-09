@@ -9,7 +9,6 @@
     --bg:#0b0b0f; --ink:#f1f3ff; --muted:#b6b8cc; --line:#23243a;
     --tile:#141627; --accent:#7aa7ff;
     --label-width:40px;
-    /* tabbar */
     --tab-bg:#182039; --tab-bd:#2d3559; --tab-ink:#e6e8ef;
     --tab-pri:#26346d; --tab-pri-bd:#3b53a8;
   }
@@ -23,69 +22,31 @@
   .logo{font-weight:900}
   .title{font-weight:800;opacity:.9}
 
-  main{
-    padding:16px;max-width:520px;margin:0 auto;
-    display:flex;flex-direction:column;gap:12px;
-    padding-bottom:100px;
-  }
-
-  .panel{background:var(--tile);padding:12px;border-radius:14px;border:1px solid var(--line);
-         display:flex;flex-direction:column;gap:10px}
-  .form-row{display:flex;align-items:center;gap:0px;margin-bottom:0}
+  main{padding:16px;max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:12px;padding-bottom:100px;}
+  .panel{background:var(--tile);padding:12px;border-radius:14px;border:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
+  .form-row{display:flex;align-items:center;gap:0;margin-bottom:0}
   .form-row.top{align-items:flex-start}
   .form-row label{width:var(--label-width);font-size:14px;font-weight:700;white-space:nowrap}
   .field{flex:1}
-  input[type="text"],select,textarea{
-    width:100%;padding:8px 12px; border-radius:8px;border:1px solid #2c2f48;
-    background:#0f1020;color:#fff;font-size:14px;
-  }
+  input[type="text"],select,textarea{width:100%;padding:8px 12px;border-radius:8px;border:1px solid #2c2f48;background:#0f1020;color:#fff;font-size:14px}
   textarea{resize:none;height:40px}
-
-  /* 토글(필) */
   .toggles{display:flex;gap:4px;flex-wrap:wrap;margin:4px 0}
-  .toggle{
-    display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;
-    border:1px solid #2b2e54;background:#1a1c2f;color:#e6e9ff;font-size:13px;cursor:pointer;
-    user-select:none;white-space:nowrap;transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease, background-color .15s ease;
-  }
-  .toggle.active{
-    border-color:var(--accent);border-width:2px;background:rgba(122,167,255,.16);
-    box-shadow:0 0 10px rgba(122,167,255,.45);transform:translateY(-1px) scale(1.03);font-weight:800;
-  }
-  .style-pill.pill-urban{border-color:#2c4484}
-  .style-pill.pill-curve{border-color:#40307a}
-  .style-pill.pill-tour{border-color:#2f5f5d}
-  .pace-pill.pill-easy{border-color:#2f5a2f}
-  .pace-pill.pill-balanced{border-color:#5a4f2f}
-  .pace-pill.pill-dynamic{border-color:#5a2f2f}
-
-  /* 아이콘 (5×2) + 소개 폭 동일 */
+  .toggle{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;border:1px solid #2b2e54;background:#1a1c2f;color:#e6e9ff;font-size:13px;cursor:pointer;user-select:none;white-space:nowrap;transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease, background-color .15s ease;}
+  .toggle.active{border-color:var(--accent);border-width:2px;background:rgba(122,167,255,.16);box-shadow:0 0 10px rgba(122,167,255,.45);transform:translateY(-1px) scale(1.03);font-weight:800;}
   .profile-icons{display:flex;flex-direction:column;align-items:center;gap:10px;margin:0}
   .icons{display:grid;grid-template-columns:repeat(5,48px);grid-auto-rows:48px;gap:10px;justify-content:center}
-  .icon-btn{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-    font-size:28px;cursor:pointer;background:#1a1c2f;border:1px solid #2c2f48;transition:.15s ease;color:#fff}
+  .icon-btn{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer;background:#1a1c2f;border:1px solid #2c2f48;transition:.15s ease;color:#fff}
   .icon-btn.active{border-color:var(--accent);box-shadow:0 0 10px rgba(122,167,255,.4);transform:scale(1.05)}
   .intro-box{width:calc(48px*5 + 10px*4);margin:8px 0 0}
   #intro{width:100%;text-align:center;font-size:13px}
-
   .btnrow{display:flex;gap:8px;flex-wrap:wrap}
-  .save-btn,.share-btn{
-    flex:1;min-width:140px;padding:14px;margin-top:6px;font-size:15px;font-weight:700;
-    background:#2a5bff;border:none;color:#fff;border-radius:10px;cursor:pointer;
-  }
-  .share-btn{background:#3340aa}
-
-  /* 하단 네비 */
+  .save-btn{flex:1;min-width:140px;padding:14px;margin-top:6px;font-size:15px;font-weight:700;background:#2a5bff;border:none;color:#fff;border-radius:10px;cursor:pointer}
   .tabbar{position:fixed;left:0;right:0;bottom:16px;z-index:2500;display:flex;gap:12px;justify-content:center}
-  .tabbar .tab{background:var(--tab-bg);border:1px solid var(--tab-bd);color:var(--tab-ink);
-    padding:12px 18px;border-radius:22px;font-weight:800;text-decoration:none;font-size:14px}
+  .tabbar .tab{background:var(--tab-bg);border:1px solid var(--tab-bd);color:var(--tab-ink);padding:12px 18px;border-radius:22px;font-weight:800;text-decoration:none;font-size:14px}
   .tabbar .tab.primary{background:var(--tab-pri);border-color:var(--tab-pri-bd)}
-
-  /* 저장 후 미리보기 팝업 */
   .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.5);z-index:3000;padding:16px}
   .modal.show{display:flex}
-  .modal-content{width:100%;max-width:520px;background:#101223;border:1px solid var(--line);border-radius:16px;
-    box-shadow:0 8px 24px rgba(0,0,0,.4);padding:18px 16px;display:flex;flex-direction:column;gap:12px}
+  .modal-content{width:100%;max-width:520px;background:#101223;border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,.4);padding:18px 16px;display:flex;flex-direction:column;gap:12px}
   .card-head{display:flex;gap:14px;align-items:center}
   .avatar{width:72px;height:72px;border-radius:50%;background:#1a1c2f;font-size:36px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
   .idcol{min-width:0}
@@ -93,16 +54,6 @@
   .sub{margin:0;color:var(--muted);font-size:13px}
   .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
   .tag{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 10px;border-radius:999px;background:#1a1c2f;border:1px solid #2b2e54;font-size:12px;white-space:nowrap}
-  .tag.style.pill-urban{background:#1e2d55;border-color:#2c4484}
-  .tag.style.pill-curve{background:#2a1f56;border-color:#40307a}
-  .tag.style.pill-tour{background:#1e3b3a;border-color:#2f5f5d}
-  .tag.pace.pill-easy{background:#1f3a1f;border-color:#2f5a2f}
-  .tag.pace.pill-balanced{background:#3a341e;border-color:#5a4f2f}
-  .tag.pace.pill-dynamic{background:#3a1f1f;border-color:#5a2f2f}
-  .modal-actions{display:flex;gap:12px;justify-content:center;margin-top:6px}
-  .modal-actions button{flex:1;padding:12px;border-radius:10px;border:none;font-size:14px;font-weight:800;cursor:pointer;color:#fff}
-  .modal-actions .ok{background:#2a5bff}
-  .modal-actions .edit{background:#2c2f48}
 </style>
 </head>
 <body>
@@ -115,18 +66,8 @@
 
 <main>
   <section class="panel">
-    <div class="form-row">
-      <label>라이더</label>
-      <div class="field"><input id="handle" type="text" placeholder="예: RIMO rider"></div>
-    </div>
-
-    <!-- 기종 -->
-    <div class="form-row">
-      <label>기종</label>
-      <div class="field"><input id="bike" type="text" placeholder="예: Honda MSX125"></div>
-    </div>
-
-    <!-- 지역 -->
+    <div class="form-row"><label>라이더</label><div class="field"><input id="handle" type="text" placeholder="예: RIMO rider"></div></div>
+    <div class="form-row"><label>기종</label><div class="field"><input id="bike" type="text" placeholder="예: Honda MSX125"></div></div>
     <div class="form-row">
       <label>지역</label>
       <div class="field">
@@ -142,48 +83,33 @@
         </select>
       </div>
     </div>
+    <div class="form-row"><label>시간대</label><div class="field">
+      <select id="time">
+        <option value="05:00–10:00 (아침)">05:00–10:00 (아침)</option>
+        <option value="14:00–17:00 (오후)">14:00–17:00 (오후)</option>
+        <option value="18:00–22:00 (저녁)">18:00–22:00 (저녁)</option>
+        <option value="23:00–03:00 (심야)">23:00–03:00 (심야)</option>
+      </select>
+    </div></div>
+    <div class="form-row"><label>탠덤</label><div class="field">
+      <select id="tandem"><option value="허용">허용</option><option value="불가">불가</option></select>
+    </div></div>
 
-    <div class="form-row">
-      <label>시간대</label>
-      <div class="field">
-        <select id="time">
-          <option value="05:00–10:00 (아침)">05:00–10:00 (아침)</option>
-          <option value="14:00–17:00 (오후)">14:00–17:00 (오후)</option>
-          <option value="18:00–22:00 (저녁)">18:00–22:00 (저녁)</option>
-          <option value="23:00–03:00 (심야)">23:00–03:00 (심야)</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="form-row">
-      <label>탠덤</label>
-      <div class="field">
-        <select id="tandem">
-          <option value="허용">허용</option>
-          <option value="불가">불가</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="form-row">
-      <label>스타일</label>
+    <div class="form-row"><label>스타일</label>
       <div class="toggles" data-group="style">
-        <span class="toggle style-pill pill-urban"  data-value="Urban">Urban</span>
-        <span class="toggle style-pill pill-curve"  data-value="Curve">Curve</span>
-        <span class="toggle style-pill pill-tour"   data-value="Tour">Tour</span>
+        <span class="toggle" data-value="Urban">Urban</span>
+        <span class="toggle" data-value="Curve">Curve</span>
+        <span class="toggle" data-value="Tour">Tour</span>
       </div>
     </div>
-
-    <div class="form-row">
-      <label>페이스</label>
+    <div class="form-row"><label>페이스</label>
       <div class="toggles" data-group="speed">
-        <span class="toggle pace-pill pill-easy"     data-value="Easy">Easy</span>
-        <span class="toggle pace-pill pill-balanced" data-value="Balanced">Balanced</span>
-        <span class="toggle pace-pill pill-dynamic"  data-value="Dynamic">Dynamic</span>
+        <span class="toggle" data-value="Easy">Easy</span>
+        <span class="toggle" data-value="Balanced">Balanced</span>
+        <span class="toggle" data-value="Dynamic">Dynamic</span>
       </div>
     </div>
 
-    <!-- 아이콘 + 소개 -->
     <div class="profile-icons">
       <div class="icons" id="iconSelect">
         <div class="icon-btn" data-icon="🏍️">🏍️</div>
@@ -203,19 +129,18 @@
     </div>
 
     <div class="btnrow">
-      <button class="save-btn" id="saveBtn">프로필 저장</button>
-      <button class="share-btn" id="shareLinkBtn">프로필 공유 링크 복사</button>
+      <button class="save-btn" id="saveBtn">프로필 저장 & 등록</button>
     </div>
   </section>
 </main>
 
 <nav class="tabbar" aria-label="하단 네비게이션">
-  <a href="index.html" class="tab">라이딩</a>
+  <a href="index.html" class="tab">메인</a>
   <a href="rimo_profile.html" class="tab primary">프로필</a>
   <a href="rimo_ambassadors.html" class="tab">엠버서더</a>
 </nav>
 
-<!-- 저장 후 미리보기 팝업 -->
+<!-- 미리보기(간단) -->
 <div class="modal" id="previewModal">
   <div class="modal-content">
     <div class="card-head">
@@ -225,10 +150,8 @@
         <p class="sub" id="bikePreview">서울 지역 · 바이크 미입력</p>
       </div>
     </div>
-
     <div class="grid-3" id="styleGrid"></div>
     <div class="grid-3" id="paceGrid"></div>
-
     <div class="modal-actions">
       <button class="ok" id="confirmBtn">확인</button>
       <button class="edit" id="editBtn">수정</button>
@@ -237,35 +160,42 @@
 </div>
 
 <script>
-const LS_KEY='rimo_profile_v1';
+/* === 환경 설정 === */
+const REG_URL = 'https://script.google.com/macros/s/AKfycbz97jUHRRsaXJpmZSq0WWQpWXepzZksnH4Txa1oC4D-fBD3JlogrgwGzp3TjNG1xbFu/exec';   // ← Apps Script 웹 앱 URL
+const LS_KEY  = 'rimo_profile_v1';
+
+/* 디바이스ID (업서트 키) */
+function getDeviceId(){
+  let id = localStorage.getItem('rimo_device_id');
+  if(!id){ id = 'dev_' + Math.random().toString(36).slice(2,10); localStorage.setItem('rimo_device_id', id); }
+  return id;
+}
 
 /* 아이콘 선택 */
 let selectedIcon="🏍️";
 const iconWrap=document.getElementById("iconSelect");
 function updateIconActive(){
-  iconWrap.querySelectorAll(".icon-btn").forEach(b => {
-    b.classList.toggle("active", b.dataset.icon === selectedIcon);
-  });
+  iconWrap.querySelectorAll(".icon-btn").forEach(b => b.classList.toggle("active", b.dataset.icon === selectedIcon));
 }
-
-/* 토글 이벤트 */
-document.querySelectorAll('.toggles').forEach(group=>{
-  group.addEventListener('click', e=>{
-    const t=e.target.closest('.toggle'); if(!t) return;
-    t.classList.toggle('active'); saveProfile();
-  });
-});
-
 iconWrap.addEventListener("click", e=>{
   const btn=e.target.closest(".icon-btn"); if(!btn) return;
   selectedIcon=btn.dataset.icon; updateIconActive(); saveProfile();
 });
 
-/* 수집/저장/로드 */
+/* 토글(필) */
+document.querySelectorAll('.toggles').forEach(g=>{
+  g.addEventListener('click', e=>{
+    const t=e.target.closest('.toggle'); if(!t) return;
+    t.classList.toggle('active'); saveProfile();
+  });
+});
+
+/* 수집/저장 */
 function collectProfile(){
   const styles=[...document.querySelectorAll('.toggles[data-group="style"] .toggle.active')].map(el=>el.dataset.value);
   const pace=[...document.querySelectorAll('.toggles[data-group="speed"] .toggle.active')].map(el=>el.dataset.value);
   return {
+    deviceId:getDeviceId(),
     name:document.getElementById('handle').value||'라이더 이름',
     bike:document.getElementById('bike').value||'바이크 미입력',
     region:document.getElementById('region').value||'',
@@ -273,7 +203,8 @@ function collectProfile(){
     time:document.getElementById('time').value,
     tandem:document.getElementById('tandem').value,
     icon:selectedIcon,
-    intro:(document.getElementById('intro').value||'').slice(0,25)
+    intro:(document.getElementById('intro').value||'').slice(0,25),
+    updatedAt: Date.now()
   };
 }
 function saveProfile(){
@@ -282,30 +213,29 @@ function saveProfile(){
   return p;
 }
 function loadProfile(){
-  try{ return JSON.parse(localStorage.getItem(LS_KEY)||'{}'); }
-  catch(e){ return {}; }
+  try{ return JSON.parse(localStorage.getItem(LS_KEY)||'{}'); }catch(e){ return {}; }
+}
+
+/* 서버 등록(업서트) — 간단 폼전송으로 CORS 프리플라이트 회피 */
+function registerProfile(p){
+  if(!REG_URL) return;
+  const body = 'payload=' + encodeURIComponent(JSON.stringify(p));
+  fetch(REG_URL, {
+    method:'POST',
+    headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
+    body
+  }).catch(console.warn);
 }
 
 /* 미리보기 */
 function showPreview(p){
   document.getElementById('avatarPreview').textContent = p.icon || '🏍️';
-  document.getElementById('namePreview').textContent = p.name || '라이더 이름';
-  document.getElementById('bikePreview').textContent = `${p.region? p.region+' · ' : ''}${p.bike||'바이크 미입력'}`;
+  document.getElementById('namePreview').textContent   = p.name || '라이더 이름';
+  document.getElementById('bikePreview').textContent   = `${p.region? p.region+' · ' : ''}${p.bike||'바이크 미입력'}`;
 
-  const STYLE_META = { Urban:{emoji:'🏙️',cls:'pill-urban'}, Curve:{emoji:'🌀',cls:'pill-curve'}, Tour:{emoji:'🗺️',cls:'pill-tour'} };
-  const PACE_META = { Easy:{emoji:'🟢',cls:'pill-easy'}, Balanced:{emoji:'⚖️',cls:'pill-balanced'}, Dynamic:{emoji:'⚡',cls:'pill-dynamic'} };
-
-  const styleGrid = document.getElementById('styleGrid');
-  styleGrid.innerHTML = (p.styles?.length?p.styles:['-']).map(s=>{
-    const m=STYLE_META[s]; if(!m) return `<div class="tag style">${s}</div>`;
-    return `<div class="tag style ${m.cls}">${m.label||s}</div>`;
-  }).join('');
-
-  const paceGrid = document.getElementById('paceGrid');
-  paceGrid.innerHTML = (p.pace?.length?p.pace:['-']).map(s=>{
-    const m=PACE_META[s]; if(!m) return `<div class="tag pace">${s}</div>`;
-    return `<div class="tag pace ${m.cls}">${m.label||s}</div>`;
-  }).join('');
+  const toTags=(arr)=> (arr&&arr.length?arr:['-']).map(s=>`<div class="tag">${s}</div>`).join('');
+  document.getElementById('styleGrid').innerHTML = toTags(p.styles);
+  document.getElementById('paceGrid').innerHTML  = toTags(p.pace);
 
   document.getElementById('previewModal').classList.add('show');
 }
@@ -318,60 +248,32 @@ function showPreview(p){
 });
 
 document.getElementById('saveBtn').addEventListener('click',()=>{
-  const p=saveProfile(); showPreview(p);
+  const p=saveProfile();
+  registerProfile(p);       // ← 저장과 동시에 엠버서더 “등록/업데이트”
+  showPreview(p);
 });
 document.getElementById('confirmBtn').addEventListener('click',()=>{
   document.getElementById('previewModal').classList.remove('show');
-  // 저장 완료 후 메인으로 이동
-  location.href='index.html';
+  location.href='rimo_ambassadors.html'; // 등록 확인하러 이동
 });
 document.getElementById('editBtn').addEventListener('click',()=>{
   document.getElementById('previewModal').classList.remove('show');
 });
-document.getElementById('previewModal').addEventListener('click',(e)=>{
-  if(e.target.id==='previewModal'){ e.currentTarget.classList.remove('show'); }
-});
 
-/* 프로필 공유 링크 생성/복사 */
-function makeShareLink(profile){
-  const data = btoa(unescape(encodeURIComponent(JSON.stringify(profile))));
-  const ambURL = new URL('rimo_ambassadors.html', location.href).toString();
-  return `${ambURL}?import=${data}#import=${data}`;
-}
-async function copyToClipboard(text){
-  try { await navigator.clipboard.writeText(text); }
-  catch(e){
-    const ta=document.createElement('textarea'); ta.value=text;
-    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
-  }
-}
-document.getElementById('shareLinkBtn').addEventListener('click', async ()=>{
-  const profile = saveProfile();
-  const url = makeShareLink(profile);
-  await copyToClipboard(url);
-  alert('공유 링크를 복사했어요. 함께 탈 라이더에게 보내 주세요!');
-});
-
-/* 초기 로드 */
+/* 초기화 */
 (function init(){
   const p=loadProfile();
-  if(p.name) document.getElementById('handle').value=p.name;
-  if(p.bike) document.getElementById('bike').value=p.bike;
+  if(p.name)   document.getElementById('handle').value=p.name;
+  if(p.bike)   document.getElementById('bike').value=p.bike;
   if(p.region) document.getElementById('region').value=p.region;
-  if(p.time) document.getElementById('time').value=p.time;
+  if(p.time)   document.getElementById('time').value=p.time;
   if(p.tandem) document.getElementById('tandem').value=p.tandem;
-  if(p.intro) document.getElementById('intro').value=p.intro;
+  if(p.intro)  document.getElementById('intro').value=p.intro;
   if(Array.isArray(p.styles)){
-    p.styles.forEach(v=>{
-      const el=[...document.querySelectorAll('.toggles[data-group="style"] .toggle')].find(x=>x.dataset.value===v);
-      if(el) el.classList.add('active');
-    });
+    p.styles.forEach(v=>{ const el=[...document.querySelectorAll('.toggles[data-group="style"] .toggle')].find(x=>x.dataset.value===v); if(el) el.classList.add('active');});
   }
   if(Array.isArray(p.pace)){
-    p.pace.forEach(v=>{
-      const el=[...document.querySelectorAll('.toggles[data-group="speed"] .toggle')].find(x=>x.dataset.value===v);
-      if(el) el.classList.add('active');
-    });
+    p.pace.forEach(v=>{ const el=[...document.querySelectorAll('.toggles[data-group="speed"] .toggle')].find(x=>x.dataset.value===v); if(el) el.classList.add('active');});
   }
   if(p.icon){ selectedIcon=p.icon; }
   updateIconActive();
