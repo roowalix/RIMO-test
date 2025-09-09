@@ -20,7 +20,6 @@
     font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Helvetica,Arial,sans-serif;
   }
 
-  /* 헤더 (메인/프로필과 동일) */
   header{
     position:sticky; top:0; z-index:5; background:rgba(11,11,15,.9);
     backdrop-filter:blur(8px); border-bottom:1px solid #232333;
@@ -32,10 +31,9 @@
   main{
     padding:16px; max-width:720px; margin:0 auto;
     display:flex; flex-direction:column; gap:12px;
-    padding-bottom:100px; /* 탭바 겹침 방지 */
+    padding-bottom:100px;
   }
 
-  /* 카드 */
   .card{
     background:var(--tile);
     border:1px solid var(--tileBd);
@@ -76,10 +74,9 @@
   }
   .sub{margin:6px 0 0; color:var(--muted); font-size:13px}
 
-  /* 핀버튼(스타일/페이스) — 이모지 제거 + 한 행 최대 6개 */
   .traits{
     display:grid;
-    grid-template-columns:repeat(6, max-content); /* 최대 6개를 한 줄에 */
+    grid-template-columns:repeat(6, max-content);
     gap:6px;
     justify-content:flex-start;
   }
@@ -90,16 +87,13 @@
     font-size:10px; font-weight:500; color:#e6e9ff;
     white-space:nowrap;
   }
-  /* 스타일 컬러 억양(아이콘 없음) */
   .tag.style.pill-urban   {background:#1e2d55;border-color:#2c4484}
   .tag.style.pill-curve   {background:#2a1f56;border-color:#40307a}
   .tag.style.pill-tour    {background:#1e3b3a;border-color:#2f5f5d}
-  /* 페이스 */
   .tag.pace.pill-easy     {background:#1f3a1f;border-color:#2f5a2f}
   .tag.pace.pill-balanced {background:#3a341e;border-color:#5a4f2f}
   .tag.pace.pill-dynamic  {background:#3a1f1f;border-color:#5a2f2f}
 
-  /* 하단 네비 (메인/프로필과 동일) */
   .tabbar{
     position:fixed; left:0; right:0; bottom:16px; z-index:2500;
     display:flex; gap:12px; justify-content:center;
@@ -110,7 +104,6 @@
   }
   .tabbar .tab.primary{background:var(--tab-pri); border-color:var(--tab-pri-bd)}
 
-  /* 로딩/에러 */
   .state{color:var(--muted); font-size:13px; text-align:center; padding:24px 0}
 </style>
 </head>
@@ -128,7 +121,6 @@
   </section>
 </main>
 
-<!-- 하단 네비 -->
 <nav class="tabbar" aria-label="하단 네비게이션">
   <a href="index.html" class="tab">메인</a>
   <a href="rimo_profile.html" class="tab">프로필</a>
@@ -137,22 +129,12 @@
 
 <script>
 /* ===== 설정 ===== */
-const REG_URL = "https://script.google.com/macros/s/AKfycbz28V6oZkCuFlwpN6ouGKoZKAcHQkveNMPhJZxjA2Er_WUbFh7nO1XwfqPXIZjs4OTq/exec";
+/* ✅ 최신 웹앱 URL로 교체 */
+const REG_URL = "https://script.google.com/macros/s/AKfycby0QQwqAIYq-uy-HFJSZ-ZDSglSETeB-llXpUuUAN4_LJop0WfcvKbLJspJSx8pRRvu/exec";
 
-async function fetchAmbassadors(){
-  const res = await fetch(REG_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({ action:'listProfiles' })
-  });
-  const txt = await res.text();
-  const data = JSON.parse(txt);
-  if(!data.ok) throw new Error('listProfiles failed');
-  return data.profiles; // [{name,region,bike,styles,pace,icon,intro}, ...]
-}
-const LSK_PROFILE='rimo_profile_v1';   // 내 로컬 프로필 (이름 표시/“(나)” 식별용)
+/* 로컬 내 프로필(내 카드 식별용) */
+const LSK_PROFILE = 'rimo_profile_v1';
 
-/* 메타(라벨만 사용) */
 const STYLE_META = {
   Urban:{cls:'pill-urban',  label:'Urban'},
   Curve:{cls:'pill-curve',  label:'Curve'},
@@ -164,34 +146,32 @@ const PACE_META = {
   Dynamic: {cls:'pill-dynamic',  label:'Dynamic'},
 };
 
-/* 로컬 내 프로필 */
 function loadLocalMe(){
   try{ return JSON.parse(localStorage.getItem(LSK_PROFILE)||'{}'); }
   catch(e){ return {}; }
 }
 
-/* 서버에서 목록 가져오기 */
-async function fetchAmbassadors(){
+/* ✅ 서버에서 목록 가져오기: GET ?action=listProfiles (캐시 방지 ts) */
+async function loadProfiles(){
+  const url = `${REG_URL}?action=listProfiles&ts=${Date.now()}`;
+  const res = await fetch(url, { method:'GET' });
+  const text = await res.text();
+
+  // 1) 표준 응답: { ok:true, data:[...] }
   try{
-    const res = await fetch(REG_URL, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json;charset=utf-8'},
-      body: JSON.stringify({ action:'listProfiles' })
-    });
-    const text = await res.text();
-    // 응답이 JSON이 아닐 수도 있으니 안전 파싱
-    let data = [];
-    try{ data = JSON.parse(text); }catch(_){}
-    // 기대 포맷: [{id, name, region, bike, icon, styles[], pace[], intro}]
-    if(!Array.isArray(data)) throw new Error('응답 형식이 배열이 아님');
-    return data;
-  }catch(err){
-    console.warn('listProfiles 실패, 폴백 사용:', err);
-    return null; // 실패 시 호출부에서 폴백
-  }
+    const json = JSON.parse(text);
+    if (json && json.ok && Array.isArray(json.data)) return json.data;
+  }catch(_) {}
+
+  // 2) 혹시 배열 그대로 내려오는 케이스도 수용
+  try{
+    const arr = JSON.parse(text);
+    if (Array.isArray(arr)) return arr;
+  }catch(_) {}
+
+  throw new Error('목록 응답 파싱 실패');
 }
 
-/* 태그 엘리먼트 */
 function tagEl(cls, text){
   const div = document.createElement('div');
   div.className = 'tag ' + cls;
@@ -201,7 +181,9 @@ function tagEl(cls, text){
 
 function renderList(items){
   const listEl = document.getElementById('list');
-  listEl.innerHTML = ''; // 초기화
+  listEl.innerHTML = '';
+
+  const me = loadLocalMe();
 
   items.forEach(a=>{
     const card = document.createElement('article');
@@ -224,7 +206,6 @@ function renderList(items){
     name.className = 'name';
     name.textContent = a.name || '라이더';
 
-    const me = loadLocalMe();
     const isMe = me?.name && a?.name && (me.name.trim() === a.name.trim());
 
     const btn = document.createElement('button');
@@ -241,7 +222,7 @@ function renderList(items){
     nameRow.appendChild(name);
     nameRow.appendChild(btn);
 
-    // 자기소개 (따옴표 + 25자)
+    // intro(선택값, 없을 수 있음)
     if (a.intro){
       const intro = document.createElement('p');
       intro.className = 'intro';
@@ -254,17 +235,19 @@ function renderList(items){
 
     const sub = document.createElement('p');
     sub.className = 'sub';
-    sub.textContent = `${a.region? a.region+' · ' : ''}${a.bike || ''}`;
+    const region = a.region ? `${a.region} · ` : '';
+    const bike   = a.bike || '';
+    sub.textContent = `${region}${bike}`;
     idcol.appendChild(sub);
 
     head.appendChild(avatar);
     head.appendChild(idcol);
 
-    // 스타일/페이스 태그 (단어만)
+    // 스타일/페이스 태그
     const traits = document.createElement('div');
     traits.className = 'traits';
-    const styles = Array.isArray(a.styles) ? a.styles : [];
-    const pace   = Array.isArray(a.pace)   ? a.pace   : [];
+    const styles = Array.isArray(a.styles) ? a.styles : (a.styles ? String(a.styles).split(/\s*\|\s*|,\s*/).filter(Boolean) : []);
+    const pace   = Array.isArray(a.pace)   ? a.pace   : (a.pace   ? String(a.pace).split(/\s*\|\s*|,\s*/).filter(Boolean)   : []);
     const all    = [
       ...styles.map(s => ({type:'style', key:s})),
       ...pace.map(p => ({type:'pace',  key:p}))
@@ -296,36 +279,26 @@ function renderList(items){
   const state = document.getElementById('stateMsg');
   if(state) state.textContent = '불러오는 중…';
 
-  // 1) 서버 시도
-  const remote = await fetchAmbassadors();
-
-  if(remote && Array.isArray(remote) && remote.length){
+  try{
+    const items = await loadProfiles();
     if(state) state.remove();
-    renderList(remote);
-    return;
-  }
 
-  // 2) 폴백: 로컬 + 데모
-  const me = loadLocalMe();
-  const list = [];
-  if(me && me.name){
-    list.push({
-      id:'me', icon: me.icon || '🏍️',
-      name: me.name,        // “(나)” 표시는 렌더에서 처리
-      region: me.region || '',
-      bike: me.bike || '바이크 미입력',
-      styles: Array.isArray(me.styles) ? me.styles : [],
-      pace: Array.isArray(me.pace) ? me.pace : [],
-      intro: (me.intro || '').slice(0,25)
-    });
+    // GAS 기본 응답은 region/intro가 없을 수 있으니, 누락 필드를 안전 보정
+    const normalized = items.map(r => ({
+      icon: r.icon || '🏍️',
+      name: r.name || '라이더',
+      region: r.region || '',          // 서버가 주지 않으면 공란
+      bike: r.bike || '',
+      styles: r.styles || [],
+      pace: r.pace || [],
+      intro: r.intro || ''             // 서버가 주지 않으면 공란
+    }));
+
+    renderList(normalized);
+  }catch(err){
+    console.error(err);
+    if(state) state.textContent = '불러오기 실패: ' + err.message;
   }
-  const demo = [
-    { id:'a2', icon:'🛵', name:'Mira',  region:'서울 성동구', bike:'Vespa Primavera', styles:['Urban'], pace:['Easy'],  intro:'성수·강남 카페투어 좋아요' },
-    { id:'a3', icon:'🏍️', name:'Owen',  region:'서울 마포구', bike:'Yamaha MT-07',   styles:['Curve','Tour'], pace:['Balanced'], intro:'가양대교~북악 팔각정 즐겨요' },
-    { id:'a4', icon:'🐶', name:'Nabi',  region:'서울 송파구', bike:'Honda Grom',      styles:['Urban'], pace:['Dynamic'], intro:'심야 한강 순환 밤바리러!' },
-  ];
-  if(state) state.remove();
-  renderList(list.concat(demo));
 })();
 </script>
 </body>
