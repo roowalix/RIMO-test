@@ -28,12 +28,12 @@
   .form-row{display:flex;align-items:center;gap:6px;margin-bottom:0}
   .form-row.top{align-items:flex-start}
   .form-row label{width:var(--label-width);font-size:14px;font-weight:700;white-space:nowrap}
-  .field{flex:1;min-width:0}
+  .field{flex:1.5;min-width:0}
 
   /* 지역/탠덤 1행 2열 */
   .form-row.split{
     display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);
-    column-gap:14px; align-items:center;
+    column-gap:16px; align-items:center;
   }
   .form-row.split .col{display:flex;align-items:center;gap:6px;min-width:0}
   .form-row.split .col label{width:var(--label-width);font-size:14px;font-weight:700;color:#fff;white-space:nowrap}
@@ -47,7 +47,7 @@
 
   .toggles{display:flex;gap:10px;flex-wrap:wrap;margin:0}
   .toggle{
-    display:inline-flex;align-items:center;gap:12px;padding:8px 12px;border-radius:999px;
+    display:inline-flex;align-items:center;gap:14px;padding:8px 12px;border-radius:999px;
     color:#e6e9ff;font-size:13px;cursor:pointer;user-select:none;white-space:nowrap;
     transition:transform .15s ease, box-shadow .15s ease;
   }
