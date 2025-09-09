@@ -457,43 +457,59 @@ document.getElementById("editBtn").addEventListener("click",()=> {
   </div>
 </div>
 
-<!-- ✅ 내 프로필 찾기 & (옵션) 복구 링크 모듈 -->
+<!-- ✅ 내 프로필 찾기(버튼만) + 모달 / 중복 제거 & 복구버튼 숨김 -->
 <script>
 (function addClaimMyProfileOnce(){
-  if (window.__rimoClaimInstalled) return; // 중복 방지
+  if (window.__rimoClaimInstalled) return;
   window.__rimoClaimInstalled = true;
 
   const LS_KEY='rimo_profile_v1', LS_UID='rimo_uid_v1';
   const REG = (typeof REG_URL!=='undefined') ? REG_URL : '';
-  const SHOW_RECOVERY = new URLSearchParams(location.search).has('recovery'); // ?recovery=1이면 복구 버튼 표시
+  const SHOW_RECOVERY = false; // << 복구 링크 복사 항상 숨김(원하면 true로)
 
-  // 유틸
   function toast(m){ try{ showToast(m); }catch{ alert(m); } }
   async function copy(text){
     try{ await navigator.clipboard.writeText(text); return true; }
-    catch(_){
-      const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta);
-      ta.select(); document.execCommand('copy'); ta.remove(); return true;
-    }
-  }
-  function buildRecoveryLink({short=true}={}){
-    const uid = localStorage.getItem(LS_UID)||'';
-    if(!uid){ toast('UID가 아직 없어요. 먼저 프로필을 저장하거나, 내 프로필 찾기에서 연결해 주세요.'); return ''; }
-    const path = location.pathname.replace(/\/+$/,'') || '/rimo_profile.html';
-    return short ? `${path}?uid=${encodeURIComponent(uid)}`
-                 : `${location.origin}${path}?uid=${encodeURIComponent(uid)}`;
+    catch(_){ const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta);
+      ta.select(); document.execCommand('copy'); ta.remove(); return true; }
   }
 
+  // ====== 0) 기존에 떠돌던 중복 요소 정리 ======
+  // (1) 프리뷰 모달 안의 '복구' 관련 버튼/링크 제거
+  (function cleanupPreviewModal(){
+    const pm = document.getElementById('previewModal');
+    if (!pm) return;
+    [...pm.querySelectorAll('a,button')].forEach(el=>{
+      const t=(el.textContent||'').trim();
+      if (t.includes('복구')) el.remove();
+    });
+  })();
+
+  // (2) 페이지 어딘가에 있던 '내 프로필 찾기' 밑줄 링크 제거(단, 우리가 생성할 버튼은 보존)
+  (function cleanupStrayFindLinks(){
+    [...document.querySelectorAll('a,button')].forEach(el=>{
+      const t=(el.textContent||'').trim();
+      if (t==='내 프로필 찾기' && !el.closest('#claimActions')) {
+        // 우리가 넣는 액션 라인(#claimActions) 바깥의 동일 텍스트는 제거
+        el.remove();
+      }
+    });
+    // 예전 id가 남아있으면 확실히 제거
+    const legacy = document.getElementById('findMineLink');
+    if (legacy && !legacy.closest('#claimActions')) legacy.remove();
+  })();
+
+  // ====== 1) 저장 버튼 아래 ‘내 프로필 찾기’ 버튼만 추가 ======
   const saveBtn = document.getElementById('saveBtn');
-  if(!saveBtn) return;
+  if (!saveBtn) return;
 
-  // 이전에 삽입된 잔재 있으면 제거
-  ['claimActions','claimModal'].forEach(id=>{ const el=document.getElementById(id); if(el) el.remove(); });
+  // 중복 방지
+  const old = document.getElementById('claimActions');
+  if (old) old.remove();
 
-  // 액션 라인: 내 프로필 찾기(항상), 복구 링크(옵션)
-  const line = document.createElement('div');
-  line.id = 'claimActions';
-  line.style.cssText = 'display:flex;gap:8px;justify-content:center;margin-top:8px;flex-wrap:wrap';
+  const actions = document.createElement('div');
+  actions.id = 'claimActions';
+  actions.style.cssText='display:flex;gap:8px;justify-content:center;margin-top:8px;flex-wrap:wrap';
 
   const findBtn = document.createElement('button');
   findBtn.type='button';
@@ -501,8 +517,9 @@ document.getElementById("editBtn").addEventListener("click",()=> {
   findBtn.className='edit';
   findBtn.style.cssText='padding:10px 14px;border-radius:8px;border:none;background:#2c2f48;color:#fff;font-weight:700';
   findBtn.onclick = ()=> document.getElementById('claimModal').classList.add('show');
-  line.appendChild(findBtn);
+  actions.appendChild(findBtn);
 
+  // 복구 링크 복사 버튼은 요구사항대로 제거(숨김). 필요 시 SHOW_RECOVERY=true로 토글.
   if (SHOW_RECOVERY){
     const recBtn = document.createElement('button');
     recBtn.type='button';
@@ -510,16 +527,19 @@ document.getElementById("editBtn").addEventListener("click",()=> {
     recBtn.className='edit';
     recBtn.style.cssText='padding:10px 14px;border-radius:8px;border:none;background:#2c2f48;color:#fff;font-weight:700';
     recBtn.onclick = ()=>{
-      const link = buildRecoveryLink({short:true});
-      if(link) copy(link).then(()=> toast('복구 링크를 복사했어요'));
+      const uid = localStorage.getItem(LS_UID)||'';
+      if(!uid){ toast('UID가 아직 없어요. 먼저 프로필을 저장하거나, 내 프로필 찾기에서 연결해 주세요.'); return; }
+      const path = location.pathname.replace(/\/+$/,'') || '/rimo_profile.html';
+      const link = `${path}?uid=${encodeURIComponent(uid)}`;
+      copy(link).then(()=>toast('복구 링크 복사 완료'));
     };
-    line.appendChild(recBtn);
+    actions.appendChild(recBtn);
   }
 
-  saveBtn.insertAdjacentElement('afterend', line);
+  saveBtn.insertAdjacentElement('afterend', actions);
 
-  // 모달 DOM (없으면 생성)
-  if(!document.getElementById('claimModal')){
+  // ====== 2) ‘내 프로필 찾기’ 모달(없으면 생성) ======
+  if (!document.getElementById('claimModal')) {
     const modal = document.createElement('div');
     modal.id='claimModal';
     modal.className='modal';
@@ -542,7 +562,6 @@ document.getElementById("editBtn").addEventListener("click",()=> {
       </div>`;
     document.body.appendChild(modal);
 
-    // 모달 동작
     const nameInp   = modal.querySelector('#claimName');
     const regionInp = modal.querySelector('#claimRegion');
     const searchBtn = modal.querySelector('#claimSearch');
