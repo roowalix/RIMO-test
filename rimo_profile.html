@@ -103,12 +103,10 @@
   .tag.pace.pill-dynamic{background:#3a1f1f;border-color:#5a2f2f}
   .modal-actions{display:flex;gap:12px;justify-content:center;margin-top:6px}
   .modal-actions button{flex:1;padding:12px;border-radius:10px;border:none;font-size:14px;font-weight:800;cursor:pointer;color:#fff}
-  
-  /* ✅ 하단 버튼 디자인 복원 */
   .modal-actions .ok{background:#2a5bff}
   .modal-actions .edit{background:#2c2f48}
 
-  /* ✅ 디버그 모달 */
+  /* 디버그 모달 */
   .debug-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.55);z-index:4000;padding:16px}
   .debug-modal.show{display:flex}
   .debug-content{width:100%;max-width:520px;background:#0f1224;border:1px solid #2b3260;border-radius:14px;padding:16px}
@@ -212,7 +210,7 @@
         <div class="icon-btn" data-icon="🎱">🎱</div>
       </div>
       <div class="intro-box">
-        <!-- ✅ 25자 제한 -->
+        <!-- 25자 제한 -->
         <textarea id="intro" maxlength="25" placeholder="간단한 자기소개 (25자 이내)"></textarea>
       </div>
     </div>
@@ -254,7 +252,7 @@
   </div>
 </div>
 
-<!-- ✅ 디버그 모달: 시트 등록 결과 표시 -->
+<!-- 디버그 모달: 시트 등록 결과 표시 -->
 <div class="debug-modal" id="debugModal">
   <div class="debug-content">
     <h4>프로필 등록 상태</h4>
@@ -266,10 +264,9 @@
 </div>
 
 <script>
-/* ===== 설정: 구글 시트 웹앱 URL (있으면 넣기) ===== */
-const REG_URL = "https://script.google.com/macros/s/AKfycbxTjczRqIWrGoNSuwO7-VFzKAEUfg7ciDJvcJVm4mpcA4w4Y6nmGB8Hhm321AZseoYH/exec"; // 예: "https://script.google.com/macros/s/AKfycbxxxxxxxx/exec"
-
+/* ===== 설정: 구글 시트 웹앱 URL (Apps Script) ===== */
 const LS_KEY='rimo_profile_v1';
+const REG_URL = "https://script.google.com/macros/s/AKfycbxTjczRqIWrGoNSuwO7-VFzKAEUfg7ciDJvcJVm4mpcA4w4Y6nmGB8Hhm321AZseoYH/exec";
 
 /* 아이콘 선택 */
 let selectedIcon="🏍️";
@@ -299,7 +296,7 @@ function collectProfile(){
 function saveProfile(){
   const p=collectProfile();
   localStorage.setItem(LS_KEY, JSON.stringify(p));
-  return p;
+  return p; /* ← 버그 수정: p 반환 */
 }
 function loadProfile(){
   try{ return JSON.parse(localStorage.getItem(LS_KEY)||'{}'); }
@@ -333,37 +330,40 @@ function showPreview(p){
   document.getElementById('previewModal').classList.add('show');
 }
 
-/* ✅ 디버그 모달 제어 */
+/* 디버그 모달 제어 */
 const debugModal = document.getElementById('debugModal');
 const debugText  = document.getElementById('debugText');
 document.getElementById('debugClose').onclick = ()=> debugModal.classList.remove('show');
-
 function showDebug(msg){
   debugText.textContent = msg;
   debugModal.classList.add('show');
 }
 
-/* ✅ 시트 등록 호출 */
-async function registerProfile(p){
+/* 시트 등록 호출 (x-www-form-urlencoded, payload=JSON) */
+async function registerProfile(profile){
   if(!REG_URL || !/^https?:\/\//.test(REG_URL)){
     showDebug('등록 URL이 설정되지 않았습니다.\nApps Script 웹앱 URL을 REG_URL에 넣어주세요.');
-    return;
+    return false;
   }
   try{
     showDebug('등록 중입니다…');
+    const body = new URLSearchParams({ payload: JSON.stringify(profile) });
     const res = await fetch(REG_URL, {
-      method:'POST',
-      headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body: JSON.stringify({ action:'registerProfile', profile: p })
+      method: 'POST',
+      headers: { 'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8' },
+      body
     });
     const text = await res.text();
     if(res.ok){
       showDebug('✅ 등록 성공\n' + text);
+      return true;
     }else{
       showDebug('❌ 등록 실패\nHTTP '+res.status+'\n'+text);
+      return false;
     }
   }catch(err){
     showDebug('❌ 네트워크 오류\n' + (err?.message||err));
+    return false;
   }
 }
 
@@ -387,15 +387,14 @@ iconWrap.addEventListener("click", e=>{
 /* 저장 버튼 동작: 저장 → 미리보기 → 시트 등록(디버그 모달) */
 document.getElementById('saveBtn').addEventListener('click', async ()=>{
   const p=saveProfile();
-  showPreview(p);           // 미리보기 모달 먼저 보여주고
-  registerProfile(p);       // 시트 등록 결과는 디버그 모달로 안내
+  showPreview(p);           // 미리보기 모달 먼저
+  registerProfile(p);       // 등록 결과는 디버그 모달로 확인
 });
 
 /* 미리보기 하단 버튼 */
 document.getElementById('confirmBtn').addEventListener('click',()=>{
   document.getElementById('previewModal').classList.remove('show');
-  // ✅ 메인으로 이동
-  location.href = 'index.html';
+  location.href = 'index.html'; // 메인 이동
 });
 document.getElementById('editBtn').addEventListener('click',()=>{
   document.getElementById('previewModal').classList.remove('show');
