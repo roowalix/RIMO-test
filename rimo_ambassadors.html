@@ -40,7 +40,7 @@
   .tabbar{position:fixed; left:0; right:0; bottom:16px; z-index:2500; display:flex; justify-content:center; gap:12px}
   .state{color:#b9b9cc; font-size:13px; text-align:center; padding:24px 0}
 
-  /* DM 모달 */
+  /* DM 모달 (스크롤+버튼 고정) */
   .modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:3000; background:rgba(0,0,0,.45); padding:22px 12px}
   .modal.show{display:flex}
   .sheet{width:100%; max-width:680px}
@@ -92,7 +92,20 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const REG_URL  = "https://script.google.com/macros/s/AKfycbz1P-KpgNGKUGqFDA20-QxUdcqsEEcWo8HEXtwQMW6voSnf6eHg18gi1yT7HpVzZCX6xw/exec";
+// ?uid= 또는 ?me= 로 들어오면 내 UID 저장
+(function seedUIDFromQuery(){
+  try{
+    const p = new URLSearchParams(location.search);
+    const v = p.get('uid') || p.get('me');
+    if(v){
+      localStorage.setItem('rimo_uid_v1', v);
+      document.cookie = `rimo_uid_v1=${encodeURIComponent(v)}; path=/; SameSite=Lax; max-age=${365*86400}`;
+      history.replaceState({}, '', location.pathname);
+    }
+  }catch(_){}
+})();
+
+const REG_URL  = "https://script.google.com/macros/s/AKfycbxgVNFxOoEgiN1nM19ws26xM8BDWxPy0RfJz5gG-HkGqJmHcFfXLn3iFIhK6DLtKTak_Q/exec";
 const LS_KEY   = 'rimo_profile_v1';
 const LS_UID   = 'rimo_uid_v1';
 const ADMIN_DM = "http://pf.kakao.com/_ceUDn/chat";
@@ -102,54 +115,28 @@ function showToast(msg, ms=2000){
   t.style.animationDuration=(ms/1000)+'s'; t.classList.add('show');
   clearTimeout(window._toastTimer); window._toastTimer=setTimeout(()=>t.classList.remove('show'), ms);
 }
+function uid(){ return localStorage.getItem(LS_UID)||''; }
 
-/* URL의 ?me= 또는 ?uid= 로 내 UID 복구 */
-function ensureMeFromURL(){
-  try{
-    const q = new URLSearchParams(location.search);
-    const v = q.get('me') || q.get('uid');
-    if(v){
-      localStorage.setItem(LS_UID, v);
-      history.replaceState({}, '', location.pathname);
-    }
-  }catch(_){}
-}
-
-/* 서버 목록 */
+// 목록 로드(앰버서더만, 최대 30)
 async function loadAmbassadors(){
-  const url = `${REG_URL}?action=listProfiles&ts=${Date.now()}`;
-  const res = await fetch(url, { cache: 'no-store' });
+  const url = `${REG_URL}?action=listProfiles&amb=1&limit=30&ts=${Date.now()}`;
+  const res = await fetch(url, {cache:'no-store'});
   const text = await res.text();
-  console.log('[listProfiles raw]', res.status, text);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-  let json;
-  try { json = JSON.parse(text); }
-  catch { throw new Error('JSON 파싱 실패 (서버가 HTML/오류 반환 가능)'); }
-
-  if (json && json.ok && Array.isArray(json.data)) return json.data;
-  if (Array.isArray(json)) return json;
-  throw new Error('예상치 못한 응답 형식');
+  let j = null;
+  try{ j = JSON.parse(text); }catch(_){ throw new Error('JSON 파싱 실패'); }
+  if(j && j.ok && Array.isArray(j.data)) return j.data;
+  if(Array.isArray(j)) return j;
+  throw new Error('응답 형식 오류');
 }
 
-/* 내 카드 맨 위 고정 */
+// 내 카드 맨 위 고정 + 최신순
 function pinMineFirst(items){
-  const uid = localStorage.getItem(LS_UID) || '';
-  const meProfile = JSON.parse(localStorage.getItem(LS_KEY) || 'null') || {};
-  const myName = meProfile.name ? String(meProfile.name).trim() : null;
-
-  const arr = items.slice();
-  let myIdx = -1;
-  if(uid) myIdx = arr.findIndex(x => x.uid && String(x.uid) === uid);
-  if(myIdx === -1 && myName) myIdx = arr.findIndex(x => x.name && String(x.name).trim() === myName);
-
-  if(myIdx > -1){
-    const mine = arr.splice(myIdx,1)[0];
-    arr.sort((a,b)=>(b.ts||0)-(a.ts||0));
-    return [mine, ...arr];
-  }else{
-    return arr.sort((a,b)=>(b.ts||0)-(a.ts||0));
-  }
+  const me = uid();
+  const arr = items.slice().sort((a,b)=>(b.ts||0)-(a.ts||0));
+  if(!me) return arr;
+  const i = arr.findIndex(x => String(x.uid||'')===me);
+  if(i>-1){ const my = arr.splice(i,1)[0]; return [my, ...arr]; }
+  return arr;
 }
 
 function tagEl(cls, text){
@@ -166,8 +153,7 @@ function renderList(items){
   const sorted = pinMineFirst(items);
 
   sorted.forEach(a=>{
-    const uid = localStorage.getItem(LS_UID) || '';
-    const isMe = (uid && a.uid === uid);
+    const isMe = (uid() && String(a.uid||'')===uid());
 
     const card = document.createElement('article');
     card.className = 'card amb-card' + (isMe ? ' me' : '');
@@ -202,7 +188,6 @@ function renderList(items){
     btn.className = 'matchBtn';
     if(isMe){
       btn.textContent = '프로필 수정';
-      // 내 UID를 쿼리로 넘겨서 프로필 페이지가 복구하도록
       btn.onclick = ()=> location.href = 'rimo_profile.html?uid=' + encodeURIComponent(a.uid || '');
     }else{
       btn.innerHTML = '🤝 매칭희망';
@@ -232,15 +217,15 @@ function renderList(items){
     traits.className = 'traits';
     const styles = Array.isArray(a.styles) ? a.styles : [];
     const pace   = Array.isArray(a.pace)   ? a.pace   : [];
-    const all    = [
+    const STYLE_META = { Urban:{cls:'pill-urban',label:'Urban'}, Curve:{cls:'pill-curve',label:'Curve'}, Tour:{cls:'pill-tour',label:'Tour'} };
+    const PACE_META  = { Easy:{cls:'pill-easy',label:'Easy'}, Balanced:{cls:'pill-balanced',label:'Balanced'}, Dynamic:{cls:'pill-dynamic',label:'Dynamic'} };
+    const all = [
       ...styles.map(s => ({type:'style', key:s})),
       ...pace.map(p => ({type:'pace',  key:p}))
     ];
-    if(all.length === 0){
-      traits.appendChild(tagEl('style', '-'));
+    if(all.length===0){
+      traits.appendChild(tagEl('style','-'));
     }else{
-      const STYLE_META = { Urban:{cls:'pill-urban',label:'Urban'}, Curve:{cls:'pill-curve',label:'Curve'}, Tour:{cls:'pill-tour',label:'Tour'} };
-      const PACE_META  = { Easy:{cls:'pill-easy',label:'Easy'}, Balanced:{cls:'pill-balanced',label:'Balanced'}, Dynamic:{cls:'pill-dynamic',label:'Dynamic'} };
       all.forEach(item=>{
         if(item.type==='style' && STYLE_META[item.key]){
           const m = STYLE_META[item.key]; traits.appendChild(tagEl(`style ${m.cls}`, m.label));
@@ -258,7 +243,7 @@ function renderList(items){
   });
 }
 
-/* DM 모달 */
+/* ===== DM 모달 ===== */
 const dmModal   = document.getElementById('dmModal');
 const dmSheet   = document.getElementById('dmSheet');
 const dmPreview = document.getElementById('dmPreview');
@@ -276,7 +261,6 @@ function composeDM(target){
 * 위 라이더와 매칭 희망합니다.`
   );
 }
-
 async function copyText(txt){
   try{ await navigator.clipboard.writeText(txt); return true; }
   catch(_){
@@ -284,7 +268,6 @@ async function copyText(txt){
     ta.select(); document.execCommand('copy'); ta.remove(); return true;
   }
 }
-
 let _currentTarget = null;
 function openDMModal(target){
   _currentTarget = target;
@@ -304,10 +287,8 @@ document.getElementById('closeDM').onclick = closeDMModal;
 dmModal.addEventListener('click', closeDMModal);
 dmSheet.addEventListener('click', e=>e.stopPropagation());
 
-/* 부트 */
+/* ===== 부트 ===== */
 (async function init(){
-  ensureMeFromURL();
-
   const state = document.getElementById('stateMsg');
   if(state) state.textContent = '불러오는 중…';
 
