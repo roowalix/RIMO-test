@@ -1,0 +1,78 @@
+/* rimo_theme.css — RIMO THEME NORMALIZER v1 */
+:root{
+  /* 색 토큰 */
+  --surface-page:#0b0b0f;   /* 페이지 바탕 */
+  --fg:#e8e8ef;
+  --muted:#b9b9cc;
+
+  --surface-1:#101223;      /* 카드/패널/시트 */
+  --surface-2:#1a1c2f;      /* 칩/아바타/토글 */
+  --surface-3:#0f1020;      /* 인풋/프리뷰 박스 */
+
+  --border-1:#23243a;       /* 카드/패널/시트 경계 */
+  --border-2:#2c2f48;       /* 인풋/칩/토글 경계 */
+
+  --accent:#7aa7ff;
+
+  /* 탭바 */
+  --tab-bg:#182039; --tab-bd:#2d3559; --tab-ink:#e6e8ef;
+  --tab-pri:#26346d; --tab-pri-bd:#3b53a8;
+
+  /* PC 폭 */
+  --container: 720px;
+}
+
+/* 페이지 공통 바탕/폰트 */
+html,body{background:var(--surface-page); color:var(--fg);}
+
+/* 공통 헤더(블러 포함) */
+header{
+  position:sticky; top:0; z-index:5;
+  background:rgba(11,11,15,.9);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border-bottom:1px solid var(--border-1);
+}
+
+/* 콘텐츠 폭 통일 */
+main{max-width:var(--container); margin:0 auto; padding:16px; padding-bottom:100px}
+
+/* 패널/카드/시트(공통 표면) */
+.panel,
+.sheet,
+.amb-card{               /* 엠버서더 카드는 .amb-card 클래스로 적용 */
+  background:var(--surface-1);
+  border:1px solid var(--border-1);
+  border-radius:16px;
+}
+
+/* “내 카드” 하이라이트(엠버서더) */
+.amb-card.me{
+  background: rgba(122,167,255,.10);
+  border-color: rgba(122,167,255,.55);
+  box-shadow:0 0 0 1px rgba(122,167,255,.55) inset;
+}
+
+/* 칩/아바타/토글 표면 */
+.tag, .avatar, .icon-btn, .toggle{
+  background:var(--surface-2);
+  border:1px solid var(--border-2);
+}
+
+/* 입력/프리뷰 박스 */
+input[type="text"], select, textarea, .pre{
+  width:100%;
+  padding:8px 12px;
+  border-radius:8px;
+  border:1px solid var(--border-2);
+  background:var(--surface-3);
+  color:#fff; font-size:14px;
+}
+select option{color:#fff; background:var(--surface-3)}
+
+/* 탭바 */
+.tabbar .tab{
+  background:var(--tab-bg); border:1px solid var(--tab-bd); color:var(--tab-ink);
+  padding:12px 18px; border-radius:22px; font-weight:800; text-decoration:none; font-size:14px
+}
+.tabbar .tab.primary{background:var(--tab-pri); border-color:var(--tab-pri-bd)}
