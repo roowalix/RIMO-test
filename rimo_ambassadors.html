@@ -194,8 +194,11 @@ function renderList(items){
     btn.type = 'button';
     btn.className = 'matchBtn';
     if(isMe){
-      btn.textContent = '프로필 수정';
-      btn.onclick = ()=> location.href='rimo_profile.html';
+- btn.textContent = '프로필 수정';
+- btn.onclick = ()=> location.href='rimo_profile.html';
++ btn.textContent = '프로필 수정';
++ btn.onclick = ()=> location.href = 'rimo_profile.html?uid=' + encodeURIComponent(a.uid || '');
+
     }else{
       btn.innerHTML = '🤝 매칭희망';
       btn.onclick = ()=> openDMModal(a);
