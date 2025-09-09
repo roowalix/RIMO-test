@@ -7,18 +7,16 @@
 <style>
   :root{
     --bg:#0b0b0f; --ink:#f1f3ff; --muted:#b6b8cc; --line:#23243a;
-    --tile:#141627; --accent:#7aa7ff; --chip:#1a1c2f; --chipOn:#242743;
+    --tile:#141627; --accent:#7aa7ff;
     --label-width:40px;
     /* tabbar */
     --tab-bg:#182039; --tab-bd:#2d3559; --tab-ink:#e6e8ef;
     --tab-pri:#26346d; --tab-pri-bd:#3b53a8;
   }
-
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);
     font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Helvetica,Arial,sans-serif;}
 
-  /* 헤더 (공통) */
   header{position:sticky;top:0;z-index:5;background:rgba(11,11,15,.9);
          backdrop-filter:blur(8px);border-bottom:1px solid #232333}
   .bar{display:flex;gap:10px;align-items:center;padding:14px 16px;height:56px}
@@ -31,7 +29,6 @@
     padding-bottom:100px;
   }
 
-  /* 작성 패널 */
   .panel{background:var(--tile);padding:12px;border-radius:14px;border:1px solid var(--line);
          display:flex;flex-direction:column;gap:10px}
   .form-row{display:flex;align-items:center;gap:0px;margin-bottom:0}
@@ -63,7 +60,7 @@
   .pace-pill.pill-dynamic{border-color:#5a2f2f}
 
   /* 아이콘 (5×2) + 소개 폭 동일 */
-  .profile-icons{display:flex;flex-direction:column;align-items:center;gap:10px;margin:0px 0 0}
+  .profile-icons{display:flex;flex-direction:column;align-items:center;gap:10px;margin:0}
   .icons{display:grid;grid-template-columns:repeat(5,48px);grid-auto-rows:48px;gap:10px;justify-content:center}
   .icon-btn{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;
     font-size:28px;cursor:pointer;background:#1a1c2f;border:1px solid #2c2f48;transition:.15s ease;color:#fff}
@@ -71,10 +68,14 @@
   .intro-box{width:calc(48px*5 + 10px*4);margin:8px 0 0}
   #intro{width:100%;text-align:center;font-size:13px}
 
-  /* 저장 버튼 */
-  .save-btn{width:100%;padding:14px;margin-top:10px;font-size:15px;font-weight:700;background:#2a5bff;border:none;color:#fff;border-radius:10px;cursor:pointer}
+  .btnrow{display:flex;gap:8px;flex-wrap:wrap}
+  .save-btn,.share-btn{
+    flex:1;min-width:140px;padding:14px;margin-top:6px;font-size:15px;font-weight:700;
+    background:#2a5bff;border:none;color:#fff;border-radius:10px;cursor:pointer;
+  }
+  .share-btn{background:#3340aa}
 
-  /* 하단 네비 (공통) */
+  /* 하단 네비 */
   .tabbar{position:fixed;left:0;right:0;bottom:16px;z-index:2500;display:flex;gap:12px;justify-content:center}
   .tabbar .tab{background:var(--tab-bg);border:1px solid var(--tab-bd);color:var(--tab-ink);
     padding:12px 18px;border-radius:22px;font-weight:800;text-decoration:none;font-size:14px}
@@ -90,7 +91,6 @@
   .idcol{min-width:0}
   .name{margin:0 0 4px;font-size:18px;font-weight:800}
   .sub{margin:0;color:var(--muted);font-size:13px}
-  .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
   .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
   .tag{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 10px;border-radius:999px;background:#1a1c2f;border:1px solid #2b2e54;font-size:12px;white-space:nowrap}
   .tag.style.pill-urban{background:#1e2d55;border-color:#2c4484}
@@ -104,27 +104,12 @@
   .modal-actions .ok{background:#2a5bff}
   .modal-actions .edit{background:#2c2f48}
 </style>
-   <!-- ✅ 캐시 문제 해결 코드 -->
-  <script>
-    // HTML, CSS, JS가 캐시에 남아 업데이트가 반영되지 않는 문제 해결용
-    (function() {
-      const currentVersion = 'v1.0.2';  // ★ 버전 번호 (업데이트할 때마다 변경)
-      const savedVersion = localStorage.getItem('rimo_profile_version');
-
-      if (savedVersion !== currentVersion) {
-        // 캐시된 파일 무효화 → 새로고침
-        localStorage.setItem('rimo_profile_version', currentVersion);
-        const cleanUrl = window.location.pathname + '?v=' + currentVersion;
-        window.location.replace(cleanUrl);
-      }
-    })();
-  </script>
 </head>
 <body>
 <header>
   <div class="bar">
     <div class="logo">🏍️ RIMO</div>
-    <div class="title">라이더 프로필</div>
+    <div class="title">엠버서더 라이더 카드</div>
   </div>
 </header>
 
@@ -183,18 +168,18 @@
     <div class="form-row">
       <label>스타일</label>
       <div class="toggles" data-group="style">
-        <span class="toggle style-pill pill-urban"  data-value="Urban">🏙️ Urban</span>
-        <span class="toggle style-pill pill-curve"  data-value="Curve">🌀 Curve</span>
-        <span class="toggle style-pill pill-tour"   data-value="Tour">🗺️ Tour</span>
+        <span class="toggle style-pill pill-urban"  data-value="Urban">Urban</span>
+        <span class="toggle style-pill pill-curve"  data-value="Curve">Curve</span>
+        <span class="toggle style-pill pill-tour"   data-value="Tour">Tour</span>
       </div>
     </div>
 
     <div class="form-row">
       <label>페이스</label>
       <div class="toggles" data-group="speed">
-        <span class="toggle pace-pill pill-easy"     data-value="Easy">🟢 Easy</span>
-        <span class="toggle pace-pill pill-balanced" data-value="Balanced">⚖️ Balanced</span>
-        <span class="toggle pace-pill pill-dynamic"  data-value="Dynamic">⚡ Dynamic</span>
+        <span class="toggle pace-pill pill-easy"     data-value="Easy">Easy</span>
+        <span class="toggle pace-pill pill-balanced" data-value="Balanced">Balanced</span>
+        <span class="toggle pace-pill pill-dynamic"  data-value="Dynamic">Dynamic</span>
       </div>
     </div>
 
@@ -217,11 +202,13 @@
       </div>
     </div>
 
-    <button class="save-btn" id="saveBtn">프로필 저장</button>
+    <div class="btnrow">
+      <button class="save-btn" id="saveBtn">프로필 저장</button>
+      <button class="share-btn" id="shareLinkBtn">프로필 공유 링크 복사</button>
+    </div>
   </section>
 </main>
 
-<!-- 하단 네비 -->
 <nav class="tabbar" aria-label="하단 네비게이션">
   <a href="index.html" class="tab">메인</a>
   <a href="rimo_profile.html" class="tab primary">프로필</a>
@@ -235,13 +222,8 @@
       <div class="avatar" id="avatarPreview">🏍️</div>
       <div class="idcol">
         <h3 class="name" id="namePreview">라이더 이름</h3>
-        <p class="sub" id="bikePreview">바이크 미입력 · 서울 지역</p>
+        <p class="sub" id="bikePreview">서울 지역 · 바이크 미입력</p>
       </div>
-    </div>
-
-    <div class="grid-2">
-      <div class="tag" id="timePreview">18:00–22:00 (저녁)</div>
-      <div class="tag" id="tandemPreview">탠덤 허용</div>
     </div>
 
     <div class="grid-3" id="styleGrid"></div>
@@ -266,7 +248,20 @@ function updateIconActive(){
   });
 }
 
-/* 저장 공통 */
+/* 토글 이벤트 */
+document.querySelectorAll('.toggles').forEach(group=>{
+  group.addEventListener('click', e=>{
+    const t=e.target.closest('.toggle'); if(!t) return;
+    t.classList.toggle('active'); saveProfile();
+  });
+});
+
+iconWrap.addEventListener("click", e=>{
+  const btn=e.target.closest(".icon-btn"); if(!btn) return;
+  selectedIcon=btn.dataset.icon; updateIconActive(); saveProfile();
+});
+
+/* 수집/저장/로드 */
 function collectProfile(){
   const styles=[...document.querySelectorAll('.toggles[data-group="style"] .toggle.active')].map(el=>el.dataset.value);
   const pace=[...document.querySelectorAll('.toggles[data-group="speed"] .toggle.active')].map(el=>el.dataset.value);
@@ -278,7 +273,7 @@ function collectProfile(){
     time:document.getElementById('time').value,
     tandem:document.getElementById('tandem').value,
     icon:selectedIcon,
-    intro:document.getElementById('intro').value||''
+    intro:(document.getElementById('intro').value||'').slice(0,25)
   };
 }
 function saveProfile(){
@@ -291,14 +286,11 @@ function loadProfile(){
   catch(e){ return {}; }
 }
 
-/* 미리보기 렌더 */
+/* 미리보기 */
 function showPreview(p){
   document.getElementById('avatarPreview').textContent = p.icon || '🏍️';
   document.getElementById('namePreview').textContent = p.name || '라이더 이름';
-  const sub = `${p.region? p.region+' · ' : ''}${p.bike||'바이크 미입력'}`;
-  document.getElementById('bikePreview').textContent = sub;
-  document.getElementById('timePreview').textContent = p.time || '-';
-  document.getElementById('tandemPreview').textContent = `탠덤 ${p.tandem||'-'}`;
+  document.getElementById('bikePreview').textContent = `${p.region? p.region+' · ' : ''}${p.bike||'바이크 미입력'}`;
 
   const STYLE_META = { Urban:{emoji:'🏙️',cls:'pill-urban'}, Curve:{emoji:'🌀',cls:'pill-curve'}, Tour:{emoji:'🗺️',cls:'pill-tour'} };
   const PACE_META = { Easy:{emoji:'🟢',cls:'pill-easy'}, Balanced:{emoji:'⚖️',cls:'pill-balanced'}, Dynamic:{emoji:'⚡',cls:'pill-dynamic'} };
@@ -306,42 +298,32 @@ function showPreview(p){
   const styleGrid = document.getElementById('styleGrid');
   styleGrid.innerHTML = (p.styles?.length?p.styles:['-']).map(s=>{
     const m=STYLE_META[s]; if(!m) return `<div class="tag style">${s}</div>`;
-    return `<div class="tag style ${m.cls}">${m.emoji} ${s}</div>`;
+    return `<div class="tag style ${m.cls}">${m.label||s}</div>`;
   }).join('');
 
   const paceGrid = document.getElementById('paceGrid');
   paceGrid.innerHTML = (p.pace?.length?p.pace:['-']).map(s=>{
     const m=PACE_META[s]; if(!m) return `<div class="tag pace">${s}</div>`;
-    return `<div class="tag pace ${m.cls}">${m.emoji} ${s}</div>`;
+    return `<div class="tag pace ${m.cls}">${m.label||s}</div>`;
   }).join('');
 
   document.getElementById('previewModal').classList.add('show');
 }
 
 /* 이벤트 */
-document.querySelectorAll('.toggles').forEach(group=>{
-  group.addEventListener('click', e=>{
-    const t=e.target.closest('.toggle'); if(!t) return;
-    t.classList.toggle('active'); saveProfile();
-  });
-});
-iconWrap.addEventListener("click", e=>{
-  const btn=e.target.closest(".icon-btn"); if(!btn) return;
-  selectedIcon=btn.dataset.icon; updateIconActive(); saveProfile();
-});
 ['handle','bike','region','time','tandem','intro'].forEach(id=>{
   const el=document.getElementById(id);
   el.addEventListener('input', saveProfile);
   el.addEventListener('change', saveProfile);
 });
+
 document.getElementById('saveBtn').addEventListener('click',()=>{
   const p=saveProfile(); showPreview(p);
 });
-
-/* ✅ 확인 → 메인으로 이동 */
 document.getElementById('confirmBtn').addEventListener('click',()=>{
   document.getElementById('previewModal').classList.remove('show');
-  location.href = 'index.html';
+  // 저장 완료 후 메인으로 이동
+  location.href='index.html';
 });
 document.getElementById('editBtn').addEventListener('click',()=>{
   document.getElementById('previewModal').classList.remove('show');
@@ -350,7 +332,27 @@ document.getElementById('previewModal').addEventListener('click',(e)=>{
   if(e.target.id==='previewModal'){ e.currentTarget.classList.remove('show'); }
 });
 
-/* 초기 로드 → 값 채우기 */
+/* 프로필 공유 링크 생성/복사 */
+function makeShareLink(profile){
+  const data = btoa(unescape(encodeURIComponent(JSON.stringify(profile))));
+  const ambURL = new URL('rimo_ambassadors.html', location.href).toString();
+  return `${ambURL}?import=${data}#import=${data}`;
+}
+async function copyToClipboard(text){
+  try { await navigator.clipboard.writeText(text); }
+  catch(e){
+    const ta=document.createElement('textarea'); ta.value=text;
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+  }
+}
+document.getElementById('shareLinkBtn').addEventListener('click', async ()=>{
+  const profile = saveProfile();
+  const url = makeShareLink(profile);
+  await copyToClipboard(url);
+  alert('공유 링크를 복사했어요. 함께 탈 라이더에게 보내 주세요!');
+});
+
+/* 초기 로드 */
 (function init(){
   const p=loadProfile();
   if(p.name) document.getElementById('handle').value=p.name;
@@ -359,7 +361,6 @@ document.getElementById('previewModal').addEventListener('click',(e)=>{
   if(p.time) document.getElementById('time').value=p.time;
   if(p.tandem) document.getElementById('tandem').value=p.tandem;
   if(p.intro) document.getElementById('intro').value=p.intro;
-
   if(Array.isArray(p.styles)){
     p.styles.forEach(v=>{
       const el=[...document.querySelectorAll('.toggles[data-group="style"] .toggle')].find(x=>x.dataset.value===v);
