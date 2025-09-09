@@ -445,64 +445,89 @@ document.getElementById("editBtn").addEventListener("click",()=> {
 </div>
 
 <script>
-/* ===== 내 프로필 찾기(모달) ===== */
-document.addEventListener('DOMContentLoaded', () => {
-  // 1) 저장 버튼 아래에 "내 프로필 찾기" 링크 주입
+(function addClaimMyProfile(){
+  const LS_KEY='rimo_profile_v1', LS_UID='rimo_uid_v1';
+  const REG = (typeof REG_URL!=='undefined') ? REG_URL : ''; // 기존 값 사용
   const saveBtn = document.getElementById('saveBtn');
+
+  // 토스트가 없으면 간단 대체
+  function toast(m){ if (typeof showToast==='function') showToast(m); else alert(m); }
+
+  // 1) 저장 버튼 아래 링크 주입
   if (saveBtn && !document.getElementById('findMineLink')) {
     const p = document.createElement('p');
-    p.style.cssText = 'text-align:center;margin:8px 0 0';
+    p.style.cssText='text-align:center;margin:8px 0 0';
     p.innerHTML = '<a href="#" id="findMineLink" style="color:#9fb7ff;text-decoration:underline">내 프로필 찾기</a>';
     saveBtn.insertAdjacentElement('afterend', p);
   }
 
-  // 2) 모달 엘리먼트
-  const claimModal   = document.getElementById('claimModal');
-  const claimName    = document.getElementById('claimName');
-  const claimRegion  = document.getElementById('claimRegion');
-  const claimSearch  = document.getElementById('claimSearch');
-  const claimResults = document.getElementById('claimResults');
-  const findMineLink = document.getElementById('findMineLink');
+  // 2) 모달 DOM 주입
+  if (!document.getElementById('claimModal')) {
+    const wrap = document.createElement('div');
+    wrap.innerHTML = `
+    <div class="modal" id="claimModal" role="dialog" aria-modal="true" aria-labelledby="claimTitle" style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;z-index:3000;background:rgba(0,0,0,.45);padding:22px 12px">
+      <div class="modal-content panel" style="max-width:520px">
+        <h3 id="claimTitle" style="margin:0 0 8px">내 프로필 찾기</h3>
+        <p style="color:var(--muted);margin:0 0 10px">닉네임으로 검색 후 내 프로필을 선택하세요.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input id="claimName" type="text" placeholder="닉네임" style="flex:1;min-width:160px;padding:8px 12px;border:1px solid #2c2f48;border-radius:8px;background:#0f1020;color:#fff">
+          <input id="claimRegion" type="text" placeholder="지역(선택)" style="flex:1;min-width:160px;padding:8px 12px;border:1px solid #2c2f48;border-radius:8px;background:#0f1020;color:#fff">
+          <button id="claimSearch" class="save-btn" style="flex:0 0 auto;padding:10px 14px;border-radius:8px">검색</button>
+        </div>
+        <div id="claimResults" style="margin-top:10px;display:grid;gap:8px"></div>
+        <div style="display:flex;justify-content:center;margin-top:10px">
+          <button id="claimClose" style="padding:10px 14px;border-radius:8px;border:none;color:#fff;background:#2c2f48">닫기</button>
+        </div>
+      </div>
+    </div>`;
+    document.body.appendChild(wrap.firstElementChild);
+  }
 
-  function openClaim(){
-    // 현재 폼값으로 힌트 채우기
+  const findLink = document.getElementById('findMineLink');
+  const modal = document.getElementById('claimModal');
+  const nameInp = document.getElementById('claimName');
+  const regionInp = document.getElementById('claimRegion');
+  const searchBtn = document.getElementById('claimSearch');
+  const closeBtn = document.getElementById('claimClose');
+  const results = document.getElementById('claimResults');
+
+  function openModal(){
+    // 현재 폼값 힌트
     const nameEl = document.getElementById('handle');
     const regEl  = document.getElementById('region');
-    claimName.value   = nameEl ? (nameEl.value || '') : '';
-    claimRegion.value = regEl  ? (regEl.value  || '') : '';
-    claimResults.innerHTML = '';
-    claimModal.classList.add('show');
-    claimName.focus();
+    nameInp.value   = nameEl ? (nameEl.value || '') : '';
+    regionInp.value = regEl  ? (regEl.value  || '') : '';
+    results.innerHTML = '';
+    modal.style.display='flex';
+    nameInp.focus();
   }
-  function closeClaim(){ claimModal.classList.remove('show'); }
+  function closeModal(){ modal.style.display='none'; }
 
-  if (findMineLink) findMineLink.addEventListener('click', (e)=>{ e.preventDefault(); openClaim(); });
-  document.getElementById('claimClose').addEventListener('click', closeClaim);
-  claimModal.addEventListener('click', (e)=>{ if(e.target===claimModal) closeClaim(); });
+  if (findLink) findLink.addEventListener('click', e=>{ e.preventDefault(); openModal(); });
+  closeBtn.addEventListener('click', closeModal);
+  modal.addEventListener('click', e=>{ if(e.target===modal) closeModal(); });
 
-  // 3) 서버에서 전체 목록 가져오기
+  // 3) 서버에서 전체 목록
   async function fetchAll(){
+    if(!REG){ toast('REG_URL이 정의되어야 합니다.'); return []; }
     try{
-      const res = await fetch(`${REG_URL}?action=listProfiles&ts=${Date.now()}`, {cache:'no-store'});
+      const res = await fetch(`${REG}?action=listProfiles&ts=${Date.now()}`, {cache:'no-store'});
       const j = await res.json().catch(()=>null);
       return (j && j.ok && Array.isArray(j.data)) ? j.data : (Array.isArray(j) ? j : []);
-    }catch(_){
-      showToast('불러오기 실패'); 
-      return [];
-    }
+    }catch(_){ toast('불러오기 실패'); return []; }
   }
 
-  // 4) 검색 결과 렌더링
-  function render(rows){
-    claimResults.innerHTML = '';
-    if(!rows.length){
-      claimResults.innerHTML = '<p style="color:var(--muted);text-align:center">검색 결과가 없습니다.</p>';
+  // 4) 결과 렌더
+  function render(list){
+    results.innerHTML = '';
+    if(!list.length){
+      results.innerHTML = '<p style="color:var(--muted);text-align:center">검색 결과가 없습니다.</p>';
       return;
     }
-    rows.forEach(r=>{
-      const el = document.createElement('div');
-      el.style.cssText = 'display:flex;gap:10px;align-items:center;padding:10px;border:1px solid #2b2e54;border-radius:12px;background:#101223';
-      el.innerHTML = `
+    list.forEach(r=>{
+      const row = document.createElement('div');
+      row.style.cssText='display:flex;gap:10px;align-items:center;padding:10px;border:1px solid #2b2e54;border-radius:12px;background:#101223';
+      row.innerHTML = `
         <div style="width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#1a1c2f;border:1px solid #2b2e54;font-size:22px;flex:0 0 auto">${r.icon||'🏍️'}</div>
         <div style="min-width:0">
           <div style="font-weight:800;margin:0 0 2px">${r.name||'이름없음'}</div>
@@ -510,10 +535,9 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
         <div style="margin-left:auto">
           <button class="save-btn" style="padding:8px 12px;border-radius:8px">이건 나예요</button>
-        </div>
-      `;
-      el.querySelector('button').addEventListener('click', ()=>{
-        // 내 기기에 이 UID를 연결 + 폼 채우기
+        </div>`;
+      row.querySelector('button').addEventListener('click', ()=>{
+        // 스토리지 저장
         const normalized = {
           uid: r.uid||'',
           name: r.name||'',
@@ -526,20 +550,27 @@ document.addEventListener('DOMContentLoaded', () => {
           icon: r.icon||'🏍️',
           intro: r.intro||''
         };
-        // 스토리지 저장
         localStorage.setItem(LS_UID, normalized.uid);
         localStorage.setItem(LS_KEY, JSON.stringify(normalized));
 
         // 폼 즉시 반영
-        selectedIcon = normalized.icon; 
-        if (typeof updateIconActive === 'function') updateIconActive();
-        document.getElementById('handle').value = normalized.name;
-        document.getElementById('bike').value   = normalized.bike;
-        document.getElementById('region').value = normalized.region;
-        document.getElementById('time').value   = normalized.time;
-        document.getElementById('tandem').value = normalized.tandem;
+        const set = (id, val) => { const el=document.getElementById(id); if(el) el.value=val; };
+        set('handle', normalized.name);
+        set('bike', normalized.bike);
+        set('region', normalized.region);
+        set('time', normalized.time);
+        set('tandem', normalized.tandem);
 
-        // 토글 초기화 후 재적용
+        // 아이콘 활성화
+        window.selectedIcon = normalized.icon;
+        if (typeof updateIconActive==='function') updateIconActive();
+        else {
+          document.querySelectorAll('.icon-btn').forEach(b=>{
+            b.classList.toggle('active', b.dataset.icon===normalized.icon);
+          });
+        }
+
+        // 토글 초기화/적용
         document.querySelectorAll('.toggles .toggle').forEach(t=>t.classList.remove('active'));
         (normalized.styles||[]).forEach(v=>{
           const t=[...document.querySelectorAll('.toggles[data-group="style"] .toggle')].find(x=>x.dataset.value===v);
@@ -551,32 +582,33 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // 소개
-        const introEl = document.getElementById('intro');
-        if (introEl) introEl.value = (normalized.intro||'').slice(0,25);
+        const introEl=document.getElementById('intro');
+        if(introEl) introEl.value=(normalized.intro||'').slice(0,25);
 
-        showToast('이 기기에 내 프로필 연결 완료');
-        closeClaim();
+        toast('이 기기에 내 프로필 연결 완료');
+        closeModal();
       });
-      claimResults.appendChild(el);
+      results.appendChild(row);
     });
   }
 
   // 5) 검색 버튼
-  claimSearch.addEventListener('click', async ()=>{
-    const qn = (claimName.value||'').trim().toLowerCase();
-    const qr = (claimRegion.value||'').trim().toLowerCase();
-    if(!qn){ showToast('닉네임을 입력해 주세요.'); claimName.focus(); return; }
-    const rows = await fetchAll();
-    const hits = rows.filter(r=>{
-      const n = String(r.name||'').toLowerCase();
-      const rg= String(r.region||'').toLowerCase();
-      return (n.includes(qn) || n===qn) && (!qr || rg.includes(qr));
-    }).slice(0,30);
-    render(hits);
-  });
-});
+  if (searchBtn){
+    searchBtn.addEventListener('click', async ()=>{
+      const qn = (nameInp.value||'').trim().toLowerCase();
+      const qr = (regionInp.value||'').trim().toLowerCase();
+      if(!qn){ toast('닉네임을 입력해 주세요.'); nameInp.focus(); return; }
+      const rows = await fetchAll();
+      const hits = rows.filter(r=>{
+        const n = String(r.name||'').toLowerCase();
+        const rg= String(r.region||'').toLowerCase();
+        return (n.includes(qn) || n===qn) && (!qr || rg.includes(qr));
+      }).slice(0,30);
+      render(hits);
+    });
+  }
+})();
 </script>
-
 </body>
 </html>
 
