@@ -131,6 +131,54 @@
     background:#2c2f48; color:#fff; font-weight:800; border:none; border-radius:8px;
   }
   #findMineBtn:hover{ filter:brightness(1.07); }
+  /* === FIND-ME modal results layout === */
+#claimResults .claim-row{
+  display:grid;
+  grid-template-columns:44px 1fr 140px; /* 아바타 | 정보 | PIN+버튼 */
+  gap:10px;
+  align-items:center;
+  padding:10px;
+  border:1px solid #2b2e54;
+  border-radius:12px;
+  background:#101223;
+}
+
+#claimResults .claim-avatar{
+  width:44px;height:44px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:#1a1c2f;border:1px solid #2b2e54;font-size:22px;
+}
+
+#claimResults .claim-name{font-weight:800;margin:0 0 2px}
+#claimResults .claim-sub{font-size:13px;color:var(--muted)}
+
+#claimResults .rail{           /* ← 오른쪽 칼럼: PIN 위, 버튼 아래 */
+  display:grid;
+  grid-template-rows:auto auto;
+  gap:8px;                     /* 두 요소 간격 */
+}
+
+#claimResults .rail .pin{
+  width:100%;
+  padding:8px 10px;
+  border-radius:10px;
+  border:1px solid #2b2e54;
+  background:#0f1020;
+  color:#fff;
+  text-align:center;
+}
+
+#claimResults .rail .connect{
+  width:100%;
+  padding:10px 0;
+  border-radius:10px;
+  border:none;
+  background:#2a5bff;
+  color:#fff;
+  font-weight:800;
+  cursor:pointer;
+}
+
 </style>
 </head>
 <body>
@@ -554,86 +602,84 @@ document.getElementById("editBtn").addEventListener("click",()=> {
       </div>`;
   }
   function render(list){
-    results.innerHTML = '';
-    if(!list.length){
-      results.innerHTML = '<p style="color:var(--muted);text-align:center">검색 결과가 없습니다.</p>';
-      return;
-    }
-    list.forEach(r=>{ results.insertAdjacentHTML('beforeend', rowHTML(r)); });
-  }
-  async function doSearch(){
-    const qn=(nameInp.value||'').trim().toLowerCase();
-    const qr=(regionInp.value||'').trim().toLowerCase();
-    if(!qn){ showToast('이름을 입력해 주세요.'); nameInp.focus(); return; }
-    const rows = await fetchAll();
-    const hits = rows.filter(r=>{
-      const n=String(r.name||'').toLowerCase();
-      const rg=String(r.region||'').toLowerCase();
-      return (n.includes(qn) || n===qn) && (!qr || rg.includes(qr));
-    }).slice(0,30);
-    render(hits);
+  results.innerHTML = '';
+  if(!list.length){
+    results.innerHTML = '<p style="color:var(--muted);text-align:center">검색 결과가 없습니다.</p>';
+    return;
   }
 
-  // 검색 버튼
-  modal.querySelector('#claimSearch').addEventListener('click', doSearch);
+  list.forEach(r=>{
+    const row = document.createElement('div');
+    row.className = 'claim-row';
 
-  // 결과 영역 이벤트 위임 (PIN 검증 → 연결)
-  results.addEventListener('click', async (e)=>{
-    const pick = e.target.closest('.claim-pick');
-    if(!pick) return;
-    const row = pick.closest('.claim-row');
-    const uid = row?.dataset?.uid || '';
-    const pinInput = row.querySelector('.claim-pin');
-    const enteredPin = (pinInput?.value||'').trim();
+    row.innerHTML = `
+      <div class="claim-avatar">${r.icon||'🏍️'}</div>
+      <div class="claim-info">
+        <div class="claim-name">${r.name||'이름없음'}</div>
+        <div class="claim-sub">${r.region||'-'} · ${r.bike||'-'}</div>
+      </div>
+      <div class="rail">
+        <input class="pin" type="password" inputmode="numeric" pattern="\\d*" maxlength="4" placeholder="PIN(4자리)">
+        <button class="connect">프로필 연결</button>
+      </div>
+    `;
 
-    if(!uid){ showToast('UID가 없습니다.'); return; }
-    if(!/^\d{4}$/.test(enteredPin)){
-      showToast('PIN 4자리를 입력해 주세요.');
-      pinInput?.focus();
-      return;
-    }
+    // 버튼 동작: PIN 검증 → 연결
+    const btn = row.querySelector('.connect');
+    btn.addEventListener('click', async ()=>{
+      const pin = (row.querySelector('.pin').value || '').trim();
+      if(pin.length !== 4){ toast('PIN 4자리를 입력해 주세요'); return; }
 
-    const ok = await verifyPin(uid, enteredPin);
-    if(!ok){ showToast('PIN 확인 실패'); return; }
+      // 서버 검증
+      let ok = false;
+      try{
+        const vres = await fetch(`${REG}?action=verifyPin&uid=${encodeURIComponent(r.uid)}&pin=${encodeURIComponent(pin)}`, {cache:'no-store'});
+        const j = await vres.json().catch(()=>null);
+        ok = !!(j && j.ok);
+      }catch(_){}
 
-    // 원격에서 해당 프로필 가져와 로컬 연결 + 폼 반영
-    const prof = await fetchProfileByUid(uid);
-    if(!prof){ showToast('프로필을 불러오지 못했습니다'); return; }
+      if(!ok){ toast('PIN이 올바르지 않습니다.'); return; }
 
-    const normalized = {
-      uid:uid, name:prof.name||'', bike:prof.bike||'', region:prof.region||'',
-      styles:Array.isArray(prof.styles)?prof.styles:[], pace:Array.isArray(prof.pace)?prof.pace:[],
-      time:prof.time||'', tandem:prof.tandem||'허용', icon:prof.icon||'🏍️', intro:prof.intro||''
-    };
-    localStorage.setItem(LS_UID, normalized.uid);
-    localStorage.setItem(LS_KEY, JSON.stringify(normalized));
+      // 연결(로컬 저장 + 폼 반영)
+      const normalized = {
+        uid:r.uid||'', name:r.name||'', bike:r.bike||'', region:r.region||'',
+        styles:Array.isArray(r.styles)?r.styles:[], pace:Array.isArray(r.pace)?r.pace:[],
+        time:r.time||'', tandem:r.tandem||'허용', icon:r.icon||'🏍️', intro:r.intro||''
+      };
+      localStorage.setItem(LS_UID, normalized.uid);
+      localStorage.setItem(LS_KEY, JSON.stringify(normalized));
 
-    // 폼 반영
-    const set = (id,val)=>{ const el=document.getElementById(id); if(el) el.value=val; };
-    set('handle', normalized.name);
-    set('bike',   normalized.bike);
-    set('region', normalized.region);
-    set('time',   normalized.time);
-    set('tandem', normalized.tandem);
+      const set = (id,val)=>{ const el=document.getElementById(id); if(el) el.value=val; };
+      set('handle', normalized.name);
+      set('bike',   normalized.bike);
+      set('region', normalized.region);
+      set('time',   normalized.time);
+      set('tandem', normalized.tandem);
 
-    window.selectedIcon = normalized.icon;
-    updateIconActive();
-    document.querySelectorAll('.toggles .toggle').forEach(t=>t.classList.remove('active'));
-    (normalized.styles||[]).forEach(v=>{
-      const t=[...document.querySelectorAll('.toggles[data-group="style"] .toggle')].find(x=>x.dataset.value===v);
-      if(t) t.classList.add('active');
+      // 아이콘/토글 반영
+      window.selectedIcon = normalized.icon;
+      if (typeof updateIconActive==='function') updateIconActive();
+      document.querySelectorAll('.toggles .toggle').forEach(t=>t.classList.remove('active'));
+      (normalized.styles||[]).forEach(v=>{
+        const t=[...document.querySelectorAll('.toggles[data-group="style"] .toggle')].find(x=>x.dataset.value===v);
+        if(t) t.classList.add('active');
+      });
+      (normalized.pace||[]).forEach(v=>{
+        const t=[...document.querySelectorAll('.toggles[data-group="speed"] .toggle')].find(x=>x.dataset.value===v);
+        if(t) t.classList.add('active');
+      });
+      const introEl=document.getElementById('intro');
+      if(introEl) introEl.value=(normalized.intro||'').slice(0,25);
+
+      toast('이 기기에 내 프로필 연결 완료');
+      // 모달 닫기(밖 클릭으로 닫히는 구현을 쓰는 경우엔 아래 줄 없어도 OK)
+      const modal = document.getElementById('claimModal');
+      if(modal) modal.style.display = 'none';
     });
-    (normalized.pace||[]).forEach(v=>{
-      const t=[...document.querySelectorAll('.toggles[data-group="speed"] .toggle')].find(x=>x.dataset.value===v);
-      if(t) t.classList.add('active');
-    });
-    const introEl=document.getElementById('intro');
-    if(introEl) introEl.value=(normalized.intro||'').slice(0,25);
 
-    showToast('이 기기에 내 프로필 연결 완료');
-    closeModal();
+    results.appendChild(row);
   });
-})();
+}
 </script>
 </body>
 </html>
