@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>RIMO — 라이더 프로필</title>
 
-<!-- 공통 테마 -->
 <link rel="stylesheet" href="rimo_theme.css?v=20250910" />
 
 <style>
@@ -29,7 +28,7 @@
   .form-row{display:flex;align-items:center;gap:6px;margin-bottom:0}
   .form-row.top{align-items:flex-start}
   .form-row label{width:var(--label-width);font-size:14px;font-weight:700;white-space:nowrap}
-  .field{flex:1;min-width:0}
+  .field{flex:1.5;min-width:0}
 
   /* 지역/탠덤 1행 2열 */
   .form-row.split{
@@ -44,11 +43,18 @@
   .form-row.split .col:nth-child(2) .field{ flex:1 1 auto; min-width:0 }
   .form-row.split select{ width:100% }
 
+  /* 드롭다운 가독성 */
+  select{color:#fff;background:#0f1020;border:1px solid #2c2f48;border-radius:8px;padding:8px 12px;font-size:14px;appearance:none}
+  select option{color:#fff;background:#0f1020}
+  input[type="text"], textarea{
+    width:100%;padding:8px 12px;border-radius:8px;border:1px solid #2c2f48;background:#0f1020;color:#fff;font-size:14px
+  }
   textarea{resize:none;height:40px}
 
   .toggles{display:flex;gap:10px;flex-wrap:wrap;margin:0}
   .toggle{
     display:inline-flex;align-items:center;gap:14px;padding:8px 12px;border-radius:999px;
+    background:var(--surface-2); border:1px solid var(--border-2);
     color:#e6e9ff;font-size:13px;cursor:pointer;user-select:none;white-space:nowrap;
     transition:transform .15s ease, box-shadow .15s ease;
   }
@@ -61,7 +67,7 @@
   .profile-icons{display:flex;flex-direction:column;align-items:center;gap:10px;margin:0}
   .icons{display:grid;grid-template-columns:repeat(5,48px);grid-auto-rows:48px;gap:10px;justify-content:center}
   .icon-btn{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-    font-size:28px;cursor:pointer;transition:.15s ease;color:#fff}
+    font-size:28px;cursor:pointer;transition:.15s ease;color:#fff;background:#1a1c2f;border:1px solid #2c2f48}
   .icon-btn.active{border-color:var(--accent);box-shadow:0 0 10px rgba(122,167,255,.4);transform:scale(1.05)}
   .intro-box{width:calc(48px*5 + 10px*4);margin:8px 0 0}
   #intro{width:100%;text-align:center}
@@ -78,13 +84,13 @@
   .modal.show{display:flex}
   .modal-content.panel{max-width:520px;box-shadow:0 8px 24px rgba(0,0,0,.4)}
   .card-head{display:flex;gap:14px;align-items:center}
-  .avatar{width:72px;height:72px;border-radius:50%;font-size:36px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+  .avatar{width:72px;height:72px;border-radius:50%;font-size:36px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;background:#1a1c2f;border:1px solid #2c2f48}
   .idcol{min-width:0}
   .name{margin:0 0 4px;font-size:18px;font-weight:800}
   .sub{margin:0;color:var(--muted);font-size:13px}
   .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
   .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-  .tag{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 10px;border-radius:999px;font-size:12px;white-space:nowrap}
+  .tag{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 10px;border-radius:999px;font-size:12px;white-space:nowrap;background:var(--surface-2);border:1px solid var(--border-2)}
   .modal-actions{display:flex;gap:12px;justify-content:center;margin-top:6px}
   .modal-actions button{flex:1;padding:12px;border-radius:10px;border:none;font-size:14px;font-weight:800;cursor:pointer;color:#fff}
   .modal-actions .ok{background:#2a5bff}
@@ -230,57 +236,74 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// 1) URL의 ?uid= 또는 ?me= 값이 있으면 내 UID로 저장 (최상단)
+// 1) URL의 ?uid= 또는 ?me= 가 있으면 내 UID로 저장
 (function seedUIDFromQuery(){
   try{
     const p = new URLSearchParams(location.search);
     const v = p.get('uid') || p.get('me');
     if(v){
       localStorage.setItem('rimo_uid_v1', v);
+      document.cookie = `rimo_uid_v1=${encodeURIComponent(v)}; path=/; SameSite=Lax; max-age=${365*86400}`;
       history.replaceState({}, '', location.pathname);
     }
   }catch(_){}
 })();
 
-// 2) 전역 상수/변수 (중복 선언 금지)
-const REG_URL = "https://script.google.com/macros/s/AKfycbz1P-KpgNGKUGqFDA20-QxUdcqsEEcWo8HEXtwQMW6voSnf6eHg18gi1yT7HpVzZCX6xw/exec";
+// 2) 상수/상태
+const REG_URL = "https://script.google.com/macros/s/AKfycbxgVNFxOoEgiN1nM19ws26xM8BDWxPy0RfJz5gG-HkGqJmHcFfXLn3iFIhK6DLtKTak_Q/exec";
 const LS_KEY  = 'rimo_profile_v1';
 const LS_UID  = 'rimo_uid_v1';
 let selectedIcon = "🏍️";
 
-// 3) 유틸
-function getParam(name){ try{ return new URL(location.href).searchParams.get(name); }catch(_){ return null; } }
-function showToast(msg, ms=2000){
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.style.animationDuration = (ms/1000)+'s';
-  t.classList.add('show');
-  clearTimeout(window._toastTimer);
-  window._toastTimer = setTimeout(()=> t.classList.remove('show'), ms);
+// cookie helpers
+function setCookie(k,v,days=365){
+  const d=new Date(); d.setTime(d.getTime()+days*864e5);
+  document.cookie = `${k}=${encodeURIComponent(v)}; expires=${d.toUTCString()}; path=/; SameSite=Lax`;
+}
+function getCookie(k){
+  const m = document.cookie.match(new RegExp('(?:^|; )'+k+'=([^;]*)'));
+  return m ? decodeURIComponent(m[1]) : null;
 }
 
-// 아이콘 선택
+// UID 보장( URL > local > cookie > 생성 )
+function ensureUID(){
+  const q = new URLSearchParams(location.search);
+  const qs = q.get('uid') || q.get('me');
+  if(qs){ localStorage.setItem(LS_UID, qs); setCookie(LS_UID, qs); return qs; }
+  let u = localStorage.getItem(LS_UID) || getCookie(LS_UID);
+  if(!u){
+    u = 'u_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+    localStorage.setItem(LS_UID, u); setCookie(LS_UID, u);
+  }
+  return u;
+}
+
+function showToast(msg, ms=2000){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.style.animationDuration=(ms/1000)+'s';
+  t.classList.add('show');
+  clearTimeout(window._toastTimer); window._toastTimer=setTimeout(()=>t.classList.remove('show'), ms);
+}
+
+// 아이콘 토글
 const iconWrap = document.getElementById("iconSelect");
 iconWrap.addEventListener("click", e=>{
-  const btn = e.target.closest(".icon-btn");
-  if(!btn) return;
-  selectedIcon = btn.dataset.icon;
-  updateIconActive();
+  const btn = e.target.closest(".icon-btn"); if(!btn) return;
+  selectedIcon = btn.dataset.icon; updateIconActive();
 });
 function updateIconActive(){
-  iconWrap.querySelectorAll(".icon-btn").forEach(b => {
-    b.classList.toggle("active", b.dataset.icon === selectedIcon);
-  });
+  iconWrap.querySelectorAll(".icon-btn").forEach(b => b.classList.toggle("active", b.dataset.icon === selectedIcon));
 }
 
-// 원격에서 uid로 프로필 읽기
+// 원격 단건 조회(getProfile)
 async function fetchProfileByUid(uid){
   try{
-    const res = await fetch(`${REG_URL}?action=listProfiles&ts=${Date.now()}`, {cache:'no-store'});
+    const url = `${REG_URL}?action=getProfile&uid=${encodeURIComponent(uid)}&ts=${Date.now()}`;
+    const res = await fetch(url, {cache:'no-store'});
     const j = await res.json().catch(()=>null);
-    const rows = (j && j.ok && Array.isArray(j.data)) ? j.data : (Array.isArray(j) ? j : []);
-    return rows.find(r => String(r.uid||'') === String(uid)) || null;
-  }catch(e){ console.warn('fetchProfileByUid fail', e); return null; }
+    if(j && j.ok && j.data) return j.data;
+  }catch(_){}
+  return null;
 }
 
 // 수집/저장
@@ -288,10 +311,8 @@ function collectProfile(){
   const styles = [...document.querySelectorAll('.toggles[data-group="style"] .toggle.active')].map(el=>el.dataset.value);
   const pace   = [...document.querySelectorAll('.toggles[data-group="speed"] .toggle.active')].map(el=>el.dataset.value);
   const introVal = (document.getElementById('intro').value||'').slice(0,25);
-  const uid = localStorage.getItem(LS_UID) || ('u_'+Math.random().toString(36).slice(2)+Date.now().toString(36));
-  localStorage.setItem(LS_UID, uid);
   return {
-    uid,
+    uid: ensureUID(),
     name: document.getElementById('handle').value.trim(),
     bike: document.getElementById('bike').value.trim(),
     region: document.getElementById('region').value,
@@ -305,12 +326,13 @@ function collectProfile(){
 function saveProfileLocal(p){
   localStorage.setItem(LS_KEY, JSON.stringify(p));
   localStorage.setItem(LS_UID, p.uid);
+  setCookie(LS_UID, p.uid);
 }
 async function saveProfileRemote(p){
   const res = await fetch(REG_URL, {
-    method:"POST",
-    headers:{ "Content-Type":"text/plain;charset=utf-8" }, // preflight 회피
-    body: JSON.stringify({ action:"registerProfile", profile:p })
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" }, // preflight 회피
+    body: JSON.stringify({ action:"registerProfile", profile: p })
   });
   const out = await res.json().catch(()=>({ok:false,msg:'응답 파싱 실패'}));
   return out;
@@ -328,63 +350,42 @@ function showPreview(p){
   document.getElementById('previewModal').classList.add('show');
 }
 
-// 하이드레이트: URL uid > 원격 > 로컬
+// 초기 프리필 (URL uid > local > server(uid))
 async function hydrate(){
-  const urlUid = getParam('uid');
+  const q = new URLSearchParams(location.search);
+  const urlUid = q.get('uid') || q.get('me');
   const ls = localStorage.getItem(LS_KEY);
 
-  if (urlUid){
-    localStorage.setItem(LS_UID, urlUid);
+  if(urlUid){
     const remote = await fetchProfileByUid(urlUid);
-    if (remote){
-      selectedIcon = remote.icon || '🏍️'; updateIconActive();
-      document.getElementById('handle').value = remote.name || '';
-      document.getElementById('bike').value   = remote.bike || '';
-      document.getElementById('region').value = remote.region || '';
-      document.getElementById('time').value   = remote.time || '';
-      document.getElementById('tandem').value = remote.tandem || '허용';
-      (remote.styles||[]).forEach(v=>{
-        const el = [...document.querySelectorAll('.toggles[data-group="style"] .toggle')].find(x=>x.dataset.value===v);
-        if(el) el.classList.add('active');
-      });
-      (remote.pace||[]).forEach(v=>{
-        const el = [...document.querySelectorAll('.toggles[data-group="speed"] .toggle')].find(x=>x.dataset.value===v);
-        if(el) el.classList.add('active');
-      });
-      document.getElementById('intro').value = (remote.intro || '').slice(0,25);
-      return;
-    }
+    if(remote){ fillForm(remote); return; }
   }
-
-  if (ls){
-    try{
-      const saved = JSON.parse(ls);
-      selectedIcon = saved.icon || '🏍️'; updateIconActive();
-      document.getElementById('handle').value = saved.name || '';
-      document.getElementById('bike').value   = saved.bike || '';
-      document.getElementById('region').value = saved.region || '';
-      document.getElementById('time').value   = saved.time || '';
-      document.getElementById('tandem').value = saved.tandem || '허용';
-      (saved.styles||[]).forEach(v=>{
-        const el = [...document.querySelectorAll('.toggles[data-group="style"] .toggle')].find(x=>x.dataset.value===v);
-        if(el) el.classList.add('active');
-      });
-      (saved.pace||[]).forEach(v=>{
-        const el = [...document.querySelectorAll('.toggles[data-group="speed"] .toggle')].find(x=>x.dataset.value===v);
-        if(el) el.classList.add('active');
-      });
-      document.getElementById('intro').value = saved.intro || '';
-    }catch(_){}
+  if(ls){
+    try{ fillForm(JSON.parse(ls)); return; }catch(_){}
   }
-
-  // 아무것도 없으면 uid만 보장
-  if (!localStorage.getItem(LS_UID)){
-    const uid = 'u_'+Math.random().toString(36).slice(2)+Date.now().toString(36);
-    localStorage.setItem(LS_UID, uid);
-  }
+  const uid = ensureUID();
+  const remote = await fetchProfileByUid(uid);
+  if(remote){ fillForm(remote); }
+}
+function fillForm(data){
+  selectedIcon = data.icon || '🏍️'; updateIconActive();
+  document.getElementById('handle').value = data.name || '';
+  document.getElementById('bike').value   = data.bike || '';
+  document.getElementById('region').value = data.region || '';
+  document.getElementById('time').value   = data.time || '';
+  document.getElementById('tandem').value = data.tandem || '허용';
+  (data.styles||[]).forEach(v=>{
+    const el = [...document.querySelectorAll('.toggles[data-group="style"] .toggle')].find(x=>x.dataset.value===v);
+    if(el) el.classList.add('active');
+  });
+  (data.pace||[]).forEach(v=>{
+    const el = [...document.querySelectorAll('.toggles[data-group="speed"] .toggle')].find(x=>x.dataset.value===v);
+    if(el) el.classList.add('active');
+  });
+  document.getElementById('intro').value = (data.intro || '').slice(0,25);
 }
 
-// 이벤트 연결
+// wire
 updateIconActive();
 document.querySelectorAll('.toggles').forEach(group=>{
   group.addEventListener('click',e=>{
@@ -393,31 +394,24 @@ document.querySelectorAll('.toggles').forEach(group=>{
     }
   });
 });
-
 (async ()=>{ await hydrate(); })();
 
-const saveBtn = document.getElementById("saveBtn");
-saveBtn.addEventListener("click", async ()=>{
+document.getElementById("saveBtn").addEventListener("click", async ()=>{
   const p = collectProfile();
   if(!p.name){ showToast("이름을 입력해 주세요."); return; }
-
-  saveBtn.disabled = true;
+  const btn = document.getElementById("saveBtn");
+  btn.disabled = true;
   try{
     saveProfileLocal(p);
     const out = await saveProfileRemote(p);
-    if(out.ok){
-      showToast("✅ 프로필 저장 완료");
-      showPreview(p);
-    }else{
-      showToast("⚠️ 저장 실패: " + (out.msg || "알 수 없는 오류"));
-    }
+    if(out.ok){ showToast("✅ 프로필 저장 완료"); showPreview(p); }
+    else{ showToast("⚠️ 저장 실패: " + (out.msg || "알 수 없는 오류")); }
   }catch(err){
     showToast("⚠️ 네트워크 오류: " + err.message);
   }finally{
-    saveBtn.disabled = false;
+    btn.disabled = false;
   }
 });
-
 document.getElementById("confirmBtn").addEventListener("click",()=> {
   document.getElementById('previewModal').classList.remove('show');
 });
