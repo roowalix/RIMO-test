@@ -89,6 +89,25 @@
   .tabbar .tab{background:var(--tab-bg);border:1px solid var(--tab-bd);color:var(--tab-ink);
                padding:12px 18px;border-radius:22px;font-weight:800;text-decoration:none;font-size:14px}
   .tabbar .tab.primary{background:var(--tab-pri);border-color:var(--tab-pri-bd)}
+  /* === RIMO THEME NORMALIZER v1 === */
+:root{
+  --bg:#0b0b0f; --fg:#e8e8ef; --muted:#b9b9cc;
+  --line:#23243a;           /* 통일 */
+  --tile:#101223;           /* 통일: 박스 배경 */
+  --tileBd:#23243a;         /* 통일: 박스 테두리 */
+  --accent:#7aa7ff;
+  --tab-bg:#182039; --tab-bd:#2d3559; --tab-ink:#e6e8ef;
+  --tab-pri:#26346d; --tab-pri-bd:#3b53a8;
+  --container: 720px;       /* PC 폭 통일 */
+}
+
+/* PC/태블릿에서 콘텐츠 폭 통일 */
+main{max-width:var(--container); margin:0 auto; padding:16px; padding-bottom:100px}
+
+/* 드롭다운 가독성 통일 */
+select{color:#fff; background:#0f1020; border:1px solid #2c2f48; border-radius:8px}
+select option{color:#fff; background:#0f1020}
+
 </style>
 </head>
 <body>
