@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>RIMO — 오늘의 라이딩 크루</title>
 
-<!-- ✅ 공통 테마(색/폭) -->
+<!-- 공통 테마 -->
 <link rel="stylesheet" href="rimo_theme.css?v=20250911">
 
 <!-- Leaflet -->
@@ -13,13 +13,13 @@
 
 <style>
   :root{
-    /* 이 페이지 토큰 */
+    /* 페이지 토큰 */
     --chip:#1a1a24; --chipBd:#2f3247;
     --btn:#2A2F4F; --btnHover:#3C4380;
     --imminent-bg: rgba(255,199,94,.16);
     --imminent-bd: rgba(255,199,94,.45);
 
-    /* tabbar (공통은 theme.css, 여기선 덮어쓰기) */
+    /* tabbar 덮어쓰기(필요시) */
     --tab-bg:#182039; --tab-bd:#2d3559; --tab-ink:#e6e8ef;
     --tab-pri:#26346d; --tab-pri-bd:#3b53a8;
   }
@@ -44,8 +44,8 @@
   .pill{margin-left:auto;padding:6px 10px;border-radius:999px;background:#151525;color:#b9b9cc;font-size:12px}
 
   /* 본문 */
-  main{display:flex;flex-direction:column;gap:12px}
-  #map{height:360px;border-radius:14px;outline:1px solid var(--border-1);margin-bottom:20px}
+  main{padding:16px;max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:14px; padding-bottom:120px;} /* 탭바 가림 방지 */
+  #map{height:360px;border-radius:14px;outline:1px solid var(--border-1)}
   .leaflet-container{z-index:1}
 
   /* 카드 캐러셀 */
@@ -60,17 +60,11 @@
   .msg{font-size:14px}
   .pillrow{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
   .chip{
-    padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.06);
-    border:1px solid rgba(255,255,255,.12);font-size:12px;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center
-  }
-
-  /* 메인 칩을 공통 Pill 스타일로 강제 */
-  .carousel .chip{
-    background:var(--pill-bg) !important;
-    border-color:var(--pill-bd) !important;
-    color:var(--pill-ink) !important;
-    padding:var(--pill-py) var(--pill-px) !important;
-    font-size:var(--pill-font) !important;
+    padding:8px 12px;border-radius:999px;background:var(--pill-bg, rgba(255,255,255,.06));
+    border:1px solid var(--pill-bd, rgba(255,255,255,.12));
+    color:var(--pill-ink, #e6e8ef);
+    font-size:var(--pill-font,12px);
+    white-space:nowrap;display:inline-flex;align-items:center;justify-content:center
   }
 
   /* 출발 임박 배지 */
@@ -92,51 +86,48 @@
         background:rgba(255,255,255,.16);cursor:pointer}
   .card.selected{box-shadow:0 0 0 2px rgba(255,255,255,.12) inset}
 
-  /* 핀 아이콘(지도) */
-  .pin{
-    width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-    font-weight:900;font-size:12px;color:#0b0b0f;border:2px solid rgba(255,255,255,.9);box-shadow:0 1px 6px rgba(0,0,0,.35)
-  }
+  /* 지도 핀 */
+  .pin{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+       font-weight:900;font-size:12px;color:#0b0b0f;border:2px solid rgba(255,255,255,.9);box-shadow:0 1px 6px rgba(0,0,0,.35)}
 
   /* 모달(합류 안내) */
-  .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:3000;
+  .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:4000;
          background:rgba(0,0,0,.45);padding:22px 12px}
   .modal.show{display:flex}
-  .sheet{max-width:680px}
-  .sheet h4{margin:4px 0 10px;font-size:18px}
+  #joinSheet.panel{
+    width:calc(100% - 24px);
+    max-width:680px;
+    background:#0e1222; border:1px solid #2b304f; border-radius:18px;
+    box-shadow:0 14px 40px rgba(0,0,0,.55);
+    padding:16px 16px 20px;  /* 하단 여유 */
+  }
+  #joinSheet h4{margin:4px 0 10px;font-size:18px}
   .hint{color:#cfd2ff;line-height:1.5;margin-bottom:10px}
-  .pre{border-radius:12px;white-space:pre-wrap;line-height:1.4}
-  .modal-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
-  .modal-actions button{flex:1;min-width:110px;max-width:160px;padding:12px 18px;border-radius:12px;border:none;
-                        background:var(--btn);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+  #preview.pre{
+    background:#0b1020; border:1px solid #293059; border-radius:12px;
+    padding:12px; white-space:pre-wrap; line-height:1.4;
+    min-height:96px; max-height:42vh; overflow:auto; color:#e6e9ff;
+  }
+  .modal-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px; padding-bottom:6px}
+  .modal-actions button{
+    flex:1; min-width:110px; max-width:160px; padding:12px 18px; border-radius:12px; border:none;
+    background:var(--btn); color:#fff; font-size:15px; font-weight:700; cursor:pointer
+  }
   .modal-actions button:hover{background:var(--btnHover)}
 
   /* 하단 네비 */
-  .tabbar{position:fixed;left:0;right:0;bottom:16px;z-index:2500;display:flex;gap:12px;justify-content:center}
+  .tabbar{position:fixed;left:0;right:0;bottom:16px;z-index:1500;display:flex;gap:12px;justify-content:center}
   .tabbar .tab{background:var(--tab-bg);border:1px solid var(--tab-bd);color:var(--tab-ink);
                padding:12px 18px;border-radius:22px;font-weight:800;text-decoration:none;font-size:14px}
   .tabbar .tab.primary{background:var(--tab-pri);border-color:var(--tab-pri-bd)}
 
-  /* === 필터 바(엠버서더 칩과 동일 룩) === */
-  .pill-bar{display:flex;flex-wrap:wrap;gap:8px;margin:10px 16px 0}
-  .pill-btn{
-    appearance:none; border-radius:999px; cursor:pointer;
-    padding:8px 12px; font-weight:800; font-size:12px;
-    border:1px solid var(--pill-bd, #2b2e54);
-    background:var(--pill-bg, #1a1c2f);
-    color:var(--pill-ink, #e6e9ff);
-    transition:transform .15s ease, box-shadow .15s ease, background .15s ease, border-color .15s ease;
+  /* 모달 열릴 때 바닥 탭바 비활성/반투명 */
+  body.modal-open .tabbar{
+    pointer-events:none;
+    opacity:.28;
+    filter:saturate(.2) blur(1px);
+    transform:translateY(2px);
   }
-  .pill-btn:is(:hover,.is-active){
-    transform:translateY(-1px) scale(1.02);
-    box-shadow:0 0 12px rgba(122,167,255,.45), 0 0 0 2px rgba(122,167,255,.25) inset;
-  }
-  .pill-btn--urban   { --pill-bg:#1e2d55; --pill-bd:#2c4484; }
-  .pill-btn--curve   { --pill-bg:#2a1f56; --pill-bd:#40307a; }
-  .pill-btn--tour    { --pill-bg:#1e3b3a; --pill-bd:#2f5f5d; }
-  .pill-btn--easy    { --pill-bg:#1f3a1f; --pill-bd:#2f5a2f; }
-  .pill-btn--balanced{ --pill-bg:#3a341e; --pill-bd:#5a4f2f; }
-  .pill-btn--dynamic { --pill-bg:#3a1f1f; --pill-bd:#5a2f2f; }
 </style>
 </head>
 <body>
@@ -149,16 +140,6 @@
 </header>
 
 <main>
-  <!-- ✅ 필터 바 -->
-  <div class="pill-bar" id="filters">
-    <button type="button" class="pill-btn pill-btn--urban"   data-key="Urban">Urban</button>
-    <button type="button" class="pill-btn pill-btn--curve"   data-key="Curve">Curve</button>
-    <button type="button" class="pill-btn pill-btn--tour"    data-key="Tour">Tour</button>
-    <button type="button" class="pill-btn pill-btn--easy"    data-key="Easy">Easy</button>
-    <button type="button" class="pill-btn pill-btn--balanced"data-key="Balanced">Balanced</button>
-    <button type="button" class="pill-btn pill-btn--dynamic" data-key="Dynamic">Dynamic</button>
-  </div>
-
   <div id="map" class="panel"></div>
   <section id="list" class="carousel"></section>
 </main>
@@ -186,15 +167,17 @@
   </div>
 </div>
 
+<!-- Leaflet -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin></script>
-<script>
-/* 공통 */
-const ADMIN_DM = "http://pf.kakao.com/_ceUDn/chat";
-const LS_KEY   = 'rimo_profile_v1';
-const LS_CREWS = 'rimo_crews_v1';
-const LS_APPS  = 'rimo_applications_v1';
 
-/* 카드/핀/대시라인 테마 */
+<script>
+/* 상수 */
+const ADMIN_DM = "http://pf.kakao.com/_ceUDn/chat";
+const LS_KEY = 'rimo_profile_v1';
+const LS_CREWS = 'rimo_crews_v1';
+const LS_APPS = 'rimo_applications_v1';
+
+/* 카드/핀 테마 */
 const THEMES = {
   red:    { base:'#ff4d4d', cardBg:'rgba(255,77,77,.14)',  border:'rgba(255,77,77,.55)'},
   yellow: { base:'#ffd24d', cardBg:'rgba(255,210,77,.16)', border:'rgba(255,210,77,.55)'},
@@ -208,9 +191,9 @@ document.getElementById('today').textContent =
 
 /* 발행된 카드 불러오기 */
 let crews = [];
-try {
-  crews = JSON.parse(localStorage.getItem(LS_CREWS) || '[]');
-} catch(e) { crews = []; }
+try { crews = JSON.parse(localStorage.getItem(LS_CREWS) || '[]'); }
+catch(e) { crews = []; }
+
 if (!crews.length) {
   crews = [{
     id:"demo1", theme:"blue", title:"<예시 카드 — 관리자에서 발행하세요>",
@@ -224,12 +207,14 @@ if (!crews.length) {
 const map = L.map('map',{scrollWheelZoom:true});
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
 const group = L.featureGroup().addTo(map);
-const arcs  = L.layerGroup().addTo(map);
+const arcs = L.layerGroup().addTo(map);
 
 function makePin(color,label){
-  return L.divIcon({className:'pin',
+  return L.divIcon({
+    className:'pin',
     html:`<div class="pin" style="background:${color}">${label}</div>`,
-    iconSize:[28,28],iconAnchor:[14,14]});
+    iconSize:[28,28], iconAnchor:[14,14]
+  });
 }
 
 function arcCoords(aLat,aLng,bLat,bLng,k=0.18){
@@ -257,39 +242,26 @@ renderMap();
 /* 카드 렌더링 */
 const listEl=document.getElementById('list');
 const chip=s=>`<span class="chip">${s}</span>`;
-let activeFilters=new Set();
-
-function filteredCrews(){
-  if(activeFilters.size===0) return crews;
-  // 현재는 스타일/페이스 텍스트 매칭만(데이터에 pace 없으면 styles만 체크)
-  return crews.filter(c=>{
-    const keys = new Set([...(c.styles||[]), ...(c.pace||[])]);
-    for(const f of activeFilters){ if(keys.has(f)) return true; }
-    return false;
-  });
-}
 
 function renderCards(){
   listEl.innerHTML="";
-  filteredCrews().forEach(c=>{
+  crews.forEach(c=>{
     const t=THEMES[c.theme]||THEMES.blue;
     const el=document.createElement('article');
     el.className="card"; el.dataset.id=c.id;
     el.style.background=t.cardBg; el.style.border=`1px solid ${t.border}`;
 
-    const departAt = new Date(); // 필요시 실제 출발 시간 사용
-    const now = new Date();
-    const diffMin = departAt ? Math.floor((departAt - now)/60000) : null;
-    const imminent = (diffMin !== null && diffMin >= 0 && diffMin <= 30);
+    // 출발 임박 판단(필요 시 실제 시간 비교 로직으로 교체)
+    const immin = false;
 
     el.innerHTML=`
       <h3>${c.title}</h3>
       <div class="meta">⏰ ${c.time}</div>
       <div class="meta">📍 ${c.from} → ${c.to}</div>
       <div class="msg">💬 ${c.msg}</div>
-      ${imminent ? `<div class="imminent">🚦 출발 임박</div>` : ``}
+      ${immin ? `<div class="imminent">🚦 출발 임박</div>` : ``}
       <div class="pillrow">
-        ${(c.styles||[]).map(chip).join("")}
+        ${c.styles.map(chip).join("")}
         ${c.cc ? chip(c.cc) : ""}
       </div>
       <button class="join">👥 ${c.peopleNow}/${c.peopleMax} · ✅ 합류 신청</button>
@@ -300,22 +272,16 @@ function renderCards(){
 }
 renderCards();
 
-/* 필터 버튼 토글 */
-document.getElementById('filters')?.addEventListener('click', (e)=>{
-  const b = e.target.closest('.pill-btn');
-  if(!b) return;
-  const key = b.dataset.key;
-  b.classList.toggle('is-active');
-  if(b.classList.contains('is-active')) activeFilters.add(key);
-  else activeFilters.delete(key);
-  renderCards();
-});
-
 /* 합류 모달 */
 const modal = document.getElementById('joinModal');
 const sheet = document.getElementById('joinSheet');
 const preview = document.getElementById('preview');
-modal.addEventListener('click', ()=> modal.classList.remove('show'));
+
+function closeJoinModal(){
+  modal.classList.remove('show');
+  document.body.classList.remove('modal-open');
+}
+modal.addEventListener('click', closeJoinModal);      // 바깥 클릭 닫기
 sheet.addEventListener('click', (e)=> e.stopPropagation());
 
 document.getElementById('editProfile').onclick = ()=> location.href='rimo_profile.html';
@@ -341,7 +307,6 @@ ${crew.from} → ${crew.to}
 ${styles} · ${paces}`
   );
 }
-
 async function copyText(txt){
   try{ await navigator.clipboard.writeText(txt); return true; }
   catch(e){
@@ -349,7 +314,6 @@ async function copyText(txt){
     ta.select(); document.execCommand('copy'); ta.remove(); return true;
   }
 }
-
 function saveApplication(crew, text){
   let apps = [];
   try { apps = JSON.parse(localStorage.getItem(LS_APPS)||'[]'); } catch(e){ apps = []; }
@@ -364,13 +328,15 @@ function saveApplication(crew, text){
   });
   localStorage.setItem(LS_APPS, JSON.stringify(apps));
 }
-
 function openJoinModal(crew){
   const profile = loadProfile();
   const text = composeText(crew, profile);
   preview.textContent = text;
   copyText(text);
+
+  document.body.classList.add('modal-open');  // 탭바 비활성/반투명
   modal.classList.add('show');
+
   document.getElementById('goAdmin').onclick = ()=>{
     saveApplication(crew, text);
     location.href = ADMIN_DM;
