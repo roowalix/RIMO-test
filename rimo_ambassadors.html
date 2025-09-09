@@ -324,7 +324,7 @@ function renderList(items){
     if (a.intro){
       const intro = document.createElement('p');
       intro.className = 'intro';
-      intro.textContent = `"${String(a.intro).slice(0,25)}"`;
+      intro.textContent =a.intro? `"${String(a.intro).slice(0,25)}"`:'자기 소개가 없습니다';
       idcol.appendChild(nameRow);
       idcol.appendChild(intro);
     } else {
@@ -447,19 +447,30 @@ dmSheet.addEventListener('click', e=>e.stopPropagation());
     const items = await loadProfiles();
     if(state) state.remove();
 
-    const normalized = items.map(r => ({
-      uid: r.uid || '',
-      icon: r.icon || '🏍️',
-      name: r.name || '라이더',
-      region: r.region || '',
-      bike: r.bike || '',
-      styles: Array.isArray(r.styles) ? r.styles : [],
-      pace: Array.isArray(r.pace) ? r.pace : [],
-      intro: r.intro || '',
-      time: r.time || '',
-      tandem: r.tandem || '',
-      ts: r.ts || 0
-    }));
+    const normalized = items.map(r => {
+  // 혹시 서버가 raw를 내려주는 상황까지 대비(현재는 안 내림)
+  let intro = r.intro || '';
+  if (!intro && r.raw) {
+    try { const raw = typeof r.raw === 'string' ? JSON.parse(r.raw) : r.raw;
+          intro = raw && raw.intro ? String(raw.intro) : ''; } catch(_){}
+  }
+  intro = String(intro).slice(0,25); // 안전 슬라이스
+
+  return {
+    uid: r.uid || '',
+    icon: r.icon || '🏍️',
+    name: r.name || '라이더',
+    region: r.region || '',
+    bike: r.bike || '',
+    styles: Array.isArray(r.styles) ? r.styles : [],
+    pace: Array.isArray(r.pace) ? r.pace : [],
+    intro,
+    time: r.time || '',
+    tandem: r.tandem || '',
+    ts: r.ts || 0
+  };
+});
+
 
     renderList(normalized);
   }catch(err){
