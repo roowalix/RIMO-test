@@ -97,105 +97,82 @@
                   90%{opacity:1}
                   100%{opacity:0}}
 
-  /* === 내 프로필 찾기 모달 전용 === */
-  #claimModal .sheet{width:100%; max-width:680px}
-  #claimModal .sheet.panel{
-    background:#0e1222; border:1px solid #2b304f; border-radius:18px;
-    box-shadow:0 14px 40px rgba(0,0,0,.55);
-    max-height:88vh; display:flex; flex-direction:column; padding:16px;
-  }
-  #claimModal .hint{color:#cfd2ff; margin:0 0 8px}
-  #claimModal .search-row{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px} /* 검색 아래 간격 ↓ */
-  #claimResults{
-    display:grid; gap:8px; overflow:auto;
-    min-height:var(--claim-results-min); /* 결과 자리 미리 확보 → 레이아웃 점프X */
-    max-height:48vh;
-  }
-  .claim-card{
-    display:grid; grid-template-columns:1fr; gap:8px;
-    padding:10px; background:#101223; border:1px solid #2b2e54; border-radius:12px;
-  }
-  .claim-top{display:flex; gap:10px; align-items:center}
-  .claim-ava{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#1a1c2f;border:1px solid #2b2e54;font-size:22px;flex:0 0 auto}
-  .claim-name{font-weight:800;margin:0 0 2px}
-  .claim-sub{font-size:13px;color:var(--muted);margin:0}
-  .claim-pin{display:flex; gap:8px; align-items:center}
-  .claim-pin input{flex:1; min-width:120px; padding:8px 10px; border:1px solid #2c2f48; border-radius:8px; background:#0f1020; color:#fff}
-  .claim-pin button{flex:0 0 auto; padding:10px 20px; border-radius:8px; border:none; background:#2a5bff; color:#fff; font-weight:800; cursor:pointer}
-  /* 모달 하단 여백 (닫기 버튼 삭제했으니 내부 패딩만 확보) */
-  #claimModal .sheet.panel{padding-bottom:18px}
-
-  /* ── 내 프로필 찾기: 결과 카드 고정 높이 ───────────────────────── */
-:root{ --claim-card-h: 120px }  /* 원하는 높이로 조절: 140~160px 권장 */
-
-#claimResults{
-  max-height: clamp(120px, 34vh, 360px);
-  overflow: auto;
-  padding-bottom: 4px;           /* 스크롤 마지막 카드 여유 */
-  display: grid;
-  gap: 10px;
+  /* === 내 프로필 찾기 모달 전용 (교체용) ============================= */
+:root{
+  --claim-card-h: 120px;       /* 결과 카드 고정 높이 */
+  --claim-foot-gap: 10px;      /* PIN↔버튼 간격 */
+  --claim-btn-w: 165px;        /* 버튼 폭 (기존 150px 대비 10% ↑) */
 }
 
+#claimModal .sheet{width:100%; max-width:680px}
+#claimModal .sheet.panel{
+  background:#0e1222; border:1px solid #2b304f; border-radius:18px;
+  box-shadow:0 14px 40px rgba(0,0,0,.55);
+  max-height:88vh; display:flex; flex-direction:column; padding:16px 16px 18px;
+}
+#claimModal .hint{color:#cfd2ff; margin:0 0 8px}
+#claimModal .search-row{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px}
+
+/* 검색 결과 리스트(영역 고정 → 위쪽 레이아웃 점프 방지) */
+#claimResults{
+  display:grid; gap:10px;
+  min-height: var(--claim-card-h);
+  max-height: clamp(160px, 48vh, 420px);
+  overflow:auto;
+  padding-bottom:4px;
+}
+
+/* 결과 카드 */
 #claimResults .claim-card{
   height: var(--claim-card-h);
   min-height: var(--claim-card-h);
-  display: grid;
-  grid-template-rows: auto 1fr auto; /* 헤더, 남는공간, 푸터(핀/버튼) */
-  gap: 10px;
-  padding: 12px;
-  border:1px solid #2b2e54;
-  border-radius:12px;
-  background:#101223;
-  overflow: hidden;               /* 넘치는 텍스트 잘라줌 */
+  display:grid;
+  grid-template-rows: auto 1fr auto; /* 헤더 / 여유 / 풋터 */
+  gap:10px;
+  padding:12px;
+  border:1px solid #2b2e54; border-radius:12px; background:#101223;
+  overflow:hidden;
 }
 
-/* 헤더(아이콘+이름/서브텍스트) */
+/* 카드 헤더(아이콘 + 텍스트) */
 #claimResults .claim-card .head{
-  display: grid;
-  grid-template-columns: 44px 1fr;
-  gap: 10px;
-  align-items: center;
+  display:grid; grid-template-columns:44px 1fr; gap:10px; align-items:center;
 }
 #claimResults .claim-card .avatar{
-  width:44px;height:44px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  background:#1a1c2f;border:1px solid #2b2e54;font-size:22px;
+  width:44px; height:44px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:#1a1c2f; border:1px solid #2b2e54; font-size:22px;
 }
 #claimResults .claim-card .name{
-  margin:0 0 2px; font-weight:800;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  margin:0 0 2px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
 #claimResults .claim-card .sub{
-  font-size:13px; color:var(--muted);
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  font-size:13px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
 
-/* 푸터(PIN 밑에 버튼 2열 배치) */
+/* 카드 풋터(PIN 입력 + 버튼) */
 #claimResults .claim-card .foot{
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 8px;
-  align-items: center;
-  margin-top: auto;               /* 항상 카드 하단에 고정 느낌 */
+  display:grid;
+  grid-template-columns:
+    minmax(0, calc(100% - var(--claim-btn-w) - var(--claim-foot-gap)))
+    var(--claim-btn-w);
+  gap: var(--claim-foot-gap);
+  align-items:center;
+  margin-top:auto;
 }
+
 #claimResults .claim-card .pin{
-  height: 36px; padding: 8px 10px;
+  height:36px; padding:8px 10px;
   border:1px solid #2b2e54; border-radius:8px;
-  background:#0f1020; color:#fff;
-/* 내 프로필 찾기 — 결과 카드 하단(PIN/버튼) 폭 조정 */
-#claimResults .claim-card .foot{
-  /* 왼쪽: PIN 입력칸(남는 폭), 오른쪽: 버튼 150px 고정 */
-  grid-template-columns: minmax(0, 1fr) 140px;
-  gap: 10px; /* 필요하면 8~12px로 조절 */
+  background:#0f1020; color:#fff; width:100%;
 }
+
 #claimResults .claim-card .connect{
-  min-width: 150px;         /* 버튼 가로 확장 */
-  white-space: nowrap;      /* 줄바꿈 방지 */
-  padding: 0 16px;          /* 터치 여백 살짝 넓힘(선택) */
+  min-width: var(--claim-btn-w);
+  height:36px; border:none; border-radius:8px;
+  background:#2a5bff; color:#fff; font-weight:800; cursor:pointer;
+  white-space:nowrap; padding:0 16px;
 }
-/* (선택) 버튼 글자크기 살짝 줄여 한 줄 유지하고 싶으면
-#claimResults .claim-card .connect{ font-size:14px; }
-*/
 </style>
 </head>
 <body>
