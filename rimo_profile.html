@@ -4,155 +4,149 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>RIMO — 라이더 프로필</title>
-
-<!-- ✅ 공통 테마 -->
-<link rel="stylesheet" href="rimo_theme.css?v=20250911" />
-
 <style>
   :root{
-  --label-width: 40px;   /* 라벨 고정폭 */
-  --label-gap:   6px;    /* 라벨↔입력칸 간격 */
-}
+    --bg:#0b0b0f; --ink:#f1f3ff; --muted:#b6b8cc;
+    --line:#23243a;
+    --tile:#101223;           /* 패널 배경 (정상화) */
+    --tileBd:#23243a;         /* 패널 테두리 (정상화) */
+    --accent:#7aa7ff;
+    --label-width:40px;
 
-/* 1) 한 줄짜리 폼: 라벨↔입력칸 간격 6px */
-.form-row{
-  display:flex;
-  align-items:center;
-  gap: var(--label-gap);     /* ✅ 6px */
-  margin-bottom:0;
-}
-.form-row label{
-  width: var(--label-width); /* ✅ 40px */
-}
+    /* 탭바 */
+    --tab-bg:#182039; --tab-bd:#2d3559; --tab-ink:#e6e8ef;
+    --tab-pri:#26346d; --tab-pri-bd:#3b53a8;
+  }
 
-/* 2) 지역/탠덤 2칸짜리: 라벨↔입력칸 간격 6px로 통일 */
-.form-row.split{
-  display:grid;
-  grid-template-columns: minmax(0,1.6fr) minmax(0,1fr); /* 왼쪽(지역) 넓게 */
-  column-gap:14px;               /* 두 칸 사이 간격(필요하면 조절) */
-  align-items:center;
-}
-.form-row.split .col{
-  display:flex;
-  align-items:center;
-  gap: var(--label-gap);         /* ✅ 6px */
-  min-width:0;
-}
-.form-row.split .col label{
-  width: var(--label-width);     /* ✅ 40px */
-}
-
-/* 입력 요소는 가로 100%로 */
-.form-row .field,
-.form-row.split .field{ flex:1; min-width:0; }
-.form-row .field select,
-.form-row .field input,
-.form-row.split .field select{ width:100%; }
-
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Helvetica,Arial,sans-serif;
+  }
 
   /* 헤더 */
   header{
     position:sticky; top:0; z-index:5;
     background:rgba(11,11,15,.9);
-    -webkit-backdrop-filter:blur(8px);
     backdrop-filter:blur(8px);
-    border-bottom:1px solid var(--border-1);
+    border-bottom:1px solid #232333;
   }
-  .bar{display:flex;gap:10px;align-items:center;padding:14px 16px;height:56px}
+  .bar{display:flex; gap:10px; align-items:center; padding:14px 16px; height:56px}
   .logo{font-weight:900}
-  .title{font-weight:800;opacity:.9}
+  .title{font-weight:800; opacity:.9}
 
-  /* 메인 컨테이너(폭은 rimo_theme.css) */
-  main{display:flex;flex-direction:column;gap:12px}
+  /* 본문 */
+  main{
+    padding:16px; max-width:520px; margin:0 auto;
+    display:flex; flex-direction:column; gap:12px; padding-bottom:100px;
+  }
 
-  /* 패널 */
-  .panel{padding:12px;display:flex;flex-direction:column;gap:10px}
+  /* 패널(프로필 박스) — 이전 톤으로 복구 */
+  .panel{
+    background:var(--tile);
+    border:1px solid var(--tileBd);
+    border-radius:16px;
+    padding:12px;
+    display:flex; flex-direction:column; gap:10px;
+  }
 
-  .form-row{display:flex;align-items:center;gap:6px;margin-bottom:0}
+  /* 폼 레이아웃 — 예전 정렬(gap:0) 유지 */
+  .form-row{display:flex; align-items:center; gap:0; margin-bottom:0}
   .form-row.top{align-items:flex-start}
-  .form-row label{width:var(--label-width);font-size:14px;font-weight:700;white-space:nowrap}
+  .form-row label{
+    width:var(--label-width);
+    font-size:14px; font-weight:700; white-space:nowrap; color:#fff; /* 라벨 흰색 */
+  }
   .field{flex:1}
 
-  /* 지역 / 탠덤 행을 다른 행과 좌우 정렬 맞추기 */
-.form-row.split{
-  display:grid;
-  grid-template-columns: minmax(0,1.6fr) minmax(0,1fr); /* 왼쪽(지역) 더 넓게 */
-  column-gap:14px;
-  align-items:center;
-}
-.form-row.split .col{
-  display:flex;
-  align-items:center;
-  gap:0;                 /* ✅ 다른 행(.form-row)과 동일하게 간격 0 */
-  min-width:0;
-}
-.form-row.split .col label{
-  width: var(--label-width);   /* ✅ 라벨도 40px 고정폭으로 통일 */
-  font-size:14px; font-weight:700;
-  white-space:nowrap;
-  color:#fff;                  /* 요청대로 흰색 */
-}
-.form-row.split .field{ flex:1; min-width:0; }
-.form-row.split select{ width:100%; }
+  /* 입력 요소(흰 글씨, 어두운 배경) */
+  input[type="text"], select, textarea{
+    width:100%; padding:8px 12px; border-radius:8px;
+    border:1px solid #2c2f48; background:#0f1020; color:#fff; font-size:14px;
+  }
+  select option{ color:#fff; background:#0f1020 }
+  textarea{ resize:none; height:40px }
+  #intro{ width:100%; text-align:center; font-size:13px }
 
-  textarea{resize:none;height:40px}
-
-  .toggles{display:flex;gap:4px;flex-wrap:wrap;margin:4px 0}
+  /* 스타일/페이스 토글 — 예전 사이즈/색상으로 복원 */
+  .toggles{display:flex; gap:4px; flex-wrap:wrap; margin:4px 0}
   .toggle{
-    display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;
-    color:#e6e9ff;font-size:13px;cursor:pointer;user-select:none;white-space:nowrap;
+    display:inline-flex; align-items:center; gap:8px;
+    padding:8px 12px; border-radius:999px;
+    border:1px solid #2b2e54; background:#1a1c2f; color:#e6e9ff;
+    font-size:13px; cursor:pointer; user-select:none; white-space:nowrap;
     transition:transform .15s ease, box-shadow .15s ease;
   }
   .toggle.active{
-    border-color:var(--accent);
-    background:rgba(122,167,255,.16);
+    border-color:var(--accent); border-width:2px; background:rgba(122,167,255,.16);
     box-shadow:0 0 10px rgba(122,167,255,.45);
     transform:translateY(-1px) scale(1.03);
     font-weight:800;
   }
 
-  .profile-icons{display:flex;flex-direction:column;align-items:center;gap:10px;margin:0}
-  .icons{display:grid;grid-template-columns:repeat(5,48px);grid-auto-rows:48px;gap:10px;justify-content:center}
-  .icon-btn{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-    font-size:28px;cursor:pointer;transition:.15s ease;color:#fff}
-  .icon-btn.active{border-color:var(--accent);box-shadow:0 0 10px rgba(122,167,255,.4);transform:scale(1.05)}
-  .intro-box{width:calc(48px*5 + 10px*4);margin:8px 0 0}
-  /* 폰트 상속 & 정렬만 유지 (크기는 공통 입력 14px 상속) */
-  #intro{width:100%;text-align:center}
+  /* 아이콘 선택 */
+  .profile-icons{display:flex; flex-direction:column; align-items:center; gap:10px; margin:0}
+  .icons{display:grid; grid-template-columns:repeat(5,48px); grid-auto-rows:48px; gap:10px; justify-content:center}
+  .icon-btn{
+    width:50px; height:50px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:28px; cursor:pointer; background:#1a1c2f; border:1px solid #2c2f48;
+    transition:.15s ease; color:#fff
+  }
+  .icon-btn.active{ border-color:var(--accent); box-shadow:0 0 10px rgba(122,167,255,.4); transform:scale(1.05) }
+  .intro-box{ width:calc(48px*5 + 10px*4); margin:8px 0 0 }
 
-  .save-btn{width:100%;padding:14px;margin-top:10px;font-size:15px;font-weight:700;background:#2a5bff;border:none;color:#fff;border-radius:10px;cursor:pointer}
-  .save-btn[disabled]{opacity:.6;cursor:not-allowed}
+  /* 저장 버튼 */
+  .save-btn{
+    width:100%; padding:14px; margin-top:10px;
+    font-size:15px; font-weight:700; background:#2a5bff; border:none; color:#fff; border-radius:10px; cursor:pointer
+  }
+  .save-btn[disabled]{opacity:.6; cursor:not-allowed}
 
-  .tabbar{position:fixed;left:0;right:0;bottom:16px;z-index:2500;display:flex;gap:12px;justify-content:center}
+  /* 하단 네비 */
+  .tabbar{
+    position:fixed; left:0; right:0; bottom:16px; z-index:2500;
+    display:flex; gap:12px; justify-content:center;
+  }
   .tabbar .tab{
-    background:var(--tab-bg);border:1px solid var(--tab-bd);color:var(--tab-ink);
-    padding:12px 18px;border-radius:22px;font-weight:800;text-decoration:none;font-size:14px}
-  .tabbar .tab.primary{background:var(--tab-pri);border-color:var(--tab-pri-bd)}
+    background:var(--tab-bg); border:1px solid var(--tab-bd); color:var(--tab-ink);
+    padding:12px 18px; border-radius:22px; font-weight:800; text-decoration:none; font-size:14px
+  }
+  .tabbar .tab.primary{ background:var(--tab-pri); border-color:var(--tab-pri-bd) }
 
-  /* 미리보기 모달 */
-  .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.5);z-index:3000;padding:16px}
+  /* 미리보기 모달 (예전 스타일) */
+  .modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.5); z-index:3000; padding:16px}
   .modal.show{display:flex}
-  .modal-content.panel{max-width:520px;box-shadow:0 8px 24px rgba(0,0,0,.4)}
-  .card-head{display:flex;gap:14px;align-items:center}
-  .avatar{width:72px;height:72px;border-radius:50%;font-size:36px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+  .modal-content{
+    width:100%; max-width:520px; background:#101223; border:1px solid var(--line); border-radius:16px;
+    box-shadow:0 8px 24px rgba(0,0,0,.4); padding:18px 16px; display:flex; flex-direction:column; gap:12px
+  }
+  .card-head{display:flex; gap:14px; align-items:center}
+  .avatar{width:72px; height:72px; border-radius:50%; background:#1a1c2f; font-size:36px; display:flex; align-items:center; justify-content:center; flex:0 0 auto}
   .idcol{min-width:0}
-  .name{margin:0 0 4px;font-size:18px;font-weight:800}
-  .sub{margin:0;color:var(--muted);font-size:13px}
-  .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-  .tag{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 10px;border-radius:999px;font-size:12px;white-space:nowrap}
-  .modal-actions{display:flex;gap:12px;justify-content:center;margin-top:6px}
-  .modal-actions button{flex:1;padding:12px;border-radius:10px;border:none;font-size:14px;font-weight:800;cursor:pointer;color:#fff}
+  .name{margin:0 0 4px; font-size:18px; font-weight:800}
+  .sub{margin:0; color:var(--muted); font-size:13px}
+  .grid-2{display:grid; grid-template-columns:repeat(2,1fr); gap:8px}
+  .grid-3{display:grid; grid-template-columns:repeat(3,1fr); gap:8px}
+  .tag{display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:8px 10px; border-radius:999px; background:#1a1c2f; border:1px solid #2b2e54; font-size:12px; white-space:nowrap}
+  .modal-actions{display:flex; gap:12px; justify-content:center; margin-top:6px}
+  .modal-actions button{flex:1; padding:12px; border-radius:10px; border:none; font-size:14px; font-weight:800; cursor:pointer; color:#fff}
   .modal-actions .ok{background:#2a5bff}
   .modal-actions .edit{background:#2c2f48}
 
-  /* 토스트 2초 유지 */
-  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);padding:10px 14px;background:rgba(0,0,0,.78);color:#fff;border-radius:10px;font-size:13px;display:none;z-index:5000;border:1px solid rgba(255,255,255,.12)}
-  .toast.show{display:block;animation:fade 2s ease}
-  @keyframes fade{0%{opacity:0;transform:translateX(-50%) translateY(6px)}
-                  10%{opacity:1;transform:translateX(-50%) translateY(0)}
-                  90%{opacity:1}
-                  100%{opacity:0}}
+  /* 토스트 */
+  .toast{
+    position:fixed; left:50%; bottom:22px; transform:translateX(-50%);
+    padding:10px 14px; background:rgba(0,0,0,.78); color:#fff; border-radius:10px; font-size:13px;
+    display:none; z-index:5000; border:1px solid rgba(255,255,255,.12)
+  }
+  .toast.show{display:block; animation:fade 2.2s ease}
+  @keyframes fade{
+    0%{opacity:0; transform:translateX(-50%) translateY(6px)}
+    10%{opacity:1; transform:translateX(-50%) translateY(0)}
+    90%{opacity:1}
+    100%{opacity:0}
+  }
 </style>
 </head>
 <body>
@@ -166,46 +160,30 @@
 <main>
   <section class="panel">
     <div class="form-row">
-      <label>이름</label>
+      <label>닉네임</label>
       <div class="field"><input id="handle" type="text" placeholder="예: RIMO rider" autocomplete="nickname"></div>
     </div>
-
     <div class="form-row">
       <label>기종</label>
       <div class="field"><input id="bike" type="text" placeholder="예: Honda MSX125" autocomplete="off"></div>
     </div>
-
-    <!-- ✅ 지역 / 탠덤 — 1행 2열, 라벨 흰색, 구분자 없음 -->
-    <div class="form-row split">
-      <div class="col">
-        <label for="region">지역</label>
-        <div class="field">
-          <select id="region">
-            <option value="">지역 선택</option>
-            <option>서울 강남구</option><option>서울 강동구</option><option>서울 강북구</option>
-            <option>서울 강서구</option><option>서울 관악구</option><option>서울 광진구</option>
-            <option>서울 구로구</option><option>서울 금천구</option><option>서울 노원구</option>
-            <option>서울 도봉구</option><option>서울 동대문구</option><option>서울 동작구</option>
-            <option>서울 마포구</option><option>서울 서대문구</option><option>서울 서초구</option>
-            <option>서울 성동구</option><option>서울 성북구</option><option>서울 송파구</option>
-            <option>서울 양천구</option><option>서울 영등포구</option><option>서울 용산구</option>
-            <option>서울 은평구</option><option>서울 종로구</option><option>서울 중구</option>
-            <option>서울 중랑구</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="col">
-        <label for="tandem">탠덤</label>
-        <div class="field">
-          <select id="tandem">
-            <option value="허용">허용</option>
-            <option value="불가">불가</option>
-          </select>
-        </div>
+    <div class="form-row">
+      <label>지역</label>
+      <div class="field">
+        <select id="region">
+          <option value="">지역 선택</option>
+          <option>서울 강남구</option><option>서울 강동구</option><option>서울 강북구</option>
+          <option>서울 강서구</option><option>서울 관악구</option><option>서울 광진구</option>
+          <option>서울 구로구</option><option>서울 금천구</option><option>서울 노원구</option>
+          <option>서울 도봉구</option><option>서울 동대문구</option><option>서울 동작구</option>
+          <option>서울 마포구</option><option>서울 서대문구</option><option>서울 서초구</option>
+          <option>서울 성동구</option><option>서울 성북구</option><option>서울 송파구</option>
+          <option>서울 양천구</option><option>서울 영등포구</option><option>서울 용산구</option>
+          <option>서울 은평구</option><option>서울 종로구</option><option>서울 중구</option>
+          <option>서울 중랑구</option>
+        </select>
       </div>
     </div>
-
     <div class="form-row">
       <label>시간대</label>
       <div class="field">
@@ -218,7 +196,15 @@
         </select>
       </div>
     </div>
-
+    <div class="form-row">
+      <label>탠덤</label>
+      <div class="field">
+        <select id="tandem">
+          <option value="허용">허용</option>
+          <option value="불가">불가</option>
+        </select>
+      </div>
+    </div>
     <div class="form-row">
       <label>스타일</label>
       <div class="toggles" data-group="style">
@@ -227,7 +213,6 @@
         <span class="toggle" data-value="Tour">Tour</span>
       </div>
     </div>
-
     <div class="form-row">
       <label>페이스</label>
       <div class="toggles" data-group="speed">
@@ -267,7 +252,7 @@
 
 <!-- 미리보기 모달 -->
 <div class="modal" id="previewModal">
-  <div class="modal-content panel">
+  <div class="modal-content">
     <div class="card-head">
       <div class="avatar" id="avatarPreview">🏍️</div>
       <div class="idcol">
@@ -305,14 +290,11 @@ function getUID(){
   return uid;
 }
 
-/* 토스트 2초 */
-function showToast(msg, ms = 2000){
+function showToast(msg){
   const t = document.getElementById('toast');
   t.textContent = msg;
-  t.style.animationDuration = (ms/1000) + 's';
   t.classList.add('show');
-  clearTimeout(window._toastTimer);
-  window._toastTimer = setTimeout(()=> t.classList.remove('show'), ms);
+  setTimeout(()=> t.classList.remove('show'), 2200);
 }
 
 // 아이콘 선택
@@ -410,7 +392,7 @@ function showPreview(p){
   document.getElementById('previewModal').classList.add('show');
 }
 
-// 저장 버튼
+// 저장
 const saveBtn = document.getElementById("saveBtn");
 saveBtn.addEventListener("click", async ()=>{
   const p = collectProfile();
