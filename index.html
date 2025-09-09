@@ -107,6 +107,27 @@ main{max-width:var(--container); margin:0 auto; padding:16px; padding-bottom:100
 /* 드롭다운 가독성 통일 */
 select{color:#fff; background:#0f1020; border:1px solid #2c2f48; border-radius:8px}
 select option{color:#fff; background:#0f1020}
+/* === INDEX SAFE NORMALIZER (width only) === */
+:root{
+  --container: 720px; /* PC 폭 통일 (원하면 880px 등으로 변경) */
+}
+
+/* 콘텐츠 폭만 통일, 나머지 색/카드 스타일은 기존 유지 */
+main{
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 16px;
+  padding-bottom: 100px;
+}
+
+/* 혹시 이전에 .card 색을 통일해둔 스타일이 있다면 충돌 방지용(선택) */
+/* 인라인 스타일이 이미 있으니 일반적으로 필요없지만, !important로 덮어쓴 적이 있다면 아래를 추가하세요. */
+/*
+.card{
+  background: unset !important;
+  border-color: transparent !important;
+}
+*/
 
 </style>
 </head>
@@ -156,10 +177,12 @@ const LS_CREWS = 'rimo_crews_v1';
 const LS_APPS = 'rimo_applications_v1';
 
 const THEMES = {
-  red:{ base:'#ff4d4d', cardBg:'rgba(255,77,77,.14)', border:'rgba(255,77,77,.55)'},
-  yellow:{ base:'#ffd24d', cardBg:'rgba(255,210,77,.16)', border:'rgba(255,210,77,.55)'},
-  blue:{ base:'#5b8cff', cardBg:'rgba(91,140,255,.16)', border:'rgba(91,140,255,.55)'}
+  red:    { base:'#ff4d4d', cardBg:'rgba(255,77,77,.14)',  border:'rgba(255,77,77,.55)'},
+  yellow: { base:'#ffd24d', cardBg:'rgba(255,210,77,.16)', border:'rgba(255,210,77,.55)'},
+  blue:   { base:'#5b8cff', cardBg:'rgba(91,140,255,.16)', border:'rgba(91,140,255,.55)'},
+  green:  { base:'#46d37d', cardBg:'rgba(70,211,125,.16)', border:'rgba(70,211,125,.55)'} // ✅ 추가
 };
+
 
 /* 날짜 뱃지 */
 document.getElementById('today').textContent =
