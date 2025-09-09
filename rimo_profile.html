@@ -350,8 +350,9 @@ async function registerProfile(profile){
     const body = new URLSearchParams({ payload: JSON.stringify(profile) });
     const res = await fetch(REG_URL, {
       method: 'POST',
-      headers: { 'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8' },
-      body
+      headers: { 'Content-Type':'application/json;charset=UTF-8' },
+      body:
+        JSON.stringify({action:'registerProfile',profile:p})
     });
     const text = await res.text();
     if(res.ok){
