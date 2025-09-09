@@ -8,7 +8,8 @@
 <link rel="stylesheet" href="rimo_theme.css?v=20250910" />
 
 <style>
-  :root{ --label-width:40px; }
+  :root{ --label-width:40px; --claim-results-min:240px; }
+
   *{box-sizing:border-box}
   body{ margin:0; font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Helvetica,Arial,sans-serif; }
 
@@ -23,7 +24,7 @@
   .title{font-weight:800;opacity:.9}
 
   main{display:flex;flex-direction:column;gap:12px}
-  .panel{padding:12px;display:flex;flex-direction:column;gap:10px;padding-bottom:16px}
+  .panel{padding:12px;display:flex;flex-direction:column;gap:10px}
 
   .form-row{display:flex;align-items:center;gap:6px;margin-bottom:0}
   .form-row.top{align-items:flex-start}
@@ -37,24 +38,16 @@
   }
   .form-row.split .col{display:flex;align-items:center;gap:6px;min-width:0}
   .form-row.split .col label{width:var(--label-width);font-size:14px;font-weight:700;color:#fff;white-space:nowrap}
-  /* 탠덤(오른쪽)만 살짝 더 붙여서 ‘허용’ 잘림 방지 */
   .form-row.split .col:nth-child(2){ gap:4px }
   .form-row.split .col:nth-child(2) label{ width:calc(var(--label-width) - 8px) }
   .form-row.split .col:nth-child(2) .field{ flex:1 1 auto; min-width:0 }
   .form-row.split select{ width:100% }
 
-  /* 인풋/드롭다운 */
-  select{color:#fff;background:#0f1020;border:1px solid #2c2f48;border-radius:8px;padding:8px 12px;font-size:14px;appearance:none}
-  select option{color:#fff;background:#0f1020}
-  input[type="text"], input[type="password"], textarea{
-    width:100%;padding:8px 12px;border-radius:8px;border:1px solid #2c2f48;background:#0f1020;color:#fff;font-size:14px
-  }
   textarea{resize:none;height:40px}
 
   .toggles{display:flex;gap:10px;flex-wrap:wrap;margin:0}
   .toggle{
     display:inline-flex;align-items:center;gap:14px;padding:8px 12px;border-radius:999px;
-    background:var(--surface-2); border:1px solid var(--border-2);
     color:#e6e9ff;font-size:13px;cursor:pointer;user-select:none;white-space:nowrap;
     transition:transform .15s ease, box-shadow .15s ease;
   }
@@ -67,37 +60,35 @@
   .profile-icons{display:flex;flex-direction:column;align-items:center;gap:10px;margin:0}
   .icons{display:grid;grid-template-columns:repeat(5,48px);grid-auto-rows:48px;gap:10px;justify-content:center}
   .icon-btn{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-    font-size:28px;cursor:pointer;transition:.15s ease;color:#fff;background:#1a1c2f;border:1px solid #2c2f48}
+    font-size:28px;cursor:pointer;transition:.15s ease;color:#fff}
   .icon-btn.active{border-color:var(--accent);box-shadow:0 0 10px rgba(122,167,255,.4);transform:scale(1.05)}
   .intro-box{width:calc(48px*5 + 10px*4);margin:8px 0 0}
   #intro{width:100%;text-align:center}
 
   .save-btn{width:100%;padding:14px;margin-top:10px;font-size:15px;font-weight:700;background:#2a5bff;border:none;color:#fff;border-radius:10px;cursor:pointer}
   .save-btn[disabled]{opacity:.6;cursor:not-allowed}
+  .btn-secondary{width:100%;padding:12px;margin-top:8px;border:none;border-radius:10px;font-weight:800;font-size:14px;background:#2c2f48;color:#fff;cursor:pointer}
 
   .tabbar{position:fixed;left:0;right:0;bottom:16px;z-index:2500;display:flex;gap:12px;justify-content:center}
   .tabbar .tab{background:var(--tab-bg);border:1px solid var(--tab-bd);color:var(--tab-ink);
     padding:12px 18px;border-radius:22px;font-weight:800;text-decoration:none;font-size:14px}
   .tabbar .tab.primary{background:var(--tab-pri);border-color:var(--tab-pri-bd)}
 
-  /* 미리보기 모달 */
   .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.5);z-index:3000;padding:16px}
   .modal.show{display:flex}
   .modal-content.panel{max-width:520px;box-shadow:0 8px 24px rgba(0,0,0,.4)}
   .card-head{display:flex;gap:14px;align-items:center}
-  .avatar{width:72px;height:72px;border-radius:50%;font-size:36px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;background:#1a1c2f;border:1px solid #2c2f48}
+  .avatar{width:72px;height:72px;border-radius:50%;font-size:36px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
   .idcol{min-width:0}
   .name{margin:0 0 4px;font-size:18px;font-weight:800}
   .sub{margin:0;color:var(--muted);font-size:13px}
   .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
   .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-  .tag{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 10px;border-radius:999px;font-size:12px;white-space:nowrap;background:var(--surface-2);border:1px solid var(--border-2)}
+  .tag{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 10px;border-radius:999px;font-size:12px;white-space:nowrap}
   .modal-actions{display:flex;gap:12px;justify-content:center;margin-top:6px}
   .modal-actions button{flex:1;padding:12px;border-radius:10px;border:none;font-size:14px;font-weight:800;cursor:pointer;color:#fff}
   .modal-actions .ok{background:#2a5bff}
   .modal-actions .edit{background:#2c2f48}
-  /* 프리뷰 모달 하단 여백 6px 추가 */
-  #previewModal .modal-actions{ margin-bottom:6px; }
 
   .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);padding:10px 14px;background:rgba(0,0,0,.78);color:#fff;border-radius:10px;font-size:13px;display:none;z-index:5000;border:1px solid rgba(255,255,255,.12)}
   .toast.show{display:block;animation:fade 2s ease}
@@ -106,79 +97,33 @@
                   90%{opacity:1}
                   100%{opacity:0}}
 
-  /* === 내 프로필 찾기 모달 스타일 === */
-  :root{ --claim-results-h: 80px; } /* 결과 영역 예약 높이 (점프 방지). 200~280px 추천 */
-
-  #claimModal .modal-content{
-    display:flex; flex-direction:column; max-height:88vh;
+  /* === 내 프로필 찾기 모달 전용 === */
+  #claimModal .sheet{width:100%; max-width:680px}
+  #claimModal .sheet.panel{
+    background:#0e1222; border:1px solid #2b304f; border-radius:18px;
+    box-shadow:0 14px 40px rgba(0,0,0,.55);
+    max-height:88vh; display:flex; flex-direction:column; padding:16px;
   }
-  #claimModal .search-row{ margin-bottom:8px; }
-  #claimModal #claimResults{
-    min-height: var(--claim-results-h);
-    max-height: 320px;
-    overflow:auto;
-    margin-top:6px;
-    display:grid; gap:8px;
+  #claimModal .hint{color:#cfd2ff; margin:0 0 8px}
+  #claimModal .search-row{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px} /* 검색 아래 간격 ↓ */
+  #claimResults{
+    display:grid; gap:8px; overflow:auto;
+    min-height:var(--claim-results-min); /* 결과 자리 미리 확보 → 레이아웃 점프X */
+    max-height:48vh;
   }
-  #claimModal #claimResults:empty::before{
-    content:"검색 결과가 여기에 표시됩니다";
-    display:block; text-align:center; color:var(--muted); padding-top:12px;
+  .claim-card{
+    display:grid; grid-template-columns:1fr; gap:8px;
+    padding:10px; background:#101223; border:1px solid #2b2e54; border-radius:12px;
   }
-  /* ‘내 프로필 찾기’ 버튼 (세컨더리 톤) */
-  #findMineBtn{
-    display:inline-flex; align-items:center; justify-content:center;
-    padding:10px 14px; max-width:200px;
-    background:#2c2f48; color:#fff; font-weight:800; border:none; border-radius:8px;
-  }
-  #findMineBtn:hover{ filter:brightness(1.07); }
-  /* === FIND-ME modal results layout === */
-#claimResults .claim-row{
-  display:grid;
-  grid-template-columns:44px 1fr 140px; /* 아바타 | 정보 | PIN+버튼 */
-  gap:10px;
-  align-items:center;
-  padding:10px;
-  border:1px solid #2b2e54;
-  border-radius:12px;
-  background:#101223;
-}
-
-#claimResults .claim-avatar{
-  width:44px;height:44px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  background:#1a1c2f;border:1px solid #2b2e54;font-size:22px;
-}
-
-#claimResults .claim-name{font-weight:800;margin:0 0 2px}
-#claimResults .claim-sub{font-size:13px;color:var(--muted)}
-
-#claimResults .rail{           /* ← 오른쪽 칼럼: PIN 위, 버튼 아래 */
-  display:grid;
-  grid-template-rows:auto auto;
-  gap:8px;                     /* 두 요소 간격 */
-}
-
-#claimResults .rail .pin{
-  width:100%;
-  padding:8px 10px;
-  border-radius:10px;
-  border:1px solid #2b2e54;
-  background:#0f1020;
-  color:#fff;
-  text-align:center;
-}
-
-#claimResults .rail .connect{
-  width:100%;
-  padding:10px 0;
-  border-radius:10px;
-  border:none;
-  background:#2a5bff;
-  color:#fff;
-  font-weight:800;
-  cursor:pointer;
-}
-
+  .claim-top{display:flex; gap:10px; align-items:center}
+  .claim-ava{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#1a1c2f;border:1px solid #2b2e54;font-size:22px;flex:0 0 auto}
+  .claim-name{font-weight:800;margin:0 0 2px}
+  .claim-sub{font-size:13px;color:var(--muted);margin:0}
+  .claim-pin{display:flex; gap:8px; align-items:center}
+  .claim-pin input{flex:1; min-width:120px; padding:8px 10px; border:1px solid #2c2f48; border-radius:8px; background:#0f1020; color:#fff}
+  .claim-pin button{flex:0 0 auto; padding:10px 12px; border-radius:8px; border:none; background:#2a5bff; color:#fff; font-weight:800; cursor:pointer}
+  /* 모달 하단 여백 (닫기 버튼 삭제했으니 내부 패딩만 확보) */
+  #claimModal .sheet.panel{padding-bottom:18px}
 </style>
 </head>
 <body>
@@ -260,15 +205,6 @@
       </div>
     </div>
 
-    <!-- (선택) 복구 PIN: 4자리 숫자 -->
-    <div class="form-row">
-      <label>PIN</label>
-      <div class="field">
-        <input id="pin" type="password" inputmode="numeric" pattern="\\d{4}" maxlength="4"
-               placeholder="(선택) 4자리 숫자 — 프로필 찾기 보호용">
-      </div>
-    </div>
-
     <div class="profile-icons">
       <div class="icons" id="iconSelect">
         <div class="icon-btn" data-icon="🏍️">🏍️</div>
@@ -288,9 +224,7 @@
     </div>
 
     <button class="save-btn" id="saveBtn">프로필 저장</button>
-
-    <!-- 저장 버튼 바로 아래, JS가 ‘내 프로필 찾기’ 버튼 1개만 주입 -->
-    <div id="claimActions" style="display:flex;justify-content:center;gap:8px;margin-top:6px"></div>
+    <button class="btn-secondary" id="claimOpen">내 프로필 찾기</button>
   </section>
 </main>
 
@@ -300,9 +234,9 @@
   <a href="rimo_ambassadors.html" class="tab">엠버서더</a>
 </nav>
 
-<!-- 미리보기 모달 -->
+<!-- 저장 후 미리보기 모달 -->
 <div class="modal" id="previewModal">
-  <div class="modal-content panel">
+  <div class="modal-content panel" style="padding-bottom:18px"><!-- 하단 +6px -->
     <div class="card-head">
       <div class="avatar" id="avatarPreview">🏍️</div>
       <div class="idcol">
@@ -310,129 +244,117 @@
         <p class="sub" id="bikePreview">바이크 미입력 · 서울</p>
       </div>
     </div>
-    <div class="grid-2">
+    <div class="grid-2" style="margin-bottom:8px">
       <div class="tag" id="timePreview">-</div>
       <div class="tag" id="tandemPreview">탠덤 허용</div>
     </div>
     <div class="grid-3" id="styleGrid"></div>
     <div class="grid-3" id="paceGrid"></div>
-    <div class="modal-actions">
+    <div class="modal-actions" style="margin-top:10px">
       <button class="ok" id="confirmBtn">확인</button>
       <button class="edit" id="editBtn">수정</button>
-      <!-- ⚠️ ‘복구 링크 복사’ 제거 -->
     </div>
   </div>
 </div>
 
-<!-- 내 프로필 찾기 모달 (닫기 버튼 없음 / 바깥 클릭으로 닫힘) -->
+<!-- 내 프로필 찾기 모달 -->
 <div class="modal" id="claimModal" role="dialog" aria-modal="true" aria-labelledby="claimTitle">
-  <div class="modal-content panel" style="max-width:520px">
+  <div class="sheet panel" id="claimSheet">
     <h3 id="claimTitle" style="margin:0 0 8px">내 프로필 찾기</h3>
-    <p style="color:var(--muted);margin:0 0 10px">이름으로 검색 후 내 프로필을 선택하세요.</p>
-
-    <!-- 검색줄 -->
-    <div class="search-row" style="display:flex;gap:8px;flex-wrap:wrap">
+    <p class="hint">이름으로 검색 후 내 프로필을 선택하세요.</p>
+    <div class="search-row">
       <input id="claimName" type="text" placeholder="이름"
              style="flex:1;min-width:160px;padding:8px 12px;border:1px solid #2c2f48;border-radius:8px;background:#0f1020;color:#fff">
       <input id="claimRegion" type="text" placeholder="지역(선택)"
              style="flex:1;min-width:160px;padding:8px 12px;border:1px solid #2c2f48;border-radius:8px;background:#0f1020;color:#fff">
-      <button id="claimSearch" class="save-btn"
-              style="flex:0 0 auto;padding:10px 14px;border-radius:8px">검색</button>
+      <button id="claimSearch" class="save-btn" style="flex:0 0 auto;padding:10px 14px;border-radius:8px">검색</button>
     </div>
-
-    <!-- 결과 -->
-    <div id="claimResults" class="claim-list"></div>
+    <div id="claimResults"></div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-/* ===== 부트: UID 시드 ===== */
-(function seedUIDFromQuery(){
-  try{
-    const p = new URLSearchParams(location.search);
-    const v = p.get('uid') || p.get('me');
-    if(v){
-      localStorage.setItem('rimo_uid_v1', v);
-      document.cookie = `rimo_uid_v1=${encodeURIComponent(v)}; path=/; SameSite=Lax; max-age=${365*86400}`;
-      history.replaceState({}, '', location.pathname);
-    }
-  }catch(_){}
-})();
-
-/* ===== 상수/상태 ===== */
+/* ========= 상수 ========= */
 const REG_URL = "https://script.google.com/macros/s/AKfycbyVF4YYdzsucME-81RusrsOg89FJIgR7NLplRZ1kIMhGQmdh0_lRD-zWz4NG9xoFN43IQ/exec";
-const LS_PIN = 'rimo_pin_v1';
-const LS_KEY = 'rimo_profile_v1';
-const LS_UID = 'rimo_uid_v1';
+const LS_KEY  = 'rimo_profile_v1';
+const LS_UID  = 'rimo_uid_v1';
 let selectedIcon = "🏍️";
 
-/* ===== 유틸 ===== */
-function setCookie(k,v,days=365){
-  const d=new Date(); d.setTime(d.getTime()+days*864e5);
-  document.cookie = `${k}=${encodeURIComponent(v)}; expires=${d.toUTCString()}; path=/; SameSite=Lax`;
-}
-function getCookie(k){
-  const m = document.cookie.match(new RegExp('(?:^|; )'+k+'=([^;]*)'));
-  return m ? decodeURIComponent(m[1]) : null;
-}
-function ensureUID(){
-  const q = new URLSearchParams(location.search);
-  const qs = q.get('uid') || q.get('me');
-  if(qs){ localStorage.setItem(LS_UID, qs); setCookie(LS_UID, qs); return qs; }
-  let u = localStorage.getItem(LS_UID) || getCookie(LS_UID);
-  if(!u){
-    u = 'u_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
-    localStorage.setItem(LS_UID, u); setCookie(LS_UID, u);
-  }
-  return u;
-}
+/* ========= 유틸 ========= */
 function showToast(msg, ms=2000){
   const t=document.getElementById('toast');
   t.textContent=msg; t.style.animationDuration=(ms/1000)+'s';
-  t.classList.add('show');
-  clearTimeout(window._toastTimer); window._toastTimer=setTimeout(()=>t.classList.remove('show'), ms);
+  t.classList.add('show'); clearTimeout(window._toastTimer);
+  window._toastTimer=setTimeout(()=>t.classList.remove('show'), ms);
+}
+function getParam(name){ try{ return new URL(location.href).searchParams.get(name); }catch(_){ return null; } }
+function setCookie(k,v,days=365){ const d=new Date(); d.setTime(d.getTime()+days*864e5);
+  document.cookie=`${k}=${encodeURIComponent(v)}; expires=${d.toUTCString()}; path=/; SameSite=Lax`; }
+function getCookie(k){ const m=document.cookie.match(new RegExp('(?:^|; )'+k+'=([^;]*)')); return m?decodeURIComponent(m[1]):null; }
+function ensureUID(){
+  const q = getParam('uid'); if(q){ localStorage.setItem(LS_UID,q); setCookie(LS_UID,q); return q; }
+  let u = localStorage.getItem(LS_UID) || getCookie(LS_UID);
+  if(!u){ u='u_'+Math.random().toString(36).slice(2)+Date.now().toString(36); localStorage.setItem(LS_UID,u); setCookie(LS_UID,u); }
+  return u;
 }
 
-/* ===== 아이콘 토글 ===== */
+/* ========= 아이콘 토글 ========= */
 const iconWrap = document.getElementById("iconSelect");
+function updateIconActive(){ iconWrap.querySelectorAll(".icon-btn").forEach(b=>b.classList.toggle("active", b.dataset.icon===selectedIcon)); }
 iconWrap.addEventListener("click", e=>{
-  const btn = e.target.closest(".icon-btn"); if(!btn) return;
-  selectedIcon = btn.dataset.icon; updateIconActive();
+  const btn = e.target.closest(".icon-btn"); if(!btn) return; selectedIcon = btn.dataset.icon; updateIconActive();
 });
-function updateIconActive(){
-  iconWrap.querySelectorAll(".icon-btn").forEach(b => b.classList.toggle("active", b.dataset.icon === selectedIcon));
-}
+updateIconActive();
 
-/* ===== 원격 조회 ===== */
-async function fetchProfileByUid(uid){
-  try{
-    const url = `${REG_URL}?action=getProfile&uid=${encodeURIComponent(uid)}&ts=${Date.now()}`;
-    const res = await fetch(url, {cache:'no-store'});
-    const j = await res.json().catch(()=>null);
-    if(j && j.ok && j.data) return j.data;
-  }catch(_){}
-  return null;
+/* ========= 서버 ========= */
+async function fetchAllProfiles(){
+  const res = await fetch(`${REG_URL}?action=listProfiles&ts=${Date.now()}`, {cache:'no-store'});
+  const j = await res.json().catch(()=>null);
+  return (j && j.ok && Array.isArray(j.data)) ? j.data : (Array.isArray(j)?j:[]);
 }
 async function verifyPin(uid, pin){
-  try{
-    const url = `${REG_URL}?action=verifyPin&uid=${encodeURIComponent(uid)}&pin=${encodeURIComponent(pin||'')}&ts=${Date.now()}`;
-    const res = await fetch(url, {cache:'no-store'});
-    const j = await res.json().catch(()=>null);
-    return !!(j && j.ok);
-  }catch(_){ return false; }
+  const actions = ['verifyPin','checkPin','claimProfile','verify'];
+  for(const a of actions){
+    try{
+      const r = await fetch(`${REG_URL}?action=${a}&uid=${encodeURIComponent(uid)}&pin=${encodeURIComponent(pin)}&ts=${Date.now()}`,{cache:'no-store'});
+      const j = await r.json().catch(()=>null);
+      if(j && (j.ok===true || j.match===true || j.verified===true)) return true;
+    }catch(_){}
+  }
+  return false;
 }
 
-/* ===== 수집/저장 ===== */
+/* ========= 폼 채우기 ========= */
+function fillForm(p){
+  selectedIcon = p.icon || '🏍️'; updateIconActive();
+  const set = (id,val)=>{ const el=document.getElementById(id); if(el) el.value=val; };
+  set('handle', p.name||''); set('bike', p.bike||''); set('region', p.region||'');
+  set('time', p.time||''); set('tandem', p.tandem||'허용');
+  document.querySelectorAll('.toggles .toggle').forEach(t=>t.classList.remove('active'));
+  (p.styles||[]).forEach(v=>{ const el=[...document.querySelectorAll('.toggles[data-group="style"] .toggle')].find(x=>x.dataset.value===v); if(el) el.classList.add('active'); });
+  (p.pace||[]).forEach(v=>{ const el=[...document.querySelectorAll('.toggles[data-group="speed"] .toggle')].find(x=>x.dataset.value===v); if(el) el.classList.add('active'); });
+  const introEl=document.getElementById('intro'); if(introEl) introEl.value=(p.intro||'').slice(0,25);
+}
+async function hydrate(){
+  const urlUid = getParam('uid');
+  const ls = localStorage.getItem(LS_KEY);
+  if(urlUid){
+    localStorage.setItem(LS_UID,urlUid); setCookie(LS_UID,urlUid);
+    const rows = await fetchAllProfiles();
+    const me = rows.find(r=>String(r.uid||'')===String(urlUid));
+    if(me){ fillForm(me); return; }
+  }
+  if(ls){ try{ fillForm(JSON.parse(ls)); return; }catch(_){ } }
+  ensureUID();
+}
+
+/* ========= 수집/저장 ========= */
 function collectProfile(){
   const styles = [...document.querySelectorAll('.toggles[data-group="style"] .toggle.active')].map(el=>el.dataset.value);
   const pace   = [...document.querySelectorAll('.toggles[data-group="speed"] .toggle.active')].map(el=>el.dataset.value);
   const introVal = (document.getElementById('intro').value||'').slice(0,25);
-  // 핀 (선택)
-  const pinRaw = (document.getElementById('pin').value||'').trim();
-  if (/^\d{4}$/.test(pinRaw)) localStorage.setItem(LS_PIN, pinRaw);
-
   return {
     uid: ensureUID(),
     name: document.getElementById('handle').value.trim(),
@@ -447,27 +369,18 @@ function collectProfile(){
 }
 function saveProfileLocal(p){
   localStorage.setItem(LS_KEY, JSON.stringify(p));
-  localStorage.setItem(LS_UID, p.uid);
-  setCookie(LS_UID, p.uid);
+  localStorage.setItem(LS_UID, p.uid); setCookie(LS_UID, p.uid);
 }
 async function saveProfileRemote(p){
-  const body = {
-    action: "registerProfile",
-    profile: {
-      ...p,
-      pin: localStorage.getItem(LS_PIN) || "" // 서버에 보관(선택)
-    }
-  };
   const res = await fetch(REG_URL, {
-    method: "POST",
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify(body)
+    method:"POST", headers:{ "Content-Type":"text/plain;charset=utf-8" },
+    body: JSON.stringify({ action:"registerProfile", profile:p })
   });
-  const out = await res.json().catch(()=>({ok:false, msg:'응답 파싱 실패'}));
+  const out = await res.json().catch(()=>({ok:false,msg:'응답 파싱 실패'}));
   return out;
 }
 
-/* ===== 프리뷰 ===== */
+/* ========= 저장 모달 ========= */
 function showPreview(p){
   document.getElementById('avatarPreview').textContent = p.icon || '🏍️';
   document.getElementById('namePreview').textContent   = p.name || '라이더 이름';
@@ -479,188 +392,104 @@ function showPreview(p){
   document.getElementById('previewModal').classList.add('show');
 }
 
-/* ===== 하이드레이트 ===== */
-async function hydrate(){
-  // PIN 입력칸에 로컬 PIN(있으면) 보여주지 않음(보안) — 남겨두기만
-  const q = new URLSearchParams(location.search);
-  const urlUid = q.get('uid') || q.get('me');
-  const ls = localStorage.getItem(LS_KEY);
-
-  if(urlUid){
-    const remote = await fetchProfileByUid(urlUid);
-    if(remote){ fillForm(remote); return; }
-  }
-  if(ls){
-    try{ fillForm(JSON.parse(ls)); return; }catch(_){}
-  }
-  const uid = ensureUID();
-  const remote = await fetchProfileByUid(uid);
-  if(remote){ fillForm(remote); }
-}
-function fillForm(data){
-  selectedIcon = data.icon || '🏍️'; updateIconActive();
-  document.getElementById('handle').value = data.name || '';
-  document.getElementById('bike').value   = data.bike || '';
-  document.getElementById('region').value = data.region || '';
-  document.getElementById('time').value   = data.time || '';
-  document.getElementById('tandem').value = data.tandem || '허용';
-  document.querySelectorAll('.toggles .toggle').forEach(t=>t.classList.remove('active'));
-  (data.styles||[]).forEach(v=>{
-    const el = [...document.querySelectorAll('.toggles[data-group="style"] .toggle')].find(x=>x.dataset.value===v);
-    if(el) el.classList.add('active');
-  });
-  (data.pace||[]).forEach(v=>{
-    const el = [...document.querySelectorAll('.toggles[data-group="speed"] .toggle')].find(x=>x.dataset.value===v);
-    if(el) el.classList.add('active');
-  });
-  document.getElementById('intro').value = (data.intro || '').slice(0,25);
-}
-
-/* ===== 이벤트 ===== */
-updateIconActive();
-document.querySelectorAll('.toggles').forEach(group=>{
-  group.addEventListener('click',e=>{
-    if(e.target.classList.contains('toggle')){
-      e.target.classList.toggle('active');
-    }
-  });
+/* ========= 내 프로필 찾기 ========= */
+const claimModal = document.getElementById('claimModal');
+const claimSheet = document.getElementById('claimSheet');
+document.getElementById('claimOpen').addEventListener('click', ()=>{
+  // 입력값 미리 채우기
+  const nEl=document.getElementById('handle'), rEl=document.getElementById('region');
+  const n=document.getElementById('claimName'), r=document.getElementById('claimRegion');
+  if(nEl && n) n.value = nEl.value || '';
+  if(rEl && r) r.value = rEl.value || '';
+  document.getElementById('claimResults').innerHTML='';
+  claimModal.classList.add('show');
 });
+claimModal.addEventListener('click', (e)=>{ if(e.target===claimModal) claimModal.classList.remove('show'); });
+claimSheet.addEventListener('click', (e)=>e.stopPropagation());
+
+document.getElementById('claimSearch').addEventListener('click', async ()=>{
+  const qn=(document.getElementById('claimName').value||'').trim().toLowerCase();
+  const qr=(document.getElementById('claimRegion').value||'').trim().toLowerCase();
+  if(!qn){ showToast('이름을 입력해 주세요.'); return; }
+  const rows = await fetchAllProfiles();
+  const hits = rows.filter(r=>{
+    const n=String(r.name||'').toLowerCase();
+    const rg=String(r.region||'').toLowerCase();
+    return (n.includes(qn) || n===qn) && (!qr || rg.includes(qr));
+  }).slice(0,50);
+  renderClaimResults(hits);
+});
+
+function renderClaimResults(list){
+  const box = document.getElementById('claimResults');
+  box.innerHTML = '';
+  if(!list.length){
+    box.innerHTML = '<p style="color:var(--muted);text-align:center;margin:8px 0 0">검색 결과가 없습니다.</p>';
+    return;
+  }
+  list.forEach(r=>{
+    const row = document.createElement('div');
+    row.className = 'claim-card';
+    row.innerHTML = `
+      <div class="claim-top">
+        <div class="claim-ava">${r.icon||'🏍️'}</div>
+        <div style="min-width:0">
+          <div class="claim-name">${r.name||'이름없음'}</div>
+          <p class="claim-sub">${r.region||'-'} · ${r.bike||'-'}</p>
+        </div>
+      </div>
+      <div class="claim-pin">
+        <input type="password" maxlength="4" pattern="\\d{4}" inputmode="numeric" placeholder="PIN(4자리)">
+        <button>프로필 연결</button>
+      </div>`;
+    const pinInput = row.querySelector('input');
+    const btn = row.querySelector('button');
+    btn.addEventListener('click', async ()=>{
+      const pin = (pinInput.value||'').trim();
+      if(!/^[0-9]{4}$/.test(pin)){ showToast('PIN 4자리를 입력하세요.'); pinInput.focus(); return; }
+      const ok = await verifyPin(r.uid, pin);
+      if(!ok){ showToast('PIN이 일치하지 않습니다.'); return; }
+
+      // 연결 성공 → 로컬 저장 + 폼 채움
+      const normalized = {
+        uid:r.uid||'', name:r.name||'', bike:r.bike||'', region:r.region||'',
+        styles:Array.isArray(r.styles)?r.styles:[], pace:Array.isArray(r.pace)?r.pace:[],
+        time:r.time||'', tandem:r.tandem||'허용', icon:r.icon||'🏍️', intro:r.intro||''
+      };
+      localStorage.setItem(LS_UID, normalized.uid);
+      localStorage.setItem(LS_KEY, JSON.stringify(normalized));
+      fillForm(normalized);
+      claimModal.classList.remove('show');
+      showToast('이 기기에 내 프로필 연결 완료');
+    });
+    box.appendChild(row);
+  });
+}
+
+/* ========= 부트 ========= */
 (async ()=>{ await hydrate(); })();
 
-document.getElementById("saveBtn").addEventListener("click", async ()=>{
+/* ========= 저장 버튼 ========= */
+const saveBtn = document.getElementById("saveBtn");
+saveBtn.addEventListener("click", async ()=>{
   const p = collectProfile();
   if(!p.name){ showToast("이름을 입력해 주세요."); return; }
-  const btn = document.getElementById("saveBtn");
-  btn.disabled = true;
+  saveBtn.disabled = true;
   try{
     saveProfileLocal(p);
     const out = await saveProfileRemote(p);
     if(out.ok){ showToast("✅ 프로필 저장 완료"); showPreview(p); }
     else{ showToast("⚠️ 저장 실패: " + (out.msg || "알 수 없는 오류")); }
-  }catch(err){
-    showToast("⚠️ 네트워크 오류: " + err.message);
-  }finally{
-    btn.disabled = false;
-  }
+  }catch(err){ showToast("⚠️ 네트워크 오류: " + err.message); }
+  finally{ saveBtn.disabled = false; }
 });
+
 document.getElementById("confirmBtn").addEventListener("click",()=> {
   document.getElementById('previewModal').classList.remove('show');
 });
 document.getElementById("editBtn").addEventListener("click",()=> {
   document.getElementById('previewModal').classList.remove('show');
 });
-
-<!-- ===== 내 프로필 찾기: 버튼 주입 + 모달 제어 + PIN 검증 ===== -->
-<script>
-(function initClaimMyProfile(){
-  // 저장 버튼 아래, 텍스트 링크 없이 버튼 1개만 주입
-  const actions = document.getElementById('claimActions');
-  if (actions) actions.innerHTML = `<button id="findMineBtn" type="button">내 프로필 찾기</button>`;
-
-  const openBtn   = document.getElementById('findMineBtn');
-  const modal     = document.getElementById('claimModal');
-  const nameInp   = document.getElementById('claimName');
-  const regionInp = document.getElementById('claimRegion');
-  const searchBtn = document.getElementById('claimSearch');
-  const results   = document.getElementById('claimResults');
-
-  function openModal(){
-    const nameEl = document.getElementById('handle');
-    const regEl  = document.getElementById('region');
-    if(nameEl) nameInp.value = nameEl.value || '';
-    if(regEl)  regionInp.value = regEl.value || '';
-    results.innerHTML = '';
-    modal.classList.add('show');
-    setTimeout(()=> nameInp.focus(), 0);
-  }
-  function closeModal(){
-    modal.classList.remove('show');
-    results.innerHTML = '';
-  }
-
-  if (openBtn) openBtn.addEventListener('click', openModal);
-  // 모달 바깥 클릭으로 닫기
-  modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
-
-  async function fetchAll(){
-    try{
-      const res = await fetch(`${REG_URL}?action=listProfiles&ts=${Date.now()}`, {cache:'no-store'});
-      const j = await res.json().catch(()=>null);
-      return (j && j.ok && Array.isArray(j.data)) ? j.data : (Array.isArray(j) ? j : []);
-    }catch(_){ showToast('불러오기 실패'); return []; }
-  }
-
-  function render(list){
-    results.innerHTML = '';
-    if(!list.length){
-      results.innerHTML = '<p style="color:var(--muted);text-align:center">검색 결과가 없습니다.</p>';
-      return;
-    }
-
-    list.forEach(r=>{
-      const row = document.createElement('div');
-      row.className = 'claim-row';
-      row.innerHTML = `
-        <div class="claim-avatar">${r.icon||'🏍️'}</div>
-        <div class="claim-info">
-          <div class="claim-name">${r.name||'이름없음'}</div>
-          <div class="claim-sub">${r.region||'-'} · ${r.bike||'-'}</div>
-        </div>
-        <div class="rail">
-          <input class="pin" type="password" inputmode="numeric" pattern="\\d*" maxlength="4" placeholder="PIN(4자리)">
-          <button class="connect">프로필 연결</button>
-        </div>
-      `;
-
-      // 연결 버튼: PIN 검증 → 로컬 연결 → 폼 반영
-      row.querySelector('.connect').addEventListener('click', async ()=>{
-        const pin = (row.querySelector('.pin').value || '').trim();
-        if(pin.length !== 4){ showToast('PIN 4자리를 입력해 주세요.'); return; }
-
-        let ok = false;
-        try{
-          const vres = await fetch(`${REG_URL}?action=verifyPin&uid=${encodeURIComponent(r.uid)}&pin=${encodeURIComponent(pin)}`, {cache:'no-store'});
-          const j = await vres.json().catch(()=>null);
-          ok = !!(j && j.ok);
-        }catch(_){}
-
-        if(!ok){ showToast('PIN이 올바르지 않습니다.'); return; }
-
-        const normalized = {
-          uid:r.uid||'', name:r.name||'', bike:r.bike||'', region:r.region||'',
-          styles:Array.isArray(r.styles)?r.styles:[], pace:Array.isArray(r.pace)?r.pace:[],
-          time:r.time||'', tandem:r.tandem||'허용', icon:r.icon||'🏍️', intro:r.intro||''
-        };
-        localStorage.setItem('rimo_uid_v1', normalized.uid);
-        localStorage.setItem('rimo_profile_v1', JSON.stringify(normalized));
-        // 폼 반영(기존 fillForm 함수 재활용)
-        if (typeof fillForm === 'function') fillForm(normalized);
-        showToast('이 기기에 내 프로필 연결 완료');
-        closeModal();
-      });
-
-      results.appendChild(row);
-    });
-  }
-
-  if (searchBtn){
-    searchBtn.addEventListener('click', async ()=>{
-      const qn = (nameInp.value||'').trim().toLowerCase();
-      const qr = (regionInp.value||'').trim().toLowerCase();
-      if(!qn){ showToast('이름을 입력해 주세요.'); nameInp.focus(); return; }
-
-      const rows = await fetchAll();
-      const hits = rows.filter(r=>{
-        const n  = String(r.name||'').toLowerCase();
-        const rg = String(r.region||'').toLowerCase();
-        return (n.includes(qn) || n===qn) && (!qr || rg.includes(qr));
-      }).slice(0, 30);
-
-      render(hits);
-    });
-  }
-})();
 </script>
-
 </body>
 </html>
