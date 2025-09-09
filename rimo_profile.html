@@ -124,6 +124,69 @@
   .claim-pin button{flex:0 0 auto; padding:10px 12px; border-radius:8px; border:none; background:#2a5bff; color:#fff; font-weight:800; cursor:pointer}
   /* 모달 하단 여백 (닫기 버튼 삭제했으니 내부 패딩만 확보) */
   #claimModal .sheet.panel{padding-bottom:18px}
+
+  /* ── 내 프로필 찾기: 결과 카드 고정 높이 ───────────────────────── */
+:root{ --claim-card-h: 150px }  /* 원하는 높이로 조절: 140~160px 권장 */
+
+#claimResults{
+  max-height: clamp(220px, 34vh, 360px);
+  overflow: auto;
+  padding-bottom: 4px;           /* 스크롤 마지막 카드 여유 */
+  display: grid;
+  gap: 10px;
+}
+
+#claimResults .claim-card{
+  height: var(--claim-card-h);
+  min-height: var(--claim-card-h);
+  display: grid;
+  grid-template-rows: auto 1fr auto; /* 헤더, 남는공간, 푸터(핀/버튼) */
+  gap: 10px;
+  padding: 12px;
+  border:1px solid #2b2e54;
+  border-radius:12px;
+  background:#101223;
+  overflow: hidden;               /* 넘치는 텍스트 잘라줌 */
+}
+
+/* 헤더(아이콘+이름/서브텍스트) */
+#claimResults .claim-card .head{
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 10px;
+  align-items: center;
+}
+#claimResults .claim-card .avatar{
+  width:44px;height:44px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:#1a1c2f;border:1px solid #2b2e54;font-size:22px;
+}
+#claimResults .claim-card .name{
+  margin:0 0 2px; font-weight:800;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+#claimResults .claim-card .sub{
+  font-size:13px; color:var(--muted);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+
+/* 푸터(PIN 밑에 버튼 2열 배치) */
+#claimResults .claim-card .foot{
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: center;
+  margin-top: auto;               /* 항상 카드 하단에 고정 느낌 */
+}
+#claimResults .claim-card .pin{
+  height: 36px; padding: 8px 10px;
+  border:1px solid #2b2e54; border-radius:8px;
+  background:#0f1020; color:#fff;
+}
+#claimResults .claim-card .connect{
+  height: 36px; padding: 0 14px; border:none; border-radius:8px;
+  background:#2a5bff; color:#fff; font-weight:800; cursor:pointer;
+}
 </style>
 </head>
 <body>
@@ -428,20 +491,23 @@ function renderClaimResults(list){
     return;
   }
   list.forEach(r=>{
-    const row = document.createElement('div');
-    row.className = 'claim-card';
-    row.innerHTML = `
-      <div class="claim-top">
-        <div class="claim-ava">${r.icon||'🏍️'}</div>
-        <div style="min-width:0">
-          <div class="claim-name">${r.name||'이름없음'}</div>
-          <p class="claim-sub">${r.region||'-'} · ${r.bike||'-'}</p>
-        </div>
-      </div>
-      <div class="claim-pin">
-        <input type="password" maxlength="4" pattern="\\d{4}" inputmode="numeric" placeholder="PIN(4자리)">
-        <button>프로필 연결</button>
-      </div>`;
+    // (검색 결과 렌더 함수 안) row 생성 부분만 교체
+const row = document.createElement('div');
+row.className = 'claim-card';               // ← 클래스로 지정
+
+row.innerHTML = `
+  <div class="head">
+    <div class="avatar">${r.icon || '🏍️'}</div>
+    <div class="txt">
+      <div class="name">${r.name || '이름없음'}</div>
+      <div class="sub">${r.region || '-'} · ${r.bike || '-'}</div>
+    </div>
+  </div>
+  <div class="foot">
+    <input class="pin" type="password" inputmode="numeric" maxlength="4" placeholder="PIN(4자리)">
+    <button class="connect">프로필 연결</button>
+  </div>
+`;
     const pinInput = row.querySelector('input');
     const btn = row.querySelector('button');
     btn.addEventListener('click', async ()=>{
