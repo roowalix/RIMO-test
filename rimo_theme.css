@@ -97,4 +97,37 @@ select option{color:#fff; background:var(--surface-3)}
   background:rgba(122,167,255,.16);
   box-shadow:0 0 10px rgba(122,167,255,.45);
 }
+/* === RIMO 공통 Pill 버튼 ===
+   - .pill 기본 스타일
+   - .pill--{urban|curve|tour|easy|balanced|dynamic} 색상
+   - .is-active 활성(선택) 효과  */
+.pill, .tag.pill, .filter-btn { /* 기존 index에 .filter-btn이 있다면 같이 묶어줌 */
+  display:inline-flex; align-items:center; justify-content:center;
+  padding:8px 12px;
+  border-radius:999px;
+  background:#1a1c2f;
+  border:1px solid #2b2e54;
+  color:#e6e9ff;
+  font-size:13px;
+  font-weight:700;
+  white-space:nowrap;
+  user-select:none;
+  transition:box-shadow .15s ease, transform .15s ease;
+}
+
+/* 색 세트 — 엠버서더와 동일 팔레트 */
+.pill--urban,   .filter-btn.urban   { background:#1e2d55; border-color:#2c4484; }
+.pill--curve,   .filter-btn.curve   { background:#2a1f56; border-color:#40307a; }
+.pill--tour,    .filter-btn.tour    { background:#1e3b3a; border-color:#2f5f5d; }
+.pill--easy,    .filter-btn.easy    { background:#1f3a1f; border-color:#2f5a2f; }
+.pill--balanced,.filter-btn.balanced{ background:#3a341e; border-color:#5a4f2f; }
+.pill--dynamic, .filter-btn.dynamic { background:#3a1f1f; border-color:#5a2f2f; }
+
+/* 활성/선택 상태 (엠버서더의 반짝 효과 동일) */
+.pill.is-active, .filter-btn.is-active {
+  border-color:#7aa7ff;
+  box-shadow:0 0 12px rgba(122,167,255,.5),
+             0 0 0 2px rgba(122,167,255,.25) inset;
+  transform:translateY(-1px);
+}
 
