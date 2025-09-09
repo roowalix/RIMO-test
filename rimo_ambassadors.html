@@ -103,42 +103,34 @@ function showToast(msg, ms=2000){
   clearTimeout(window._toastTimer); window._toastTimer=setTimeout(()=>t.classList.remove('show'), ms);
 }
 
-/* URL의 ?me=UID 로 내 UID 복구 */
+/* URL의 ?me= 또는 ?uid= 로 내 UID 복구 */
 function ensureMeFromURL(){
   try{
     const q = new URLSearchParams(location.search);
-    const me = q.get('me');
-    if(me){
-      localStorage.setItem(LS_UID, me);
+    const v = q.get('me') || q.get('uid');
+    if(v){
+      localStorage.setItem(LS_UID, v);
       history.replaceState({}, '', location.pathname);
     }
   }catch(_){}
 }
 
-// 기존 loadAmbassadors()를 이걸로 통째로 바꿔 넣으세요
+/* 서버 목록 */
 async function loadAmbassadors(){
   const url = `${REG_URL}?action=listProfiles&ts=${Date.now()}`;
   const res = await fetch(url, { cache: 'no-store' });
-
   const text = await res.text();
-  console.log('[listProfiles raw]', res.status, text); // ✅ 원문 로그로 즉시 진단
-
+  console.log('[listProfiles raw]', res.status, text);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-  // JSON 파싱
   let json;
   try { json = JSON.parse(text); }
   catch { throw new Error('JSON 파싱 실패 (서버가 HTML/오류 반환 가능)'); }
 
-  // v1 포맷: { ok:true, data:[...] }
   if (json && json.ok && Array.isArray(json.data)) return json.data;
-
-  // v0 호환: 배열을 바로 주는 경우
   if (Array.isArray(json)) return json;
-
   throw new Error('예상치 못한 응답 형식');
 }
-
 
 /* 내 카드 맨 위 고정 */
 function pinMineFirst(items){
@@ -209,18 +201,15 @@ function renderList(items){
     btn.type = 'button';
     btn.className = 'matchBtn';
     if(isMe){
-- btn.textContent = '프로필 수정';
-- btn.onclick = ()=> location.href='rimo_profile.html';
-+ btn.textContent = '프로필 수정';
-+ btn.onclick = ()=> location.href = 'rimo_profile.html?uid=' + encodeURIComponent(a.uid || '');
-
+      btn.textContent = '프로필 수정';
+      // 내 UID를 쿼리로 넘겨서 프로필 페이지가 복구하도록
+      btn.onclick = ()=> location.href = 'rimo_profile.html?uid=' + encodeURIComponent(a.uid || '');
     }else{
       btn.innerHTML = '🤝 매칭희망';
       btn.onclick = ()=> openDMModal(a);
     }
     nameRow.appendChild(btn);
 
-    // 소개
     if (a.intro){
       const intro = document.createElement('p');
       intro.className = 'intro';
@@ -231,7 +220,6 @@ function renderList(items){
       idcol.appendChild(nameRow);
     }
 
-    // 지역 · 기종
     const sub = document.createElement('p');
     sub.className = 'sub';
     sub.textContent = `${a.region? a.region+' · ' : ''}${a.bike || ''}`;
@@ -240,7 +228,6 @@ function renderList(items){
     head.appendChild(avatar);
     head.appendChild(idcol);
 
-    // 스타일/페이스
     const traits = document.createElement('div');
     traits.className = 'traits';
     const styles = Array.isArray(a.styles) ? a.styles : [];
@@ -271,7 +258,7 @@ function renderList(items){
   });
 }
 
-/* ===== DM 모달 ===== */
+/* DM 모달 */
 const dmModal   = document.getElementById('dmModal');
 const dmSheet   = document.getElementById('dmSheet');
 const dmPreview = document.getElementById('dmPreview');
@@ -317,7 +304,7 @@ document.getElementById('closeDM').onclick = closeDMModal;
 dmModal.addEventListener('click', closeDMModal);
 dmSheet.addEventListener('click', e=>e.stopPropagation());
 
-/* ===== 부트 ===== */
+/* 부트 */
 (async function init(){
   ensureMeFromURL();
 
@@ -325,9 +312,9 @@ dmSheet.addEventListener('click', e=>e.stopPropagation());
   if(state) state.textContent = '불러오는 중…';
 
   try{
-    const items = await loadAmbassadors(30);
+    const items = await loadAmbassadors();
     if(state) state.remove();
-    // 방탄 정규화
+
     const normalized = items.map(r => ({
       uid: r.uid || '',
       icon: r.icon || '🏍️',
