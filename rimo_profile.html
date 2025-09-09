@@ -8,7 +8,11 @@
 <link rel="stylesheet" href="rimo_theme.css?v=20250910" />
 
 <style>
-  :root{ --label-width:40px; --claim-results-min:240px; }
+  :root{
+    --label-width:40px;
+    --claim-results-min:240px;
+    --claim-card-min:128px; /* ✅ 결과 카드 최소 높이 (PIN이 잘리지 않도록) */
+  }
 
   *{box-sizing:border-box}
   body{ margin:0; font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Helvetica,Arial,sans-serif; }
@@ -47,20 +51,24 @@
 
   .toggles{display:flex;gap:10px;flex-wrap:wrap;margin:0}
   .toggle{
-    display:inline-flex;align-items:center;gap:14px;padding:8px 12px;border-radius:999px;
+    display:inline-flex;align-items:center;gap:10px;padding:8px 12px;border-radius:999px;
     color:#e6e9ff;font-size:13px;cursor:pointer;user-select:none;white-space:nowrap;
-    transition:transform .15s ease, box-shadow .15s ease;
+    transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease, background-color .15s ease;
+    border:1px solid transparent;              /* ✅ 기본 테두리(투명) */
+    background:transparent;
   }
-  .toggle.active{
-    border-color:var(--accent); background:rgba(122,167,255,.16);
-    box-shadow:0 0 10px rgba(122,167,255,.45); transform:translateY(-1px) scale(1.03);
+  .toggle.active{                               /* ✅ 아이콘 버튼과 동일한 느낌으로 */
+    border-color:var(--accent);
+    background:rgba(122,167,255,.16);
+    box-shadow:0 0 10px rgba(122,167,255,.45);
+    transform:translateY(-1px) scale(1.03);
     font-weight:800;
   }
 
   .profile-icons{display:flex;flex-direction:column;align-items:center;gap:10px;margin:0}
   .icons{display:grid;grid-template-columns:repeat(5,48px);grid-auto-rows:48px;gap:10px;justify-content:center}
   .icon-btn{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-    font-size:28px;cursor:pointer;transition:.15s ease;color:#fff}
+    font-size:28px;cursor:pointer;transition:.15s ease;color:#fff;border:1px solid transparent}
   .icon-btn.active{border-color:var(--accent);box-shadow:0 0 10px rgba(122,167,255,.4);transform:scale(1.05)}
   .intro-box{width:calc(48px*5 + 10px*4);margin:8px 0 0}
   #intro{width:100%;text-align:center}
@@ -97,82 +105,70 @@
                   90%{opacity:1}
                   100%{opacity:0}}
 
-  /* === 내 프로필 찾기 모달 전용 (교체용) ============================= */
-:root{
-  --claim-card-h: 110px;       /* 결과 카드 고정 높이 */
-  --claim-foot-gap: 10px;      /* PIN↔버튼 간격 */
-  --claim-btn-w: 90px;        /* 버튼 폭 (기존 150px 대비 10% ↑) */
-}
+  /* === 내 프로필 찾기 모달 전용 ============================= */
+  #claimModal .sheet{width:100%; max-width:680px}
+  #claimModal .sheet.panel{
+    background:#0e1222; border:1px solid #2b304f; border-radius:18px;
+    box-shadow:0 14px 40px rgba(0,0,0,.55);
+    max-height:88vh; display:flex; flex-direction:column; padding:16px 16px 18px;
+  }
+  #claimModal .hint{color:#cfd2ff; margin:0 0 8px}
+  #claimModal .search-row{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px}
 
-#claimModal .sheet{width:100%; max-width:680px}
-#claimModal .sheet.panel{
-  background:#0e1222; border:1px solid #2b304f; border-radius:18px;
-  box-shadow:0 14px 40px rgba(0,0,0,.55);
-  max-height:88vh; display:flex; flex-direction:column; padding:16px 16px 18px;
-}
-#claimModal .hint{color:#cfd2ff; margin:0 0 8px}
-#claimModal .search-row{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px}
+  /* 검색 결과 리스트(영역 고정 → 위쪽 레이아웃 점프 방지) */
+  #claimResults{
+    display:grid; gap:10px;
+    min-height: var(--claim-results-min);
+    max-height: clamp(160px, 48vh, 420px);
+    overflow:auto;
+    padding-bottom:4px;
+  }
 
-/* 검색 결과 리스트(영역 고정 → 위쪽 레이아웃 점프 방지) */
-#claimResults{
-  display:grid; gap:10px;
-  min-height: var(--claim-card-h);
-  max-height: clamp(160px, 48vh, 420px);
-  overflow:auto;
-  padding-bottom:4px;
-}
+  /* 결과 카드 */
+  #claimResults .claim-card{
+    min-height: var(--claim-card-min);       /* ✅ 고정높이 → 최소높이 */
+    display:grid;
+    grid-template-rows: auto 1fr auto;       /* 헤더 / 여유 / 풋터 */
+    gap:10px;
+    padding:12px;
+    border:1px solid #2b2e54; border-radius:12px; background:#101223;
+    /* overflow:hidden;  <-- ✅ 제거. PIN이 클립되는 이슈 방지 */
+  }
 
-/* 결과 카드 */
-#claimResults .claim-card{
-  height: var(--claim-card-h);
-  min-height: var(--claim-card-h);
-  display:grid;
-  grid-template-rows: auto 1fr auto; /* 헤더 / 여유 / 풋터 */
-  gap:10px;
-  padding:12px;
-  border:1px solid #2b2e54; border-radius:12px; background:#101223;
-  overflow:hidden;
-}
+  /* 카드 헤더(아이콘 + 텍스트) */
+  #claimResults .claim-card .head{
+    display:grid; grid-template-columns:44px 1fr; gap:10px; align-items:center;
+  }
+  #claimResults .claim-card .avatar{
+    width:44px; height:44px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background:#1a1c2f; border:1px solid #2b2e54; font-size:22px;
+  }
+  #claimResults .claim-card .name{
+    margin:0 0 2px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  #claimResults .claim-card .sub{
+    font-size:13px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
 
-/* 카드 헤더(아이콘 + 텍스트) */
-#claimResults .claim-card .head{
-  display:grid; grid-template-columns:44px 1fr; gap:10px; align-items:center;
-}
-#claimResults .claim-card .avatar{
-  width:44px; height:44px; border-radius:50%;
-  display:flex; align-items:center; justify-content:center;
-  background:#1a1c2f; border:1px solid #2b2e54; font-size:22px;
-}
-#claimResults .claim-card .name{
-  margin:0 0 2px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-}
-#claimResults .claim-card .sub{
-  font-size:13px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-}
-
-/* 카드 풋터(PIN 입력 + 버튼) */
-#claimResults .claim-card .foot{
-  display:grid;
-  grid-template-columns:
-    minmax(0, calc(100% - var(--claim-btn-w) - var(--claim-foot-gap)))
-    var(--claim-btn-w);
-  gap: var(--claim-foot-gap);
-  align-items:center;
-  margin-top:auto;
-}
-
-#claimResults .claim-card .pin{
-  height:36px; padding:8px 10px;
-  border:1px solid #2b2e54; border-radius:8px;
-  background:#0f1020; color:#fff; width:100%;
-}
-
-#claimResults .claim-card .connect{
-  min-width: var(--claim-btn-w);
-  height:36px; border:none; border-radius:8px;
-  background:#2a5bff; color:#fff; font-weight:800; cursor:pointer;
-  white-space:nowrap; padding:0 16px;
-}
+  /* 카드 풋터(PIN 입력 + 버튼 2열) */
+  #claimResults .claim-card .foot{
+    display:grid;
+    grid-template-columns: minmax(0,1fr) 110px;  /* 입력칸 / 버튼 */
+    gap:10px;
+    align-items:center;
+    margin-top:auto;
+  }
+  #claimResults .claim-card .pin{
+    height:36px; padding:8px 10px;
+    border:1px solid #2b2e54; border-radius:8px;
+    background:#0f1020; color:#fff; width:100%;
+  }
+  #claimResults .claim-card .connect{
+    height:36px; border:none; border-radius:8px;
+    background:#2a5bff; color:#fff; font-weight:800; cursor:pointer;
+    white-space:nowrap; padding:0 14px;
+  }
 </style>
 </head>
 <body>
@@ -285,7 +281,7 @@
 
 <!-- 저장 후 미리보기 모달 -->
 <div class="modal" id="previewModal">
-  <div class="modal-content panel" style="padding-bottom:18px"><!-- 하단 +6px -->
+  <div class="modal-content panel" style="padding-bottom:18px">
     <div class="card-head">
       <div class="avatar" id="avatarPreview">🏍️</div>
       <div class="idcol">
@@ -357,6 +353,15 @@ iconWrap.addEventListener("click", e=>{
 });
 updateIconActive();
 
+/* ✅ 스타일/페이스 토글 클릭 핸들러 복구 */
+document.querySelectorAll('.toggles').forEach(group=>{
+  group.addEventListener('click', e=>{
+    const pill = e.target.closest('.toggle');
+    if(!pill) return;
+    pill.classList.toggle('active');
+  });
+});
+
 /* ========= 서버 ========= */
 async function fetchAllProfiles(){
   const res = await fetch(`${REG_URL}?action=listProfiles&ts=${Date.now()}`, {cache:'no-store'});
@@ -381,9 +386,12 @@ function fillForm(p){
   const set = (id,val)=>{ const el=document.getElementById(id); if(el) el.value=val; };
   set('handle', p.name||''); set('bike', p.bike||''); set('region', p.region||'');
   set('time', p.time||''); set('tandem', p.tandem||'허용');
+
+  // 토글 상태 초기화/세팅
   document.querySelectorAll('.toggles .toggle').forEach(t=>t.classList.remove('active'));
   (p.styles||[]).forEach(v=>{ const el=[...document.querySelectorAll('.toggles[data-group="style"] .toggle')].find(x=>x.dataset.value===v); if(el) el.classList.add('active'); });
   (p.pace||[]).forEach(v=>{ const el=[...document.querySelectorAll('.toggles[data-group="speed"] .toggle')].find(x=>x.dataset.value===v); if(el) el.classList.add('active'); });
+
   const introEl=document.getElementById('intro'); if(introEl) introEl.value=(p.intro||'').slice(0,25);
 }
 async function hydrate(){
@@ -453,7 +461,9 @@ document.getElementById('claimOpen').addEventListener('click', ()=>{
   document.getElementById('claimResults').innerHTML='';
   claimModal.classList.add('show');
 });
+/* 모달 바깥 클릭 닫힘 */
 claimModal.addEventListener('click', (e)=>{ if(e.target===claimModal) claimModal.classList.remove('show'); });
+/* 시트 안쪽 클릭 전파 중단 */
 claimSheet.addEventListener('click', (e)=>e.stopPropagation());
 
 document.getElementById('claimSearch').addEventListener('click', async ()=>{
@@ -477,23 +487,21 @@ function renderClaimResults(list){
     return;
   }
   list.forEach(r=>{
-    // (검색 결과 렌더 함수 안) row 생성 부분만 교체
-const row = document.createElement('div');
-row.className = 'claim-card';               // ← 클래스로 지정
-
-row.innerHTML = `
-  <div class="head">
-    <div class="avatar">${r.icon || '🏍️'}</div>
-    <div class="txt">
-      <div class="name">${r.name || '이름없음'}</div>
-      <div class="sub">${r.region || '-'} · ${r.bike || '-'}</div>
-    </div>
-  </div>
-  <div class="foot">
-    <input class="pin" type="password" inputmode="numeric" maxlength="4" placeholder="PIN(4자리)">
-    <button class="connect">프로필 연결</button>
-  </div>
-`;
+    const row = document.createElement('div');
+    row.className = 'claim-card';
+    row.innerHTML = `
+      <div class="head">
+        <div class="avatar">${r.icon || '🏍️'}</div>
+        <div class="txt">
+          <div class="name">${r.name || '이름없음'}</div>
+          <div class="sub">${r.region || '-'} · ${r.bike || '-'}</div>
+        </div>
+      </div>
+      <div class="foot">
+        <input class="pin" type="password" inputmode="numeric" maxlength="4" placeholder="PIN(4자리)">
+        <button class="connect">프로필 연결</button>
+      </div>
+    `;
     const pinInput = row.querySelector('input');
     const btn = row.querySelector('button');
     btn.addEventListener('click', async ()=>{
@@ -502,7 +510,6 @@ row.innerHTML = `
       const ok = await verifyPin(r.uid, pin);
       if(!ok){ showToast('PIN이 일치하지 않습니다.'); return; }
 
-      // 연결 성공 → 로컬 저장 + 폼 채움
       const normalized = {
         uid:r.uid||'', name:r.name||'', bike:r.bike||'', region:r.region||'',
         styles:Array.isArray(r.styles)?r.styles:[], pace:Array.isArray(r.pace)?r.pace:[],
