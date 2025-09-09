@@ -457,13 +457,18 @@ document.getElementById("editBtn").addEventListener("click",()=> {
   </div>
 </div>
 
+<!-- ✅ 내 프로필 찾기 & (옵션) 복구 링크 모듈 -->
 <script>
-(function addClaimMyProfile(){
+(function addClaimMyProfileOnce(){
+  if (window.__rimoClaimInstalled) return; // 중복 방지
+  window.__rimoClaimInstalled = true;
+
   const LS_KEY='rimo_profile_v1', LS_UID='rimo_uid_v1';
   const REG = (typeof REG_URL!=='undefined') ? REG_URL : '';
-  const saveBtn = document.getElementById('saveBtn');
+  const SHOW_RECOVERY = new URLSearchParams(location.search).has('recovery'); // ?recovery=1이면 복구 버튼 표시
 
-  function toast(m){ if (typeof showToast==='function') showToast(m); else alert(m); }
+  // 유틸
+  function toast(m){ try{ showToast(m); }catch{ alert(m); } }
   async function copy(text){
     try{ await navigator.clipboard.writeText(text); return true; }
     catch(_){
@@ -475,32 +480,53 @@ document.getElementById("editBtn").addEventListener("click",()=> {
     const uid = localStorage.getItem(LS_UID)||'';
     if(!uid){ toast('UID가 아직 없어요. 먼저 프로필을 저장하거나, 내 프로필 찾기에서 연결해 주세요.'); return ''; }
     const path = location.pathname.replace(/\/+$/,'') || '/rimo_profile.html';
-    if(short){
-      // 짧은 상대 경로 (예: /rimo_profile.html?uid=xxxxx)
-      return `${path}?uid=${encodeURIComponent(uid)}`;
-    }else{
-      // 전체 URL
-      return `${location.origin}${path}?uid=${encodeURIComponent(uid)}`;
-    }
+    return short ? `${path}?uid=${encodeURIComponent(uid)}`
+                 : `${location.origin}${path}?uid=${encodeURIComponent(uid)}`;
   }
 
-  /* 1) 저장 버튼 아래 액션 라인 주입 (찾기 / 복구복사) */
-  if (saveBtn && !document.getElementById('claimActions')) {
-    const line = document.createElement('div');
-    line.id = 'claimActions';
-    line.className = 'claim-actions';
-    line.innerHTML = `
-      <a href="#" id="findMineLink">내 프로필 찾기</a> |
-      <a href="#" id="copyRecovery">복구 복사</a>
-    `;
-    saveBtn.insertAdjacentElement('afterend', line);
+  const saveBtn = document.getElementById('saveBtn');
+  if(!saveBtn) return;
+
+  // 이전에 삽입된 잔재 있으면 제거
+  ['claimActions','claimModal'].forEach(id=>{ const el=document.getElementById(id); if(el) el.remove(); });
+
+  // 액션 라인: 내 프로필 찾기(항상), 복구 링크(옵션)
+  const line = document.createElement('div');
+  line.id = 'claimActions';
+  line.style.cssText = 'display:flex;gap:8px;justify-content:center;margin-top:8px;flex-wrap:wrap';
+
+  const findBtn = document.createElement('button');
+  findBtn.type='button';
+  findBtn.textContent='내 프로필 찾기';
+  findBtn.className='edit';
+  findBtn.style.cssText='padding:10px 14px;border-radius:8px;border:none;background:#2c2f48;color:#fff;font-weight:700';
+  findBtn.onclick = ()=> document.getElementById('claimModal').classList.add('show');
+  line.appendChild(findBtn);
+
+  if (SHOW_RECOVERY){
+    const recBtn = document.createElement('button');
+    recBtn.type='button';
+    recBtn.textContent='복구 링크 복사';
+    recBtn.className='edit';
+    recBtn.style.cssText='padding:10px 14px;border-radius:8px;border:none;background:#2c2f48;color:#fff;font-weight:700';
+    recBtn.onclick = ()=>{
+      const link = buildRecoveryLink({short:true});
+      if(link) copy(link).then(()=> toast('복구 링크를 복사했어요'));
+    };
+    line.appendChild(recBtn);
   }
 
-  /* 2) 모달 DOM 주입 (내 프로필 찾기) — 이전 버전과 동일 */
-  if (!document.getElementById('claimModal')) {
-    const wrap = document.createElement('div');
-    wrap.innerHTML = `
-    <div class="modal" id="claimModal" role="dialog" aria-modal="true" aria-labelledby="claimTitle" style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;z-index:3000;background:rgba(0,0,0,.45);padding:22px 12px">
+  saveBtn.insertAdjacentElement('afterend', line);
+
+  // 모달 DOM (없으면 생성)
+  if(!document.getElementById('claimModal')){
+    const modal = document.createElement('div');
+    modal.id='claimModal';
+    modal.className='modal';
+    modal.setAttribute('role','dialog');
+    modal.setAttribute('aria-modal','true');
+    modal.setAttribute('aria-labelledby','claimTitle');
+    modal.innerHTML = `
       <div class="modal-content panel" style="max-width:520px">
         <h3 id="claimTitle" style="margin:0 0 8px">내 프로필 찾기</h3>
         <p style="color:var(--muted);margin:0 0 10px">닉네임으로 검색 후 내 프로필을 선택하세요.</p>
@@ -511,109 +537,86 @@ document.getElementById("editBtn").addEventListener("click",()=> {
         </div>
         <div id="claimResults" style="margin-top:10px;display:grid;gap:8px"></div>
         <div style="display:flex;justify-content:center;margin-top:10px">
-          <button id="claimClose" style="padding:10px 14px;border-radius:8px;border:none;color:#fff;background:#2c2f48">닫기</button>
+          <button id="claimClose" class="edit" style="padding:10px 14px;border-radius:8px;border:none;color:#fff;background:#2c2f48">닫기</button>
         </div>
-      </div>
-    </div>`;
-    document.body.appendChild(wrap.firstElementChild);
-  }
+      </div>`;
+    document.body.appendChild(modal);
 
-  const findLink   = document.getElementById('findMineLink');
-  const copyLink   = document.getElementById('copyRecovery');
-  const modal      = document.getElementById('claimModal');
-  const nameInp    = document.getElementById('claimName');
-  const regionInp  = document.getElementById('claimRegion');
-  const searchBtn  = document.getElementById('claimSearch');
-  const closeBtn   = document.getElementById('claimClose');
-  const results    = document.getElementById('claimResults');
+    // 모달 동작
+    const nameInp   = modal.querySelector('#claimName');
+    const regionInp = modal.querySelector('#claimRegion');
+    const searchBtn = modal.querySelector('#claimSearch');
+    const closeBtn  = modal.querySelector('#claimClose');
+    const results   = modal.querySelector('#claimResults');
 
-  function openModal(){
-    const nameEl = document.getElementById('handle');
-    const regEl  = document.getElementById('region');
-    if(nameEl) nameInp.value = nameEl.value || '';
-    if(regEl)  regionInp.value = regEl.value || '';
-    results.innerHTML = '';
-    modal.style.display = 'flex';
-    nameInp.focus();
-  }
-  function closeModal(){ modal.style.display='none'; }
+    modal.addEventListener('click', e=>{ if(e.target===modal) modal.classList.remove('show'); });
+    closeBtn.onclick = ()=> modal.classList.remove('show');
 
-  if (findLink) findLink.addEventListener('click', (e)=>{ e.preventDefault(); openModal(); });
-  if (copyLink) copyLink.addEventListener('click', async (e)=>{
-    e.preventDefault();
-    const link = buildRecoveryLink({short:true});
-    if(!link) return;
-    await copy(link);
-    toast('복구 링크 복사됨');
-  });
-  closeBtn.addEventListener('click', closeModal);
-  modal.addEventListener('click', e=>{ if(e.target===modal) closeModal(); });
-
-  async function fetchAll(){
-    if(!REG){ toast('REG_URL이 정의되어야 합니다.'); return []; }
-    try{
-      const res = await fetch(`${REG}?action=listProfiles&ts=${Date.now()}`, {cache:'no-store'});
-      const j = await res.json().catch(()=>null);
-      return (j && j.ok && Array.isArray(j.data)) ? j.data : (Array.isArray(j) ? j : []);
-    }catch(_){ toast('불러오기 실패'); return []; }
-  }
-  function render(list){
-    results.innerHTML = '';
-    if(!list.length){
-      results.innerHTML = '<p style="color:var(--muted);text-align:center">검색 결과가 없습니다.</p>';
-      return;
+    async function fetchAll(){
+      if(!REG){ toast('REG_URL이 정의되어야 합니다.'); return []; }
+      try{
+        const res = await fetch(`${REG}?action=listProfiles&ts=${Date.now()}`, {cache:'no-store'});
+        const j = await res.json().catch(()=>null);
+        return (j && j.ok && Array.isArray(j.data)) ? j.data : (Array.isArray(j) ? j : []);
+      }catch{ toast('불러오기 실패'); return []; }
     }
-    list.forEach(r=>{
-      const row = document.createElement('div');
-      row.style.cssText='display:flex;gap:10px;align-items:center;padding:10px;border:1px solid #2b2e54;border-radius:12px;background:#101223';
-      row.innerHTML = `
-        <div style="width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#1a1c2f;border:1px solid #2b2e54;font-size:22px;flex:0 0 auto">${r.icon||'🏍️'}</div>
-        <div style="min-width:0">
-          <div style="font-weight:800;margin:0 0 2px">${r.name||'이름없음'}</div>
-          <div style="font-size:13px;color:var(--muted)">${r.region||'-'} · ${r.bike||'-'}</div>
-        </div>
-        <div style="margin-left:auto">
-          <button class="save-btn" style="padding:8px 12px;border-radius:8px">이건 나예요</button>
-        </div>`;
-      row.querySelector('button').addEventListener('click', ()=>{
-        const normalized = {
-          uid:r.uid||'', name:r.name||'', bike:r.bike||'', region:r.region||'',
-          styles:Array.isArray(r.styles)?r.styles:[], pace:Array.isArray(r.pace)?r.pace:[],
-          time:r.time||'', tandem:r.tandem||'허용', icon:r.icon||'🏍️', intro:r.intro||''
-        };
-        localStorage.setItem(LS_UID, normalized.uid);
-        localStorage.setItem(LS_KEY, JSON.stringify(normalized));
+    function render(list){
+      results.innerHTML = '';
+      if(!list.length){
+        results.innerHTML = '<p style="color:var(--muted);text-align:center">검색 결과가 없습니다.</p>';
+        return;
+      }
+      list.forEach(r=>{
+        const row = document.createElement('div');
+        row.style.cssText='display:flex;gap:10px;align-items:center;padding:10px;border:1px solid #2b2e54;border-radius:12px;background:#101223';
+        row.innerHTML = `
+          <div style="width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#1a1c2f;border:1px solid #2b2e54;font-size:22px;flex:0 0 auto">${r.icon||'🏍️'}</div>
+          <div style="min-width:0">
+            <div style="font-weight:800;margin:0 0 2px">${r.name||'이름없음'}</div>
+            <div style="font-size:13px;color:var(--muted)">${r.region||'-'} · ${r.bike||'-'}</div>
+          </div>
+          <div style="margin-left:auto">
+            <button class="save-btn" style="padding:8px 12px;border-radius:8px">이건 나예요</button>
+          </div>`;
+        row.querySelector('button').addEventListener('click', ()=>{
+          const normalized = {
+            uid:r.uid||'', name:r.name||'', bike:r.bike||'', region:r.region||'',
+            styles:Array.isArray(r.styles)?r.styles:[], pace:Array.isArray(r.pace)?r.pace:[],
+            time:r.time||'', tandem:r.tandem||'허용', icon:r.icon||'🏍️', intro:r.intro||''
+          };
+          localStorage.setItem(LS_UID, normalized.uid);
+          localStorage.setItem(LS_KEY, JSON.stringify(normalized));
 
-        // 폼 반영
-        const set = (id,val)=>{ const el=document.getElementById(id); if(el) el.value=val; };
-        set('handle', normalized.name);
-        set('bike',   normalized.bike);
-        set('region', normalized.region);
-        set('time',   normalized.time);
-        set('tandem', normalized.tandem);
+          // 폼 반영
+          const set = (id,val)=>{ const el=document.getElementById(id); if(el) el.value=val; };
+          set('handle', normalized.name);
+          set('bike',   normalized.bike);
+          set('region', normalized.region);
+          set('time',   normalized.time);
+          set('tandem', normalized.tandem);
 
-        // 아이콘 & 토글
-        window.selectedIcon = normalized.icon;
-        if (typeof updateIconActive==='function') updateIconActive();
-        document.querySelectorAll('.toggles .toggle').forEach(t=>t.classList.remove('active'));
-        (normalized.styles||[]).forEach(v=>{
-          const t=[...document.querySelectorAll('.toggles[data-group="style"] .toggle')].find(x=>x.dataset.value===v);
-          if(t) t.classList.add('active');
+          // 아이콘 & 토글
+          window.selectedIcon = normalized.icon;
+          if (typeof updateIconActive==='function') updateIconActive();
+          document.querySelectorAll('.toggles .toggle').forEach(t=>t.classList.remove('active'));
+          (normalized.styles||[]).forEach(v=>{
+            const t=[...document.querySelectorAll('.toggles[data-group="style"] .toggle')].find(x=>x.dataset.value===v);
+            if(t) t.classList.add('active');
+          });
+          (normalized.pace||[]).forEach(v=>{
+            const t=[...document.querySelectorAll('.toggles[data-group="speed"] .toggle')].find(x=>x.dataset.value===v);
+            if(t) t.classList.add('active');
+          });
+          const introEl=document.getElementById('intro');
+          if(introEl) introEl.value=(normalized.intro||'').slice(0,25);
+
+          toast('이 기기에 내 프로필 연결 완료');
+          modal.classList.remove('show');
         });
-        (normalized.pace||[]).forEach(v=>{
-          const t=[...document.querySelectorAll('.toggles[data-group="speed"] .toggle')].find(x=>x.dataset.value===v);
-          if(t) t.classList.add('active');
-        });
-        const introEl=document.getElementById('intro');
-        if(introEl) introEl.value=(normalized.intro||'').slice(0,25);
-
-        toast('이 기기에 내 프로필 연결 완료');
-        closeModal();
+        results.appendChild(row);
       });
-      results.appendChild(row);
-    });
-  }
-  if (searchBtn){
+    }
+
     searchBtn.addEventListener('click', async ()=>{
       const qn=(nameInp.value||'').trim().toLowerCase();
       const qr=(regionInp.value||'').trim().toLowerCase();
@@ -629,7 +632,7 @@ document.getElementById("editBtn").addEventListener("click",()=> {
   }
 })();
 </script>
-
 </body>
 </html>
+
 
