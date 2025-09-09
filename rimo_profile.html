@@ -10,31 +10,37 @@
 <style>
   :root{
     --label-width:40px;
-    --accent:#2a5bff;                /* 메인 포인트 */
+    --accent:#2a5bff;
     --accent-glow: rgba(122,167,255,.45);
     --chip-bg:#101223; --chip-bd:#2b2e54;
+
+    /* 내 프로필 찾기 모달 전용 변수 */
+    --claim-results-min: 140px;
+    --claim-card-h: 132px;
   }
 
   *{box-sizing:border-box}
-  body{ margin:0; font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Helvetica,Arial,sans-serif; }
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Helvetica,Arial,sans-serif}
 
-  /* 헤더 */
-  header{ position:sticky; top:0; z-index:5; background:rgba(11,11,15,.9);
-          -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
-          border-bottom:1px solid var(--border-1); }
+  header{
+    position:sticky; top:0; z-index:5;
+    background:rgba(11,11,15,.9);
+    -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--border-1);
+  }
   .bar{display:flex;gap:10px;align-items:center;padding:14px 16px;height:56px}
   .logo{font-weight:900}
   .title{font-weight:800;opacity:.9}
 
-  /* 레이아웃 */
   main{display:flex;flex-direction:column;gap:12px}
   .panel{padding:12px;display:flex;flex-direction:column;gap:10px}
 
-  /* 행 간격/라벨 */
   .form-row{display:flex;align-items:center;gap:6px;margin-bottom:0}
   .form-row.top{align-items:flex-start}
   .form-row label{width:var(--label-width);font-size:14px;font-weight:700;white-space:nowrap}
   .field{flex:1.5;min-width:0}
+  /* PIN 입력칸 룩 */
+  #pin{letter-spacing:2px;text-align:center}
 
   /* 지역/탠덤 1행 2열 */
   .form-row.split{
@@ -43,7 +49,6 @@
   }
   .form-row.split .col{display:flex;align-items:center;gap:6px;min-width:0}
   .form-row.split .col label{width:var(--label-width);font-size:14px;font-weight:700;color:#fff;white-space:nowrap}
-  /* 탠덤(오른쪽)만 ‘허용’ 잘림 방지 */
   .form-row.split .col:nth-child(2){ gap:4px }
   .form-row.split .col:nth-child(2) label{ width:calc(var(--label-width) - 8px) }
   .form-row.split .col:nth-child(2) .field{ flex:1 1 auto; min-width:0 }
@@ -51,7 +56,6 @@
 
   textarea{resize:none;height:40px}
 
-  /* 토글칩 */
   .toggles{display:flex;gap:10px;flex-wrap:wrap;margin:0}
   .toggle{
     display:inline-flex;align-items:center;gap:14px;padding:8px 12px;border-radius:999px;
@@ -65,7 +69,6 @@
     font-weight:800;
   }
 
-  /* 아이콘 */
   .profile-icons{display:flex;flex-direction:column;align-items:center;gap:10px;margin:0}
   .icons{display:grid;grid-template-columns:repeat(5,48px);grid-auto-rows:48px;gap:10px;justify-content:center}
   .icon-btn{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;
@@ -75,11 +78,9 @@
   .intro-box{width:calc(48px*5 + 10px*4);margin:8px 0 0}
   #intro{width:100%;text-align:center}
 
-  /* 버튼 */
   .save-btn{width:100%;padding:14px;margin-top:10px;font-size:15px;font-weight:700;background:var(--accent);border:none;color:#fff;border-radius:10px;cursor:pointer}
   .save-btn[disabled]{opacity:.6;cursor:not-allowed}
 
-  /* 하단 탭 */
   .tabbar{position:fixed;left:0;right:0;bottom:16px;z-index:2500;display:flex;gap:12px;justify-content:center}
   .tabbar .tab{background:var(--tab-bg);border:1px solid var(--tab-bd);color:var(--tab-ink);
     padding:12px 18px;border-radius:22px;font-weight:800;text-decoration:none;font-size:14px}
@@ -97,13 +98,11 @@
   .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
   .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
   .tag{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 10px;border-radius:999px;font-size:12px;white-space:nowrap;background:var(--chip-bg);border:1px solid var(--chip-bd)}
-
   .modal-actions{display:flex;gap:12px;justify-content:center;margin-top:6px}
   .modal-actions button{flex:1;padding:12px;border-radius:10px;border:none;font-size:14px;font-weight:800;cursor:pointer;color:#fff}
   .modal-actions .ok{background:var(--accent)}
   .modal-actions .edit{background:#2c2f48}
 
-  /* 토스트 */
   .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);padding:10px 14px;background:rgba(0,0,0,.78);color:#fff;border-radius:10px;font-size:13px;display:none;z-index:5000;border:1px solid rgba(255,255,255,.12)}
   .toast.show{display:block;animation:fade 2s ease}
   @keyframes fade{0%{opacity:0;transform:translateX(-50%) translateY(6px)}
@@ -111,9 +110,7 @@
                   90%{opacity:1}
                   100%{opacity:0}}
 
-  /* ===========================================================
-     내 프로필 찾기 모달 (전용)
-     =========================================================== */
+  /* ===== 내 프로필 찾기 모달 ===== */
   #claimModal .sheet{width:100%; max-width:680px}
   #claimModal .sheet.panel{
     background:#0e1222; border:1px solid #2b304f; border-radius:18px;
@@ -121,53 +118,26 @@
     max-height:88vh; display:flex; flex-direction:column; padding:16px 16px 18px;
   }
   #claimModal .hint{color:#cfd2ff; margin:0 0 8px}
-
-  /* 검색행 & 검색버튼 아래 여백(작게), 결과와는 10px 띄움 */
   #claimModal .search-row{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px}
   #claimModal .search-btn{width:100%; padding:12px 16px; border:none; border-radius:10px; background:var(--accent); color:#fff; font-weight:800; cursor:pointer; margin-bottom:10px}
-
-  /* 결과 영역 높이 고정 느낌 + 스크롤 */
-  :root{ --claim-results-min: 140px; --claim-card-h: 132px; }
   #claimResults{
     display:grid; gap:10px; overflow:auto;
     min-height:var(--claim-results-min);
     max-height: clamp(180px, 48vh, 420px);
   }
-
-  /* 결과 카드 */
   .claim-card{
     height: var(--claim-card-h);
     min-height: var(--claim-card-h);
-    display: grid;
-    grid-template-rows: auto 1fr auto; /* 헤더, 남는공간, 푸터 */
-    gap: 10px;
-    padding: 12px;
-    background: var(--chip-bg);
-    border:1px solid var(--chip-bd);
-    border-radius:12px;
-    overflow: hidden;
+    display:grid; grid-template-rows:auto 1fr auto; gap:10px;
+    padding:12px; background:var(--chip-bg); border:1px solid var(--chip-bd); border-radius:12px; overflow:hidden;
   }
-  .claim-card .head{ display:grid; grid-template-columns:44px 1fr; gap:10px; align-items:center }
-  .claim-card .avatar{
-    width:44px;height:44px;border-radius:50%;
-    display:flex;align-items:center;justify-content:center;
-    background:#1a1c2f;border:1px solid #2b2e54;font-size:22px;
-  }
-  .claim-card .name{ margin:0 0 2px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
-  .claim-card .sub{ font-size:13px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
-
-  /* 푸터(PIN + 버튼) — PIN은 15% 줄이고, 버튼은 10% 넓힘 느낌 */
-  .claim-card .foot{
-    display:grid;
-    grid-template-columns: minmax(0, calc(100% - 160px - 10px)) 160px;
-    gap:10px; align-items:center; margin-top:auto;
-  }
-  .claim-card .pin{
-    height:36px; padding:8px 10px; border:1px solid #2b2e54; border-radius:8px; background:#0f1020; color:#fff;
-  }
-  .claim-card .pin:focus{ outline:none; box-shadow:0 0 0 2px rgba(122,167,255,.25) inset; border-color:var(--accent) }
-
-  /* ▷ ‘프로필 연결’ 버튼: 엠버서더 톤 + 아이콘과 동일한 활성 효과 */
+  .claim-card .head{display:grid; grid-template-columns:44px 1fr; gap:10px; align-items:center}
+  .claim-card .avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#1a1c2f;border:1px solid #2b2e54;font-size:22px}
+  .claim-card .name{margin:0 0 2px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .claim-card .sub{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .claim-card .foot{display:grid; grid-template-columns: minmax(0, calc(100% - 160px - 10px)) 160px; gap:10px; align-items:center; margin-top:auto}
+  .claim-card .pin{height:36px;padding:8px 10px;border:1px solid #2b2e54;border-radius:8px;background:#0f1020;color:#fff;letter-spacing:2px;text-align:center}
+  .claim-card .pin:focus{outline:none;box-shadow:0 0 0 2px rgba(122,167,255,.25) inset;border-color:var(--accent)}
   .claim-card .connect{
     height:36px; padding:0 18px; border-radius:10px; border:1px solid transparent;
     background:var(--accent); color:#fff; font-weight:800; cursor:pointer;
@@ -181,10 +151,6 @@
     box-shadow:0 0 10px var(--accent-glow), 0 0 0 2px rgba(122,167,255,.25) inset;
     transform:translateY(-1px) scale(1.03);
   }
-  .claim-card .connect:active{
-    transform:scale(.98);
-  }
-  /* 클릭 후 ‘활성’ 상태 강조(스크립트에서 .active 부여) */
   .claim-card .connect.active{
     border-color:var(--accent); background:rgba(122,167,255,.16);
     color:#e6e9ff; box-shadow:0 0 10px var(--accent-glow), 0 0 0 2px rgba(122,167,255,.25) inset;
@@ -271,6 +237,14 @@
       </div>
     </div>
 
+    <!-- ✅ PIN(4자리) — 저장 시 함께 전송 (해시 저장) -->
+    <div class="form-row">
+      <label>PIN</label>
+      <div class="field">
+        <input id="pin" type="password" inputmode="numeric" pattern="\d*" maxlength="4" placeholder="4자리 숫자 (새로 설정/변경)">
+      </div>
+    </div>
+
     <div class="profile-icons">
       <div class="icons" id="iconSelect">
         <div class="icon-btn" data-icon="🏍️">🏍️</div>
@@ -290,7 +264,6 @@
     </div>
 
     <button class="save-btn" id="saveBtn">프로필 저장</button>
-    <!-- 내 프로필 찾기 버튼(텍스트 링크는 제거) -->
     <button class="save-btn" id="findMineBtn" style="background:#2c2f48;margin-top:8px">내 프로필 찾기</button>
   </section>
 </main>
@@ -326,7 +299,7 @@
 
 <!-- 내 프로필 찾기 모달 -->
 <div class="modal" id="claimModal" aria-modal="true" role="dialog">
-  <div class="sheet panel" id="claimSheet" style="max-width:680px">
+  <div class="sheet panel" id="claimSheet">
     <h3 style="margin:0 0 8px">내 프로필 찾기</h3>
     <p class="hint" style="margin:0 0 10px">이름으로 검색 후 내 프로필을 선택하세요.</p>
     <div class="search-row">
@@ -341,7 +314,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-/* 1) URL의 uid/me 로 들어오면 내 UID로 설정 */
+/* uid/me 쿼리로 들어오면 내 UID로 저장 */
 (function seedUIDFromQuery(){
   try{
     const p = new URLSearchParams(location.search);
@@ -353,7 +326,7 @@
   }catch(_){}
 })();
 
-/* 2) 상수 */
+/* 상수 */
 const REG_URL = "https://script.google.com/macros/s/AKfycbyVF4YYdzsucME-81RusrsOg89FJIgR7NLplRZ1kIMhGQmdh0_lRD-zWz4NG9xoFN43IQ/exec";
 const LS_KEY  = 'rimo_profile_v1';
 const LS_UID  = 'rimo_uid_v1';
@@ -393,7 +366,8 @@ document.querySelectorAll('.toggles').forEach(group=>{
   });
 });
 
-/* 로컬 → 폼 */
+/* 로컬 → 폼 (PIN은 보안상 미표시) */
+let _localPinSha = '';
 (function hydrateLocal(){
   try{
     const saved = JSON.parse(localStorage.getItem(LS_KEY)||'null');
@@ -414,11 +388,12 @@ document.querySelectorAll('.toggles').forEach(group=>{
         if(el) el.classList.add('active');
       });
       document.getElementById('intro').value = saved.intro || '';
+      _localPinSha = saved.pin_sha256 || '';
     }
   }catch(_){}
 })();
 
-/* 수집/저장 */
+/* 유틸: UID 보장 */
 function ensureUID(){
   let u = localStorage.getItem(LS_UID);
   if(!u){
@@ -427,10 +402,29 @@ function ensureUID(){
   }
   return u;
 }
-function collectProfile(){
+
+/* 유틸: SHA-256(hex) */
+async function sha256Hex(text){
+  const buf = new TextEncoder().encode(text);
+  const hash = await crypto.subtle.digest('SHA-256', buf);
+  const bytes = Array.from(new Uint8Array(hash));
+  return bytes.map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+/* 수집 (PIN 해시 포함) */
+async function collectProfile(){
   const styles = [...document.querySelectorAll('.toggles[data-group="style"] .toggle.active')].map(el=>el.dataset.value);
   const pace   = [...document.querySelectorAll('.toggles[data-group="speed"] .toggle.active')].map(el=>el.dataset.value);
   const introVal = (document.getElementById('intro').value||'').slice(0,25);
+
+  // PIN 입력이 있으면 새 해시, 없으면 기존 해시 유지
+  const pinRaw = (document.getElementById('pin').value || '').trim();
+  let pinSha = _localPinSha || '';
+  if(pinRaw){
+    if(!/^\d{4}$/.test(pinRaw)){ showToast('PIN은 숫자 4자리로 입력해 주세요.'); throw new Error('bad pin'); }
+    pinSha = await sha256Hex(pinRaw);
+  }
+
   return {
     uid: ensureUID(),
     name: document.getElementById('handle').value.trim(),
@@ -440,12 +434,16 @@ function collectProfile(){
     time: document.getElementById('time').value,
     tandem: document.getElementById('tandem').value,
     icon: selectedIcon,
-    intro: introVal
+    intro: introVal,
+    pin_sha256: pinSha
   };
 }
+
+/* 저장 */
 function saveProfileLocal(p){
   localStorage.setItem(LS_KEY, JSON.stringify(p));
   localStorage.setItem(LS_UID, p.uid);
+  _localPinSha = p.pin_sha256 || '';
 }
 async function saveProfileRemote(p){
   const res = await fetch(REG_URL, {
@@ -470,24 +468,26 @@ function showPreview(p){
 }
 
 document.getElementById("saveBtn").addEventListener("click", async ()=>{
-  const p = collectProfile();
-  if(!p.name){ showToast("이름을 입력해 주세요."); return; }
-  const btn = document.getElementById("saveBtn");
-  btn.disabled = true;
   try{
-    saveProfileLocal(p);
-    const out = await saveProfileRemote(p);
-    if(out.ok){
-      showToast("✅ 프로필 저장 완료");
-      showPreview(p);
-    }else{
-      showToast("⚠️ 저장 실패: " + (out.msg || "알 수 없는 오류"));
+    const p = await collectProfile();          // ← PIN 해시를 위해 async
+    if(!p.name){ showToast("이름을 입력해 주세요."); return; }
+    const btn = document.getElementById("saveBtn");
+    btn.disabled = true;
+    try{
+      saveProfileLocal(p);
+      const out = await saveProfileRemote(p);
+      if(out.ok){
+        showToast("✅ 프로필 저장 완료");
+        // 저장 후 PIN 입력칸은 비워두기
+        const pinEl = document.getElementById('pin'); if(pinEl) pinEl.value='';
+        showPreview(p);
+      }else{
+        showToast("⚠️ 저장 실패: " + (out.msg || "알 수 없는 오류"));
+      }
+    }finally{
+      btn.disabled = false;
     }
-  }catch(err){
-    showToast("⚠️ 네트워크 오류: " + err.message);
-  }finally{
-    btn.disabled = false;
-  }
+  }catch(_e){ /* PIN 오류 등은 토스트로 안내됨 */ }
 });
 document.getElementById("confirmBtn").addEventListener("click",()=> {
   document.getElementById('previewModal').classList.remove('show');
@@ -496,9 +496,7 @@ document.getElementById("editBtn").addEventListener("click",()=> {
   document.getElementById('previewModal').classList.remove('show');
 });
 
-/* =========================
-   내 프로필 찾기 (검색/연결)
-   ========================= */
+/* ===== 내 프로필 찾기 ===== */
 (function addClaimMyProfile(){
   const REG = REG_URL;
   const findBtn   = document.getElementById('findMineBtn');
@@ -510,7 +508,6 @@ document.getElementById("editBtn").addEventListener("click",()=> {
   const results   = document.getElementById('claimResults');
 
   function openModal(){
-    // 폼 값 프리필
     const nameEl = document.getElementById('handle');
     const regEl  = document.getElementById('region');
     if(nameEl) nameInp.value = nameEl.value || '';
@@ -520,11 +517,8 @@ document.getElementById("editBtn").addEventListener("click",()=> {
     nameInp.focus();
   }
   function closeModal(){ modal.classList.remove('show'); }
-  // 바깥 클릭 닫기
   modal.addEventListener('click', (e)=>{ if(e.target === modal) closeModal(); });
-  // 안쪽 클릭 버블 막기
   sheet.addEventListener('click', (e)=> e.stopPropagation());
-
   if (findBtn) findBtn.addEventListener('click', openModal);
 
   async function fetchAll(){
@@ -557,37 +551,37 @@ document.getElementById("editBtn").addEventListener("click",()=> {
           <button class="connect">프로필 연결</button>
         </div>
       `;
-
       const btn = card.querySelector('.connect');
       const pinEl = card.querySelector('.pin');
 
-      btn.addEventListener('click', ()=>{
+      btn.addEventListener('click', async ()=>{
         const pin = (pinEl.value||'').trim();
         if(pin.length !== 4){ showToast('PIN 4자리를 입력해주세요'); pinEl.focus(); return; }
 
-        // (선택) 서버가 PIN을 내려주는 경우에만 검증:
-        // if(String(r.pin||'') !== pin){ showToast('PIN이 올바르지 않습니다'); return; }
+        // (선택) 서버에서 검증하려면 별도 API로 pin_sha256 전달해 확인하세요.
+        // const ok = await verifyOnServer(r.uid, await sha256Hex(pin));
 
-        // 클릭 시 활성 효과
         btn.classList.add('active');
         setTimeout(()=>btn.classList.remove('active'), 600);
 
-        // 로컬 연결
         const normalized = {
           uid:r.uid||'', name:r.name||'', bike:r.bike||'', region:r.region||'',
           styles:Array.isArray(r.styles)?r.styles:[], pace:Array.isArray(r.pace)?r.pace:[],
-          time:r.time||'', tandem:r.tandem||'허용', icon:r.icon||'🏍️', intro:r.intro||''
+          time:r.time||'', tandem:r.tandem||'허용', icon:r.icon||'🏍️', intro:r.intro||'',
+          pin_sha256: await sha256Hex(pin)
         };
         localStorage.setItem(LS_UID, normalized.uid);
         localStorage.setItem(LS_KEY, JSON.stringify(normalized));
+        _localPinSha = normalized.pin_sha256 || '';
 
-        // 폼 반영
+        // 폼 반영 (PIN은 비워둠)
         const set=(id,val)=>{const el=document.getElementById(id); if(el) el.value=val;};
         set('handle', normalized.name);
         set('bike',   normalized.bike);
         set('region', normalized.region);
         set('time',   normalized.time);
         set('tandem', normalized.tandem);
+        const pinInput = document.getElementById('pin'); if(pinInput) pinInput.value='';
 
         selectedIcon = normalized.icon; updateIconActive();
         document.querySelectorAll('.toggles .toggle').forEach(t=>t.classList.remove('active'));
@@ -610,7 +604,6 @@ document.getElementById("editBtn").addEventListener("click",()=> {
     });
   }
 
-  // 검색
   if (searchBtn){
     searchBtn.addEventListener('click', async ()=>{
       const qn=(nameInp.value||'').trim().toLowerCase();
