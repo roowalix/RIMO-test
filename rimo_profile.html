@@ -17,7 +17,7 @@
     font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Helvetica,Arial,sans-serif;
   }
 
-  /* 헤더(공통 톤 유지 + 사파리 블러) */
+  /* 헤더 */
   header{
     position:sticky; top:0; z-index:5;
     background:rgba(11,11,15,.9);
@@ -29,10 +29,10 @@
   .logo{font-weight:900}
   .title{font-weight:800;opacity:.9}
 
-  /* 메인(폭은 rimo_theme.css에서 통일) */
+  /* 메인 컨테이너(폭은 rimo_theme.css) */
   main{display:flex;flex-direction:column;gap:12px}
 
-  /* 패널(표면/테두리/둥근모서리는 공통에서 처리) */
+  /* 패널 */
   .panel{padding:12px;display:flex;flex-direction:column;gap:10px}
 
   .form-row{display:flex;align-items:center;gap:0;margin-bottom:0}
@@ -40,11 +40,28 @@
   .form-row label{width:var(--label-width);font-size:14px;font-weight:700;white-space:nowrap}
   .field{flex:1}
 
+  /* ✅ 지역 | 탠덤: 항상 1행 2열 */
+  .form-row.split{
+    display:grid;
+    grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+    gap: 10px;
+    align-items: start;
+  }
+  .form-row.split .col{
+    display:flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .form-row.split .col label{
+    width:auto;                 /* 라벨 고정폭 해제 */
+    font-size:14px; font-weight:700;
+    white-space:nowrap;
+  }
+
   textarea{resize:none;height:40px}
 
   .toggles{display:flex;gap:4px;flex-wrap:wrap;margin:4px 0}
   .toggle{
-    /* 기본 배경/테두리는 공통 토큰 적용됨 */
     display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;
     color:#e6e9ff;font-size:13px;cursor:pointer;user-select:none;white-space:nowrap;
     transition:transform .15s ease, box-shadow .15s ease;
@@ -118,23 +135,37 @@
       <label>기종</label>
       <div class="field"><input id="bike" type="text" placeholder="예: Honda MSX125" autocomplete="off"></div>
     </div>
-    <div class="form-row">
-      <label>지역</label>
-      <div class="field">
-        <select id="region">
-          <option value="">지역 선택</option>
-          <option>서울 강남구</option><option>서울 강동구</option><option>서울 강북구</option>
-          <option>서울 강서구</option><option>서울 관악구</option><option>서울 광진구</option>
-          <option>서울 구로구</option><option>서울 금천구</option><option>서울 노원구</option>
-          <option>서울 도봉구</option><option>서울 동대문구</option><option>서울 동작구</option>
-          <option>서울 마포구</option><option>서울 서대문구</option><option>서울 서초구</option>
-          <option>서울 성동구</option><option>서울 성북구</option><option>서울 송파구</option>
-          <option>서울 양천구</option><option>서울 영등포구</option><option>서울 용산구</option>
-          <option>서울 은평구</option><option>서울 종로구</option><option>서울 중구</option>
-          <option>서울 중랑구</option>
-        </select>
+
+    <!-- ✅ 지역 | 탠덤: 항상 1행 2열 -->
+    <div class="form-row split">
+      <div class="col">
+        <label>지역</label>
+        <div class="field">
+          <select id="region">
+            <option value="">지역 선택</option>
+            <option>서울 강남구</option><option>서울 강동구</option><option>서울 강북구</option>
+            <option>서울 강서구</option><option>서울 관악구</option><option>서울 광진구</option>
+            <option>서울 구로구</option><option>서울 금천구</option><option>서울 노원구</option>
+            <option>서울 도봉구</option><option>서울 동대문구</option><option>서울 동작구</option>
+            <option>서울 마포구</option><option>서울 서대문구</option><option>서울 서초구</option>
+            <option>서울 성동구</option><option>서울 성북구</option><option>서울 송파구</option>
+            <option>서울 양천구</option><option>서울 영등포구</option><option>서울 용산구</option>
+            <option>서울 은평구</option><option>서울 종로구</option><option>서울 중구</option>
+            <option>서울 중랑구</option>
+          </select>
+        </div>
+      </div>
+      <div class="col">
+        <label>탠덤</label>
+        <div class="field">
+          <select id="tandem">
+            <option value="허용">허용</option>
+            <option value="불가">불가</option>
+          </select>
+        </div>
       </div>
     </div>
+
     <div class="form-row">
       <label>시간대</label>
       <div class="field">
@@ -147,15 +178,7 @@
         </select>
       </div>
     </div>
-    <div class="form-row">
-      <label>탠덤</label>
-      <div class="field">
-        <select id="tandem">
-          <option value="허용">허용</option>
-          <option value="불가">불가</option>
-        </select>
-      </div>
-    </div>
+
     <div class="form-row">
       <label>스타일</label>
       <div class="toggles" data-group="style">
@@ -241,7 +264,7 @@ function getUID(){
   return uid;
 }
 
-/* ✅ 토스트 2초 유지 (연속 호출 안전) */
+/* 토스트 2초 */
 function showToast(msg, ms = 2000){
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -346,7 +369,7 @@ function showPreview(p){
   document.getElementById('previewModal').classList.add('show');
 }
 
-// 버튼 이벤트
+// 저장 버튼
 const saveBtn = document.getElementById("saveBtn");
 saveBtn.addEventListener("click", async ()=>{
   const p = collectProfile();
