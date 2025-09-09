@@ -8,7 +8,7 @@
   :root{
     --bg:#0b0b0f; --fg:#e8e8ef; --muted:#b9b9cc; --line:#23243a;
     --tile:#101223; --tileBd:#23243a;
-    --accent:#7aa7ff;
+    --accent:#7aa7ff; --meBg:rgba(122,167,255,.10); --meBd:rgba(122,167,255,.55);
 
     --tab-bg:#182039; --tab-bd:#2d3559; --tab-ink:#e6e8ef;
     --tab-pri:#26346d; --tab-pri-bd:#3b53a8;
@@ -41,13 +41,29 @@
     padding:10px 12px;
     display:flex; flex-direction:column; gap:7px;margin-bottom:10px;
   }
+  /* ✅ 내 프로필 하이라이트 */
+  .card.me{
+    background:var(--meBg);
+    border-color:var(--meBd);
+    box-shadow:0 0 0 1px var(--meBd) inset;
+  }
+  .meBadge{
+    margin-left:8px;
+    padding:3px 7px;
+    font-size:11px; font-weight:800;
+    color:#cfe0ff;
+    background:rgba(122,167,255,.15);
+    border:1px solid rgba(122,167,255,.35);
+    border-radius:999px;
+  }
+
   .head{display:flex; gap:14px; align-items:center}
   .avatar{
     width:72px; height:72px; border-radius:50%;
     background:#1a1c2f; font-size:36px; display:flex; align-items:center; justify-content:center; flex:0 0 auto;
   }
   .idcol{min-width:0; flex:1}
-  .nameRow{display:flex; align-items:center; gap:10px}
+  .nameRow{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
   .name{
     margin:0; font-size:16px; font-weight:800; line-height: 1.2;
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
@@ -129,11 +145,9 @@
 
 <script>
 /* ===== 설정 ===== */
-/* ✅ 최신 웹앱 URL로 교체 */
-const REG_URL = "https://script.google.com/macros/s/AKfycby0QQwqAIYq-uy-HFJSZ-ZDSglSETeB-llXpUuUAN4_LJop0WfcvKbLJspJSx8pRRvu/exec";
-
-/* 로컬 내 프로필(내 카드 식별용) */
-const LSK_PROFILE = 'rimo_profile_v1';
+const REG_URL   = "https://script.google.com/macros/s/AKfycbzdOZDlDa8wcOt9XPCYM9HnNRS6n4fpxiEOfd5v9QEAXLICK0LERjHNM2-G0nOQ3BcV/exec";
+const LS_KEY    = 'rimo_profile_v1';  // 내 프로필 로컬
+const LS_UID    = 'rimo_uid_v1';      // 내 uid 로컬
 
 const STYLE_META = {
   Urban:{cls:'pill-urban',  label:'Urban'},
@@ -146,30 +160,51 @@ const PACE_META = {
   Dynamic: {cls:'pill-dynamic',  label:'Dynamic'},
 };
 
-function loadLocalMe(){
-  try{ return JSON.parse(localStorage.getItem(LSK_PROFILE)||'{}'); }
-  catch(e){ return {}; }
+function meLocal() {
+  let uid = null, name = null;
+  try { uid = localStorage.getItem(LS_UID) || null; } catch(_){}
+  try {
+    const p = JSON.parse(localStorage.getItem(LS_KEY) || 'null');
+    if (p && p.name) name = String(p.name).trim();
+  } catch(_){}
+  return { uid, name };
 }
 
-/* ✅ 서버에서 목록 가져오기: GET ?action=listProfiles (캐시 방지 ts) */
+/* GET ?action=listProfiles&ts=... */
 async function loadProfiles(){
   const url = `${REG_URL}?action=listProfiles&ts=${Date.now()}`;
-  const res = await fetch(url, { method:'GET' });
+  const res = await fetch(url);
   const text = await res.text();
+  let json;
+  try { json = JSON.parse(text); } catch(_) { throw new Error('목록 응답 파싱 실패'); }
+  if (!(json && json.ok && Array.isArray(json.data))) throw new Error('목록 형식 오류');
+  return json.data;
+}
 
-  // 1) 표준 응답: { ok:true, data:[...] }
-  try{
-    const json = JSON.parse(text);
-    if (json && json.ok && Array.isArray(json.data)) return json.data;
-  }catch(_) {}
+/* 내 프로필 고정 정렬 */
+function pinMineFirst(items){
+  const me = meLocal();
+  if (!me.uid && !me.name) return items.slice();
 
-  // 2) 혹시 배열 그대로 내려오는 케이스도 수용
-  try{
-    const arr = JSON.parse(text);
-    if (Array.isArray(arr)) return arr;
-  }catch(_) {}
+  const arr = items.slice();
+  let myIdx = -1;
 
-  throw new Error('목록 응답 파싱 실패');
+  // 1) uid 최우선
+  if (me.uid) myIdx = arr.findIndex(x => x.uid && String(x.uid) === me.uid);
+  // 2) uid 없으면 이름 폴백
+  if (myIdx === -1 && me.name) {
+    myIdx = arr.findIndex(x => x.name && String(x.name).trim() === me.name);
+  }
+
+  if (myIdx > -1) {
+    const mine = arr.splice(myIdx, 1)[0];
+    // 나머지 최신순 정렬(옵션)
+    arr.sort((a,b) => (b.ts || 0) - (a.ts || 0));
+    return [mine, ...arr];
+  } else {
+    // 못 찾으면 전체 최신순
+    return arr.sort((a,b) => (b.ts || 0) - (a.ts || 0));
+  }
 }
 
 function tagEl(cls, text){
@@ -183,11 +218,17 @@ function renderList(items){
   const listEl = document.getElementById('list');
   listEl.innerHTML = '';
 
-  const me = loadLocalMe();
+  const me = meLocal();
 
-  items.forEach(a=>{
+  // 내 카드 최상단 고정
+  const sorted = pinMineFirst(items);
+
+  sorted.forEach(a=>{
     const card = document.createElement('article');
-    card.className = 'card';
+    const isMe = (me.uid && a.uid === me.uid) ||
+                 (!me.uid && me.name && a.name && me.name === a.name);
+
+    card.className = 'card' + (isMe ? ' me' : '');
 
     const head = document.createElement('div');
     head.className = 'head';
@@ -206,7 +247,15 @@ function renderList(items){
     name.className = 'name';
     name.textContent = a.name || '라이더';
 
-    const isMe = me?.name && a?.name && (me.name.trim() === a.name.trim());
+    nameRow.appendChild(name);
+
+    // ✅ 내 프로필 배지
+    if (isMe) {
+      const badge = document.createElement('span');
+      badge.className = 'meBadge';
+      badge.textContent = '내 프로필';
+      nameRow.appendChild(badge);
+    }
 
     const btn = document.createElement('button');
     btn.type = 'button';
@@ -218,11 +267,9 @@ function renderList(items){
       btn.innerHTML = '🤝 매칭희망';
       btn.onclick = ()=> alert('매칭희망 수집은 곧 연결됩니다 🙂');
     }
-
-    nameRow.appendChild(name);
     nameRow.appendChild(btn);
 
-    // intro(선택값, 없을 수 있음)
+    // intro(선택값)
     if (a.intro){
       const intro = document.createElement('p');
       intro.className = 'intro';
@@ -243,11 +290,11 @@ function renderList(items){
     head.appendChild(avatar);
     head.appendChild(idcol);
 
-    // 스타일/페이스 태그
+    // 태그
     const traits = document.createElement('div');
     traits.className = 'traits';
-    const styles = Array.isArray(a.styles) ? a.styles : (a.styles ? String(a.styles).split(/\s*\|\s*|,\s*/).filter(Boolean) : []);
-    const pace   = Array.isArray(a.pace)   ? a.pace   : (a.pace   ? String(a.pace).split(/\s*\|\s*|,\s*/).filter(Boolean)   : []);
+    const styles = Array.isArray(a.styles) ? a.styles : [];
+    const pace   = Array.isArray(a.pace)   ? a.pace   : [];
     const all    = [
       ...styles.map(s => ({type:'style', key:s})),
       ...pace.map(p => ({type:'pace',  key:p}))
@@ -283,15 +330,17 @@ function renderList(items){
     const items = await loadProfiles();
     if(state) state.remove();
 
-    // GAS 기본 응답은 region/intro가 없을 수 있으니, 누락 필드를 안전 보정
+    // 서버가 region/intro를 넘겨주므로 그대로 사용
     const normalized = items.map(r => ({
+      uid: r.uid || '',
       icon: r.icon || '🏍️',
       name: r.name || '라이더',
-      region: r.region || '',          // 서버가 주지 않으면 공란
+      region: r.region || '',
       bike: r.bike || '',
-      styles: r.styles || [],
-      pace: r.pace || [],
-      intro: r.intro || ''             // 서버가 주지 않으면 공란
+      styles: Array.isArray(r.styles) ? r.styles : [],
+      pace: Array.isArray(r.pace) ? r.pace : [],
+      intro: r.intro || '',
+      ts: r.ts || 0
     }));
 
     renderList(normalized);
