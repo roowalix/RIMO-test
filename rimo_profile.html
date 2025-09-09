@@ -40,25 +40,27 @@
   .form-row label{width:var(--label-width);font-size:14px;font-weight:700;white-space:nowrap}
   .field{flex:1}
 
-  /* ✅ 지역 / 탠덤 : 항상 1행 2열, 왼쪽(지역) 더 넓게, 라벨은 흰색 */
-  .form-row.split{
-    display:grid;
-    grid-template-columns: minmax(0,1.6fr) minmax(0,1fr);
-    column-gap:14px;
-    align-items:center;
-  }
-  .form-row.split .col{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    min-width:0; /* 좁은 화면에서도 압축 가능 */
-  }
-  .form-row.split .col label{
-    width:auto;                 /* 라벨 고정폭 해제 */
-    font-size:14px; font-weight:700;
-    white-space:nowrap;
-    color:#fff;                 /* ✅ 흰색으로 통일 */
-  }
+  /* 지역 / 탠덤 행을 다른 행과 좌우 정렬 맞추기 */
+.form-row.split{
+  display:grid;
+  grid-template-columns: minmax(0,1.6fr) minmax(0,1fr); /* 왼쪽(지역) 더 넓게 */
+  column-gap:14px;
+  align-items:center;
+}
+.form-row.split .col{
+  display:flex;
+  align-items:center;
+  gap:0;                 /* ✅ 다른 행(.form-row)과 동일하게 간격 0 */
+  min-width:0;
+}
+.form-row.split .col label{
+  width: var(--label-width);   /* ✅ 라벨도 40px 고정폭으로 통일 */
+  font-size:14px; font-weight:700;
+  white-space:nowrap;
+  color:#fff;                  /* 요청대로 흰색 */
+}
+.form-row.split .field{ flex:1; min-width:0; }
+.form-row.split select{ width:100%; }
 
   textarea{resize:none;height:40px}
 
