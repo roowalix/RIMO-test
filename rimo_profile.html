@@ -175,6 +175,42 @@
   border-color:var(--accent);
   box-shadow:0 0 0 2px rgba(122,167,255,.25) inset;
 }
+  /* ===== 폼 컨트롤 공통 세팅 (이름/기종/지역/탠덤/시간대/PIN) ===== */
+:root { --control-h: 52px } /* 6개 컨트롤의 공통 높이. 원하면 48~56px로 조정 */
+
+.panel .field input[type="text"],
+.panel .field input[type="password"],
+.panel .field select {
+  appearance: none;
+  width: 100%;
+  height: var(--control-h);
+  padding: 12px 14px;
+  border: 1px solid #2c2f48;
+  border-radius: 12px;
+  background: #0f1020;
+  color: #fff;
+  font-size: 14px;
+  line-height: 1;            /* 플랫폼 차이 줄이기 */
+  box-sizing: border-box;
+}
+
+/* placeholder 톤統一 */
+.panel .field input::placeholder { color: #9aa0b6; }
+
+/* 포커스(활성화) 시 효과 — 모든 컨트롤 공통 */
+.panel .field input:focus,
+.panel .field select:focus {
+  outline: none;
+  border-color: var(--accent);
+  /* 다른 폼과 동일한 빛번짐 */
+  box-shadow: 0 0 0 2px rgba(122,167,255,.25) inset, 0 0 12px rgba(122,167,255,.28);
+}
+
+/* --- PIN 전용(다른 컨트롤과 룩을 완전히 동일화) --- */
+#pin {
+  text-align: center;        /* 기존처럼 가운데 입력 원하면 유지, 좌측정렬 원하면 지우기 */
+  letter-spacing: 2px;       /* 숫자 간격 */
+}
 </style>
 </head>
 <body>
