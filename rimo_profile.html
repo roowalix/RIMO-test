@@ -118,6 +118,26 @@
                   10%{opacity:1;transform:translateX(-50%) translateY(0)}
                   90%{opacity:1}
                   100%{opacity:0}}
+
+  /* ✅ 탠덤(오른쪽 컬럼)만 간격·폭 최적화 */
+.form-row.split .col:nth-child(2){ 
+  gap:2px;                 /* 라벨 ↔ 셀렉트 간격만 살짝 줄임(기존 6px → 4px) */
+}
+
+.form-row.split .col:nth-child(2) label{
+  width: calc(var(--label-width) - 8px);  /* 라벨 폭만 8px 줄여서 입력칸을 더 넓힘 */
+  /* 필요하면 더 줄여도 OK: 예) -10px */
+}
+
+.form-row.split .col:nth-child(2) .field{
+  flex: 1 1 auto; 
+  min-width: 0;            /* 좁은 화면에서도 자연스럽게 늘어나도록 */
+}
+
+.form-row.split .col:nth-child(2) select{
+  width: 100%;             /* 허용/불가 텍스트가 잘리지 않도록 전체폭 사용 */
+}
+
 </style>
 </head>
 <body>
