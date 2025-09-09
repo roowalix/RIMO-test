@@ -327,9 +327,10 @@
 })();
 
 // 2) 상수/상태
-const REG_URL = "https://script.google.com/macros/s/AKfycbwUWRmyofeMKOQX9iErQLypTT_oOrgZVFZh7i8HjO0VODFIEjoV7HDjA9a3jUe8rBreug/exec";
-const LS_KEY  = 'rimo_profile_v1';
-const LS_UID  = 'rimo_uid_v1';
+const REG_URL = "https://script.google.com/macros/s/AKfycbyVF4YYdzsucME-81RusrsOg89FJIgR7NLplRZ1kIMhGQmdh0_lRD-zWz4NG9xoFN43IQ/exec";
+const LS_PIN = 'rimo_pin_v1';
+const LS_KEY = 'rimo_profile_v1';
+const LS_UID = 'rimo_uid_v1';
 let selectedIcon = "🏍️";
 
 // cookie helpers
@@ -406,14 +407,22 @@ function saveProfileLocal(p){
   setCookie(LS_UID, p.uid);
 }
 async function saveProfileRemote(p){
+  const body = {
+    action: "registerProfile",
+    profile: {
+      ...p,
+      pin: localStorage.getItem(LS_PIN) || ""  // ← 추가
+    }
+  };
   const res = await fetch(REG_URL, {
     method: "POST",
-    headers: { "Content-Type": "text/plain;charset=utf-8" }, // preflight 회피
-    body: JSON.stringify({ action:"registerProfile", profile: p })
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify(body)
   });
-  const out = await res.json().catch(()=>({ok:false,msg:'응답 파싱 실패'}));
+  const out = await res.json().catch(()=>({ok:false, msg:'응답 파싱 실패'}));
   return out;
 }
+
 
 // 프리뷰
 function showPreview(p){
