@@ -120,16 +120,16 @@
   .claim-name{font-weight:800;margin:0 0 2px}
   .claim-sub{font-size:13px;color:var(--muted);margin:0}
   .claim-pin{display:flex; gap:8px; align-items:center}
-  .claim-pin input{flex:1; min-width:110px; padding:8px 10px; border:1px solid #2c2f48; border-radius:8px; background:#0f1020; color:#fff}
-  .claim-pin button{flex:0 0 auto; padding:10px 16px; border-radius:8px; border:none; background:#2a5bff; color:#fff; font-weight:800; cursor:pointer}
+  .claim-pin input{flex:1; min-width:120px; padding:8px 10px; border:1px solid #2c2f48; border-radius:8px; background:#0f1020; color:#fff}
+  .claim-pin button{flex:0 0 auto; padding:10px 20px; border-radius:8px; border:none; background:#2a5bff; color:#fff; font-weight:800; cursor:pointer}
   /* 모달 하단 여백 (닫기 버튼 삭제했으니 내부 패딩만 확보) */
   #claimModal .sheet.panel{padding-bottom:18px}
 
   /* ── 내 프로필 찾기: 결과 카드 고정 높이 ───────────────────────── */
-:root{ --claim-card-h: 60px }  /* 원하는 높이로 조절: 140~160px 권장 */
+:root{ --claim-card-h: 70px }  /* 원하는 높이로 조절: 140~160px 권장 */
 
 #claimResults{
-  max-height: clamp(220px, 34vh, 360px);
+  max-height: clamp(120px, 34vh, 360px);
   overflow: auto;
   padding-bottom: 4px;           /* 스크롤 마지막 카드 여유 */
   display: grid;
