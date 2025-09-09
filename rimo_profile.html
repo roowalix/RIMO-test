@@ -10,26 +10,27 @@
 <style>
   :root{
     --label-width:40px;
-    --claim-results-min:240px;
-    --claim-card-min:128px; /* ✅ 결과 카드 최소 높이 (PIN이 잘리지 않도록) */
+    --accent:#2a5bff;                /* 메인 포인트 */
+    --accent-glow: rgba(122,167,255,.45);
+    --chip-bg:#101223; --chip-bd:#2b2e54;
   }
 
   *{box-sizing:border-box}
   body{ margin:0; font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Helvetica,Arial,sans-serif; }
 
-  header{
-    position:sticky; top:0; z-index:5;
-    background:rgba(11,11,15,.9);
-    -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
-    border-bottom:1px solid var(--border-1);
-  }
+  /* 헤더 */
+  header{ position:sticky; top:0; z-index:5; background:rgba(11,11,15,.9);
+          -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+          border-bottom:1px solid var(--border-1); }
   .bar{display:flex;gap:10px;align-items:center;padding:14px 16px;height:56px}
   .logo{font-weight:900}
   .title{font-weight:800;opacity:.9}
 
+  /* 레이아웃 */
   main{display:flex;flex-direction:column;gap:12px}
   .panel{padding:12px;display:flex;flex-direction:column;gap:10px}
 
+  /* 행 간격/라벨 */
   .form-row{display:flex;align-items:center;gap:6px;margin-bottom:0}
   .form-row.top{align-items:flex-start}
   .form-row label{width:var(--label-width);font-size:14px;font-weight:700;white-space:nowrap}
@@ -42,6 +43,7 @@
   }
   .form-row.split .col{display:flex;align-items:center;gap:6px;min-width:0}
   .form-row.split .col label{width:var(--label-width);font-size:14px;font-weight:700;color:#fff;white-space:nowrap}
+  /* 탠덤(오른쪽)만 ‘허용’ 잘림 방지 */
   .form-row.split .col:nth-child(2){ gap:4px }
   .form-row.split .col:nth-child(2) label{ width:calc(var(--label-width) - 8px) }
   .form-row.split .col:nth-child(2) .field{ flex:1 1 auto; min-width:0 }
@@ -49,39 +51,41 @@
 
   textarea{resize:none;height:40px}
 
+  /* 토글칩 */
   .toggles{display:flex;gap:10px;flex-wrap:wrap;margin:0}
   .toggle{
-    display:inline-flex;align-items:center;gap:10px;padding:8px 12px;border-radius:999px;
+    display:inline-flex;align-items:center;gap:14px;padding:8px 12px;border-radius:999px;
     color:#e6e9ff;font-size:13px;cursor:pointer;user-select:none;white-space:nowrap;
-    transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease, background-color .15s ease;
-    border:1px solid transparent;              /* ✅ 기본 테두리(투명) */
-    background:transparent;
+    transition:transform .15s ease, box-shadow .15s ease;
+    background:var(--chip-bg); border:1px solid var(--chip-bd);
   }
-  .toggle.active{                               /* ✅ 아이콘 버튼과 동일한 느낌으로 */
-    border-color:var(--accent);
-    background:rgba(122,167,255,.16);
-    box-shadow:0 0 10px rgba(122,167,255,.45);
-    transform:translateY(-1px) scale(1.03);
+  .toggle.active{
+    border-color:var(--accent); background:rgba(122,167,255,.16);
+    box-shadow:0 0 10px var(--accent-glow); transform:translateY(-1px) scale(1.03);
     font-weight:800;
   }
 
+  /* 아이콘 */
   .profile-icons{display:flex;flex-direction:column;align-items:center;gap:10px;margin:0}
   .icons{display:grid;grid-template-columns:repeat(5,48px);grid-auto-rows:48px;gap:10px;justify-content:center}
   .icon-btn{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-    font-size:28px;cursor:pointer;transition:.15s ease;color:#fff;border:1px solid transparent}
-  .icon-btn.active{border-color:var(--accent);box-shadow:0 0 10px rgba(122,167,255,.4);transform:scale(1.05)}
+    font-size:28px;cursor:pointer;transition:.15s ease;color:#fff;
+    background:var(--chip-bg); border:1px solid var(--chip-bd)}
+  .icon-btn.active{border-color:var(--accent);box-shadow:0 0 10px var(--accent-glow);transform:scale(1.05)}
   .intro-box{width:calc(48px*5 + 10px*4);margin:8px 0 0}
   #intro{width:100%;text-align:center}
 
-  .save-btn{width:100%;padding:14px;margin-top:10px;font-size:15px;font-weight:700;background:#2a5bff;border:none;color:#fff;border-radius:10px;cursor:pointer}
+  /* 버튼 */
+  .save-btn{width:100%;padding:14px;margin-top:10px;font-size:15px;font-weight:700;background:var(--accent);border:none;color:#fff;border-radius:10px;cursor:pointer}
   .save-btn[disabled]{opacity:.6;cursor:not-allowed}
-  .btn-secondary{width:100%;padding:12px;margin-top:8px;border:none;border-radius:10px;font-weight:800;font-size:14px;background:#2c2f48;color:#fff;cursor:pointer}
 
+  /* 하단 탭 */
   .tabbar{position:fixed;left:0;right:0;bottom:16px;z-index:2500;display:flex;gap:12px;justify-content:center}
   .tabbar .tab{background:var(--tab-bg);border:1px solid var(--tab-bd);color:var(--tab-ink);
     padding:12px 18px;border-radius:22px;font-weight:800;text-decoration:none;font-size:14px}
   .tabbar .tab.primary{background:var(--tab-pri);border-color:var(--tab-pri-bd)}
 
+  /* 미리보기 모달 */
   .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.5);z-index:3000;padding:16px}
   .modal.show{display:flex}
   .modal-content.panel{max-width:520px;box-shadow:0 8px 24px rgba(0,0,0,.4)}
@@ -92,12 +96,14 @@
   .sub{margin:0;color:var(--muted);font-size:13px}
   .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
   .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-  .tag{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 10px;border-radius:999px;font-size:12px;white-space:nowrap}
+  .tag{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 10px;border-radius:999px;font-size:12px;white-space:nowrap;background:var(--chip-bg);border:1px solid var(--chip-bd)}
+
   .modal-actions{display:flex;gap:12px;justify-content:center;margin-top:6px}
   .modal-actions button{flex:1;padding:12px;border-radius:10px;border:none;font-size:14px;font-weight:800;cursor:pointer;color:#fff}
-  .modal-actions .ok{background:#2a5bff}
+  .modal-actions .ok{background:var(--accent)}
   .modal-actions .edit{background:#2c2f48}
 
+  /* 토스트 */
   .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);padding:10px 14px;background:rgba(0,0,0,.78);color:#fff;border-radius:10px;font-size:13px;display:none;z-index:5000;border:1px solid rgba(255,255,255,.12)}
   .toast.show{display:block;animation:fade 2s ease}
   @keyframes fade{0%{opacity:0;transform:translateX(-50%) translateY(6px)}
@@ -105,7 +111,9 @@
                   90%{opacity:1}
                   100%{opacity:0}}
 
-  /* === 내 프로필 찾기 모달 전용 ============================= */
+  /* ===========================================================
+     내 프로필 찾기 모달 (전용)
+     =========================================================== */
   #claimModal .sheet{width:100%; max-width:680px}
   #claimModal .sheet.panel{
     background:#0e1222; border:1px solid #2b304f; border-radius:18px;
@@ -113,61 +121,74 @@
     max-height:88vh; display:flex; flex-direction:column; padding:16px 16px 18px;
   }
   #claimModal .hint{color:#cfd2ff; margin:0 0 8px}
-  #claimModal .search-row{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px}
 
-  /* 검색 결과 리스트(영역 고정 → 위쪽 레이아웃 점프 방지) */
+  /* 검색행 & 검색버튼 아래 여백(작게), 결과와는 10px 띄움 */
+  #claimModal .search-row{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px}
+  #claimModal .search-btn{width:100%; padding:12px 16px; border:none; border-radius:10px; background:var(--accent); color:#fff; font-weight:800; cursor:pointer; margin-bottom:10px}
+
+  /* 결과 영역 높이 고정 느낌 + 스크롤 */
+  :root{ --claim-results-min: 140px; --claim-card-h: 132px; }
   #claimResults{
-    display:grid; gap:10px;
-    min-height: var(--claim-results-min);
-    max-height: clamp(160px, 48vh, 420px);
-    overflow:auto;
-    padding-bottom:4px;
+    display:grid; gap:10px; overflow:auto;
+    min-height:var(--claim-results-min);
+    max-height: clamp(180px, 48vh, 420px);
   }
 
   /* 결과 카드 */
-  #claimResults .claim-card{
-    min-height: var(--claim-card-min);       /* ✅ 고정높이 → 최소높이 */
-    display:grid;
-    grid-template-rows: auto 1fr auto;       /* 헤더 / 여유 / 풋터 */
-    gap:10px;
-    padding:12px;
-    border:1px solid #2b2e54; border-radius:12px; background:#101223;
-    /* overflow:hidden;  <-- ✅ 제거. PIN이 클립되는 이슈 방지 */
+  .claim-card{
+    height: var(--claim-card-h);
+    min-height: var(--claim-card-h);
+    display: grid;
+    grid-template-rows: auto 1fr auto; /* 헤더, 남는공간, 푸터 */
+    gap: 10px;
+    padding: 12px;
+    background: var(--chip-bg);
+    border:1px solid var(--chip-bd);
+    border-radius:12px;
+    overflow: hidden;
   }
+  .claim-card .head{ display:grid; grid-template-columns:44px 1fr; gap:10px; align-items:center }
+  .claim-card .avatar{
+    width:44px;height:44px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    background:#1a1c2f;border:1px solid #2b2e54;font-size:22px;
+  }
+  .claim-card .name{ margin:0 0 2px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+  .claim-card .sub{ font-size:13px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
 
-  /* 카드 헤더(아이콘 + 텍스트) */
-  #claimResults .claim-card .head{
-    display:grid; grid-template-columns:44px 1fr; gap:10px; align-items:center;
-  }
-  #claimResults .claim-card .avatar{
-    width:44px; height:44px; border-radius:50%;
-    display:flex; align-items:center; justify-content:center;
-    background:#1a1c2f; border:1px solid #2b2e54; font-size:22px;
-  }
-  #claimResults .claim-card .name{
-    margin:0 0 2px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-  }
-  #claimResults .claim-card .sub{
-    font-size:13px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-  }
-
-  /* 카드 풋터(PIN 입력 + 버튼 2열) */
-  #claimResults .claim-card .foot{
+  /* 푸터(PIN + 버튼) — PIN은 15% 줄이고, 버튼은 10% 넓힘 느낌 */
+  .claim-card .foot{
     display:grid;
-    grid-template-columns: minmax(0,1fr) 110px;  /* 입력칸 / 버튼 */
-    gap:10px;
-    align-items:center;
-    margin-top:auto;
+    grid-template-columns: minmax(0, calc(100% - 160px - 10px)) 160px;
+    gap:10px; align-items:center; margin-top:auto;
   }
-  #claimResults .claim-card .pin{
-    height:36px; padding:8px 10px;
-    border:1px solid #2b2e54; border-radius:8px;
-    background:#0f1020; color:#fff; width:100%;
+  .claim-card .pin{
+    height:36px; padding:8px 10px; border:1px solid #2b2e54; border-radius:8px; background:#0f1020; color:#fff;
   }
-  #claimResults .claim-card .connect{
-    height:36px; border:none; border-radius:8px;
-    background:#2a5bff; color:#fff; font-weight:800; cursor:pointer;
-    white-space:nowrap; padding:0 14px;
+  .claim-card .pin:focus{ outline:none; box-shadow:0 0 0 2px rgba(122,167,255,.25) inset; border-color:var(--accent) }
+
+  /* ▷ ‘프로필 연결’ 버튼: 엠버서더 톤 + 아이콘과 동일한 활성 효과 */
+  .claim-card .connect{
+    height:36px; padding:0 18px; border-radius:10px; border:1px solid transparent;
+    background:var(--accent); color:#fff; font-weight:800; cursor:pointer;
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease, background-color .15s ease;
+    white-space:nowrap;
+  }
+  .claim-card .connect:hover,
+  .claim-card .connect:focus-visible{
+    border-color:var(--accent); background:rgba(122,167,255,.16);
+    color:#e6e9ff;
+    box-shadow:0 0 10px var(--accent-glow), 0 0 0 2px rgba(122,167,255,.25) inset;
+    transform:translateY(-1px) scale(1.03);
+  }
+  .claim-card .connect:active{
+    transform:scale(.98);
+  }
+  /* 클릭 후 ‘활성’ 상태 강조(스크립트에서 .active 부여) */
+  .claim-card .connect.active{
+    border-color:var(--accent); background:rgba(122,167,255,.16);
+    color:#e6e9ff; box-shadow:0 0 10px var(--accent-glow), 0 0 0 2px rgba(122,167,255,.25) inset;
+    transform:translateY(-1px) scale(1.03);
   }
 </style>
 </head>
@@ -269,7 +290,8 @@
     </div>
 
     <button class="save-btn" id="saveBtn">프로필 저장</button>
-    <button class="btn-secondary" id="claimOpen">내 프로필 찾기</button>
+    <!-- 내 프로필 찾기 버튼(텍스트 링크는 제거) -->
+    <button class="save-btn" id="findMineBtn" style="background:#2c2f48;margin-top:8px">내 프로필 찾기</button>
   </section>
 </main>
 
@@ -279,9 +301,9 @@
   <a href="rimo_ambassadors.html" class="tab">엠버서더</a>
 </nav>
 
-<!-- 저장 후 미리보기 모달 -->
+<!-- 미리보기 모달 -->
 <div class="modal" id="previewModal">
-  <div class="modal-content panel" style="padding-bottom:18px">
+  <div class="modal-content panel">
     <div class="card-head">
       <div class="avatar" id="avatarPreview">🏍️</div>
       <div class="idcol">
@@ -289,13 +311,13 @@
         <p class="sub" id="bikePreview">바이크 미입력 · 서울</p>
       </div>
     </div>
-    <div class="grid-2" style="margin-bottom:8px">
+    <div class="grid-2">
       <div class="tag" id="timePreview">-</div>
       <div class="tag" id="tandemPreview">탠덤 허용</div>
     </div>
     <div class="grid-3" id="styleGrid"></div>
     <div class="grid-3" id="paceGrid"></div>
-    <div class="modal-actions" style="margin-top:10px">
+    <div class="modal-actions">
       <button class="ok" id="confirmBtn">확인</button>
       <button class="edit" id="editBtn">수정</button>
     </div>
@@ -303,17 +325,15 @@
 </div>
 
 <!-- 내 프로필 찾기 모달 -->
-<div class="modal" id="claimModal" role="dialog" aria-modal="true" aria-labelledby="claimTitle">
-  <div class="sheet panel" id="claimSheet">
-    <h3 id="claimTitle" style="margin:0 0 8px">내 프로필 찾기</h3>
-    <p class="hint">이름으로 검색 후 내 프로필을 선택하세요.</p>
+<div class="modal" id="claimModal" aria-modal="true" role="dialog">
+  <div class="sheet panel" id="claimSheet" style="max-width:680px">
+    <h3 style="margin:0 0 8px">내 프로필 찾기</h3>
+    <p class="hint" style="margin:0 0 10px">이름으로 검색 후 내 프로필을 선택하세요.</p>
     <div class="search-row">
-      <input id="claimName" type="text" placeholder="이름"
-             style="flex:1;min-width:160px;padding:8px 12px;border:1px solid #2c2f48;border-radius:8px;background:#0f1020;color:#fff">
-      <input id="claimRegion" type="text" placeholder="지역(선택)"
-             style="flex:1;min-width:160px;padding:8px 12px;border:1px solid #2c2f48;border-radius:8px;background:#0f1020;color:#fff">
-      <button id="claimSearch" class="save-btn" style="flex:0 0 auto;padding:10px 14px;border-radius:8px">검색</button>
+      <input id="claimName" type="text" placeholder="이름" style="flex:1;min-width:160px;padding:10px 12px;border:1px solid #2c2f48;border-radius:10px;background:#0f1020;color:#fff">
+      <input id="claimRegion" type="text" placeholder="지역(선택)" style="flex:1;min-width:160px;padding:10px 12px;border:1px solid #2c2f48;border-radius:10px;background:#0f1020;color:#fff">
     </div>
+    <button id="claimSearch" class="search-btn">검색</button>
     <div id="claimResults"></div>
   </div>
 </div>
@@ -321,93 +341,92 @@
 <div class="toast" id="toast"></div>
 
 <script>
-/* ========= 상수 ========= */
+/* 1) URL의 uid/me 로 들어오면 내 UID로 설정 */
+(function seedUIDFromQuery(){
+  try{
+    const p = new URLSearchParams(location.search);
+    const v = p.get('uid') || p.get('me');
+    if(v){
+      localStorage.setItem('rimo_uid_v1', v);
+      history.replaceState({}, '', location.pathname);
+    }
+  }catch(_){}
+})();
+
+/* 2) 상수 */
 const REG_URL = "https://script.google.com/macros/s/AKfycbyVF4YYdzsucME-81RusrsOg89FJIgR7NLplRZ1kIMhGQmdh0_lRD-zWz4NG9xoFN43IQ/exec";
 const LS_KEY  = 'rimo_profile_v1';
 const LS_UID  = 'rimo_uid_v1';
 let selectedIcon = "🏍️";
 
-/* ========= 유틸 ========= */
+/* 토스트 */
 function showToast(msg, ms=2000){
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.style.animationDuration=(ms/1000)+'s';
-  t.classList.add('show'); clearTimeout(window._toastTimer);
-  window._toastTimer=setTimeout(()=>t.classList.remove('show'), ms);
-}
-function getParam(name){ try{ return new URL(location.href).searchParams.get(name); }catch(_){ return null; } }
-function setCookie(k,v,days=365){ const d=new Date(); d.setTime(d.getTime()+days*864e5);
-  document.cookie=`${k}=${encodeURIComponent(v)}; expires=${d.toUTCString()}; path=/; SameSite=Lax`; }
-function getCookie(k){ const m=document.cookie.match(new RegExp('(?:^|; )'+k+'=([^;]*)')); return m?decodeURIComponent(m[1]):null; }
-function ensureUID(){
-  const q = getParam('uid'); if(q){ localStorage.setItem(LS_UID,q); setCookie(LS_UID,q); return q; }
-  let u = localStorage.getItem(LS_UID) || getCookie(LS_UID);
-  if(!u){ u='u_'+Math.random().toString(36).slice(2)+Date.now().toString(36); localStorage.setItem(LS_UID,u); setCookie(LS_UID,u); }
-  return u;
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.animationDuration = (ms/1000)+'s';
+  t.classList.add('show');
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(()=> t.classList.remove('show'), ms);
 }
 
-/* ========= 아이콘 토글 ========= */
+/* 아이콘 선택 */
 const iconWrap = document.getElementById("iconSelect");
-function updateIconActive(){ iconWrap.querySelectorAll(".icon-btn").forEach(b=>b.classList.toggle("active", b.dataset.icon===selectedIcon)); }
+function updateIconActive(){
+  iconWrap.querySelectorAll(".icon-btn").forEach(b => {
+    b.classList.toggle("active", b.dataset.icon === selectedIcon);
+  });
+}
 iconWrap.addEventListener("click", e=>{
-  const btn = e.target.closest(".icon-btn"); if(!btn) return; selectedIcon = btn.dataset.icon; updateIconActive();
+  const btn = e.target.closest(".icon-btn");
+  if(!btn) return;
+  selectedIcon = btn.dataset.icon;
+  updateIconActive();
 });
 updateIconActive();
 
-/* ✅ 스타일/페이스 토글 클릭 핸들러 복구 */
+/* 토글칩 */
 document.querySelectorAll('.toggles').forEach(group=>{
-  group.addEventListener('click', e=>{
-    const pill = e.target.closest('.toggle');
-    if(!pill) return;
-    pill.classList.toggle('active');
+  group.addEventListener('click',e=>{
+    if(e.target.classList.contains('toggle')){
+      e.target.classList.toggle('active');
+    }
   });
 });
 
-/* ========= 서버 ========= */
-async function fetchAllProfiles(){
-  const res = await fetch(`${REG_URL}?action=listProfiles&ts=${Date.now()}`, {cache:'no-store'});
-  const j = await res.json().catch(()=>null);
-  return (j && j.ok && Array.isArray(j.data)) ? j.data : (Array.isArray(j)?j:[]);
-}
-async function verifyPin(uid, pin){
-  const actions = ['verifyPin','checkPin','claimProfile','verify'];
-  for(const a of actions){
-    try{
-      const r = await fetch(`${REG_URL}?action=${a}&uid=${encodeURIComponent(uid)}&pin=${encodeURIComponent(pin)}&ts=${Date.now()}`,{cache:'no-store'});
-      const j = await r.json().catch(()=>null);
-      if(j && (j.ok===true || j.match===true || j.verified===true)) return true;
-    }catch(_){}
+/* 로컬 → 폼 */
+(function hydrateLocal(){
+  try{
+    const saved = JSON.parse(localStorage.getItem(LS_KEY)||'null');
+    if(saved){
+      selectedIcon = saved.icon || '🏍️';
+      updateIconActive();
+      document.getElementById('handle').value = saved.name || '';
+      document.getElementById('bike').value   = saved.bike || '';
+      document.getElementById('region').value = saved.region || '';
+      document.getElementById('time').value   = saved.time || '';
+      document.getElementById('tandem').value = saved.tandem || '허용';
+      (saved.styles||[]).forEach(v=>{
+        const el = [...document.querySelectorAll('.toggles[data-group="style"] .toggle')].find(x=>x.dataset.value===v);
+        if(el) el.classList.add('active');
+      });
+      (saved.pace||[]).forEach(v=>{
+        const el = [...document.querySelectorAll('.toggles[data-group="speed"] .toggle')].find(x=>x.dataset.value===v);
+        if(el) el.classList.add('active');
+      });
+      document.getElementById('intro').value = saved.intro || '';
+    }
+  }catch(_){}
+})();
+
+/* 수집/저장 */
+function ensureUID(){
+  let u = localStorage.getItem(LS_UID);
+  if(!u){
+    u = 'u_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+    localStorage.setItem(LS_UID, u);
   }
-  return false;
+  return u;
 }
-
-/* ========= 폼 채우기 ========= */
-function fillForm(p){
-  selectedIcon = p.icon || '🏍️'; updateIconActive();
-  const set = (id,val)=>{ const el=document.getElementById(id); if(el) el.value=val; };
-  set('handle', p.name||''); set('bike', p.bike||''); set('region', p.region||'');
-  set('time', p.time||''); set('tandem', p.tandem||'허용');
-
-  // 토글 상태 초기화/세팅
-  document.querySelectorAll('.toggles .toggle').forEach(t=>t.classList.remove('active'));
-  (p.styles||[]).forEach(v=>{ const el=[...document.querySelectorAll('.toggles[data-group="style"] .toggle')].find(x=>x.dataset.value===v); if(el) el.classList.add('active'); });
-  (p.pace||[]).forEach(v=>{ const el=[...document.querySelectorAll('.toggles[data-group="speed"] .toggle')].find(x=>x.dataset.value===v); if(el) el.classList.add('active'); });
-
-  const introEl=document.getElementById('intro'); if(introEl) introEl.value=(p.intro||'').slice(0,25);
-}
-async function hydrate(){
-  const urlUid = getParam('uid');
-  const ls = localStorage.getItem(LS_KEY);
-  if(urlUid){
-    localStorage.setItem(LS_UID,urlUid); setCookie(LS_UID,urlUid);
-    const rows = await fetchAllProfiles();
-    const me = rows.find(r=>String(r.uid||'')===String(urlUid));
-    if(me){ fillForm(me); return; }
-  }
-  if(ls){ try{ fillForm(JSON.parse(ls)); return; }catch(_){ } }
-  ensureUID();
-}
-
-/* ========= 수집/저장 ========= */
 function collectProfile(){
   const styles = [...document.querySelectorAll('.toggles[data-group="style"] .toggle.active')].map(el=>el.dataset.value);
   const pace   = [...document.querySelectorAll('.toggles[data-group="speed"] .toggle.active')].map(el=>el.dataset.value);
@@ -426,18 +445,19 @@ function collectProfile(){
 }
 function saveProfileLocal(p){
   localStorage.setItem(LS_KEY, JSON.stringify(p));
-  localStorage.setItem(LS_UID, p.uid); setCookie(LS_UID, p.uid);
+  localStorage.setItem(LS_UID, p.uid);
 }
 async function saveProfileRemote(p){
   const res = await fetch(REG_URL, {
-    method:"POST", headers:{ "Content-Type":"text/plain;charset=utf-8" },
+    method:"POST",
+    headers:{ "Content-Type":"text/plain;charset=utf-8" },
     body: JSON.stringify({ action:"registerProfile", profile:p })
   });
   const out = await res.json().catch(()=>({ok:false,msg:'응답 파싱 실패'}));
   return out;
 }
 
-/* ========= 저장 모달 ========= */
+/* 미리보기 */
 function showPreview(p){
   document.getElementById('avatarPreview').textContent = p.icon || '🏍️';
   document.getElementById('namePreview').textContent   = p.name || '라이더 이름';
@@ -449,106 +469,163 @@ function showPreview(p){
   document.getElementById('previewModal').classList.add('show');
 }
 
-/* ========= 내 프로필 찾기 ========= */
-const claimModal = document.getElementById('claimModal');
-const claimSheet = document.getElementById('claimSheet');
-document.getElementById('claimOpen').addEventListener('click', ()=>{
-  // 입력값 미리 채우기
-  const nEl=document.getElementById('handle'), rEl=document.getElementById('region');
-  const n=document.getElementById('claimName'), r=document.getElementById('claimRegion');
-  if(nEl && n) n.value = nEl.value || '';
-  if(rEl && r) r.value = rEl.value || '';
-  document.getElementById('claimResults').innerHTML='';
-  claimModal.classList.add('show');
-});
-/* 모달 바깥 클릭 닫힘 */
-claimModal.addEventListener('click', (e)=>{ if(e.target===claimModal) claimModal.classList.remove('show'); });
-/* 시트 안쪽 클릭 전파 중단 */
-claimSheet.addEventListener('click', (e)=>e.stopPropagation());
-
-document.getElementById('claimSearch').addEventListener('click', async ()=>{
-  const qn=(document.getElementById('claimName').value||'').trim().toLowerCase();
-  const qr=(document.getElementById('claimRegion').value||'').trim().toLowerCase();
-  if(!qn){ showToast('이름을 입력해 주세요.'); return; }
-  const rows = await fetchAllProfiles();
-  const hits = rows.filter(r=>{
-    const n=String(r.name||'').toLowerCase();
-    const rg=String(r.region||'').toLowerCase();
-    return (n.includes(qn) || n===qn) && (!qr || rg.includes(qr));
-  }).slice(0,50);
-  renderClaimResults(hits);
-});
-
-function renderClaimResults(list){
-  const box = document.getElementById('claimResults');
-  box.innerHTML = '';
-  if(!list.length){
-    box.innerHTML = '<p style="color:var(--muted);text-align:center;margin:8px 0 0">검색 결과가 없습니다.</p>';
-    return;
-  }
-  list.forEach(r=>{
-    const row = document.createElement('div');
-    row.className = 'claim-card';
-    row.innerHTML = `
-      <div class="head">
-        <div class="avatar">${r.icon || '🏍️'}</div>
-        <div class="txt">
-          <div class="name">${r.name || '이름없음'}</div>
-          <div class="sub">${r.region || '-'} · ${r.bike || '-'}</div>
-        </div>
-      </div>
-      <div class="foot">
-        <input class="pin" type="password" inputmode="numeric" maxlength="4" placeholder="PIN(4자리)">
-        <button class="connect">프로필 연결</button>
-      </div>
-    `;
-    const pinInput = row.querySelector('input');
-    const btn = row.querySelector('button');
-    btn.addEventListener('click', async ()=>{
-      const pin = (pinInput.value||'').trim();
-      if(!/^[0-9]{4}$/.test(pin)){ showToast('PIN 4자리를 입력하세요.'); pinInput.focus(); return; }
-      const ok = await verifyPin(r.uid, pin);
-      if(!ok){ showToast('PIN이 일치하지 않습니다.'); return; }
-
-      const normalized = {
-        uid:r.uid||'', name:r.name||'', bike:r.bike||'', region:r.region||'',
-        styles:Array.isArray(r.styles)?r.styles:[], pace:Array.isArray(r.pace)?r.pace:[],
-        time:r.time||'', tandem:r.tandem||'허용', icon:r.icon||'🏍️', intro:r.intro||''
-      };
-      localStorage.setItem(LS_UID, normalized.uid);
-      localStorage.setItem(LS_KEY, JSON.stringify(normalized));
-      fillForm(normalized);
-      claimModal.classList.remove('show');
-      showToast('이 기기에 내 프로필 연결 완료');
-    });
-    box.appendChild(row);
-  });
-}
-
-/* ========= 부트 ========= */
-(async ()=>{ await hydrate(); })();
-
-/* ========= 저장 버튼 ========= */
-const saveBtn = document.getElementById("saveBtn");
-saveBtn.addEventListener("click", async ()=>{
+document.getElementById("saveBtn").addEventListener("click", async ()=>{
   const p = collectProfile();
   if(!p.name){ showToast("이름을 입력해 주세요."); return; }
-  saveBtn.disabled = true;
+  const btn = document.getElementById("saveBtn");
+  btn.disabled = true;
   try{
     saveProfileLocal(p);
     const out = await saveProfileRemote(p);
-    if(out.ok){ showToast("✅ 프로필 저장 완료"); showPreview(p); }
-    else{ showToast("⚠️ 저장 실패: " + (out.msg || "알 수 없는 오류")); }
-  }catch(err){ showToast("⚠️ 네트워크 오류: " + err.message); }
-  finally{ saveBtn.disabled = false; }
+    if(out.ok){
+      showToast("✅ 프로필 저장 완료");
+      showPreview(p);
+    }else{
+      showToast("⚠️ 저장 실패: " + (out.msg || "알 수 없는 오류"));
+    }
+  }catch(err){
+    showToast("⚠️ 네트워크 오류: " + err.message);
+  }finally{
+    btn.disabled = false;
+  }
 });
-
 document.getElementById("confirmBtn").addEventListener("click",()=> {
   document.getElementById('previewModal').classList.remove('show');
 });
 document.getElementById("editBtn").addEventListener("click",()=> {
   document.getElementById('previewModal').classList.remove('show');
 });
+
+/* =========================
+   내 프로필 찾기 (검색/연결)
+   ========================= */
+(function addClaimMyProfile(){
+  const REG = REG_URL;
+  const findBtn   = document.getElementById('findMineBtn');
+  const modal     = document.getElementById('claimModal');
+  const sheet     = document.getElementById('claimSheet');
+  const nameInp   = document.getElementById('claimName');
+  const regionInp = document.getElementById('claimRegion');
+  const searchBtn = document.getElementById('claimSearch');
+  const results   = document.getElementById('claimResults');
+
+  function openModal(){
+    // 폼 값 프리필
+    const nameEl = document.getElementById('handle');
+    const regEl  = document.getElementById('region');
+    if(nameEl) nameInp.value = nameEl.value || '';
+    if(regEl)  regionInp.value = regEl.value || '';
+    results.innerHTML = '';
+    modal.classList.add('show');
+    nameInp.focus();
+  }
+  function closeModal(){ modal.classList.remove('show'); }
+  // 바깥 클릭 닫기
+  modal.addEventListener('click', (e)=>{ if(e.target === modal) closeModal(); });
+  // 안쪽 클릭 버블 막기
+  sheet.addEventListener('click', (e)=> e.stopPropagation());
+
+  if (findBtn) findBtn.addEventListener('click', openModal);
+
+  async function fetchAll(){
+    try{
+      const res = await fetch(`${REG}?action=listProfiles&ts=${Date.now()}`, {cache:'no-store'});
+      const j = await res.json().catch(()=>null);
+      return (j && j.ok && Array.isArray(j.data)) ? j.data : (Array.isArray(j) ? j : []);
+    }catch(_){ showToast('불러오기 실패'); return []; }
+  }
+
+  function render(list){
+    results.innerHTML = '';
+    if(!list.length){
+      results.innerHTML = '<p style="color:var(--muted);text-align:center">검색 결과가 없습니다.</p>';
+      return;
+    }
+    list.forEach(r=>{
+      const card = document.createElement('div');
+      card.className = 'claim-card';
+      card.innerHTML = `
+        <div class="head">
+          <div class="avatar">${r.icon || '🏍️'}</div>
+          <div class="text">
+            <div class="name">${r.name || '이름없음'}</div>
+            <div class="sub">${r.region || '-'} · ${r.bike || '-'}</div>
+          </div>
+        </div>
+        <div class="foot">
+          <input class="pin" type="password" inputmode="numeric" pattern="\\d*" maxlength="4" placeholder="PIN(4자리)" aria-label="PIN(4자리)"/>
+          <button class="connect">프로필 연결</button>
+        </div>
+      `;
+
+      const btn = card.querySelector('.connect');
+      const pinEl = card.querySelector('.pin');
+
+      btn.addEventListener('click', ()=>{
+        const pin = (pinEl.value||'').trim();
+        if(pin.length !== 4){ showToast('PIN 4자리를 입력해주세요'); pinEl.focus(); return; }
+
+        // (선택) 서버가 PIN을 내려주는 경우에만 검증:
+        // if(String(r.pin||'') !== pin){ showToast('PIN이 올바르지 않습니다'); return; }
+
+        // 클릭 시 활성 효과
+        btn.classList.add('active');
+        setTimeout(()=>btn.classList.remove('active'), 600);
+
+        // 로컬 연결
+        const normalized = {
+          uid:r.uid||'', name:r.name||'', bike:r.bike||'', region:r.region||'',
+          styles:Array.isArray(r.styles)?r.styles:[], pace:Array.isArray(r.pace)?r.pace:[],
+          time:r.time||'', tandem:r.tandem||'허용', icon:r.icon||'🏍️', intro:r.intro||''
+        };
+        localStorage.setItem(LS_UID, normalized.uid);
+        localStorage.setItem(LS_KEY, JSON.stringify(normalized));
+
+        // 폼 반영
+        const set=(id,val)=>{const el=document.getElementById(id); if(el) el.value=val;};
+        set('handle', normalized.name);
+        set('bike',   normalized.bike);
+        set('region', normalized.region);
+        set('time',   normalized.time);
+        set('tandem', normalized.tandem);
+
+        selectedIcon = normalized.icon; updateIconActive();
+        document.querySelectorAll('.toggles .toggle').forEach(t=>t.classList.remove('active'));
+        (normalized.styles||[]).forEach(v=>{
+          const t=[...document.querySelectorAll('.toggles[data-group="style"] .toggle')].find(x=>x.dataset.value===v);
+          if(t) t.classList.add('active');
+        });
+        (normalized.pace||[]).forEach(v=>{
+          const t=[...document.querySelectorAll('.toggles[data-group="speed"] .toggle')].find(x=>x.dataset.value===v);
+          if(t) t.classList.add('active');
+        });
+        const introEl=document.getElementById('intro');
+        if(introEl) introEl.value=(normalized.intro||'').slice(0,25);
+
+        showToast('이 기기에 내 프로필 연결 완료');
+        closeModal();
+      });
+
+      results.appendChild(card);
+    });
+  }
+
+  // 검색
+  if (searchBtn){
+    searchBtn.addEventListener('click', async ()=>{
+      const qn=(nameInp.value||'').trim().toLowerCase();
+      const qr=(regionInp.value||'').trim().toLowerCase();
+      if(!qn){ showToast('이름을 입력해 주세요.'); nameInp.focus(); return; }
+      const rows = await fetchAll();
+      const hits = rows.filter(r=>{
+        const n=String(r.name||'').toLowerCase();
+        const rg=String(r.region||'').toLowerCase();
+        return (n.includes(qn) || n===qn) && (!qr || rg.includes(qr));
+      }).slice(0,30);
+      render(hits);
+    });
+  }
+})();
 </script>
 </body>
 </html>
