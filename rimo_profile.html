@@ -149,6 +149,29 @@
 /* 프리뷰 모달 하단(확인/수정) 버튼 블록 아래 6px 여백 추가 */
 #previewModal .modal-actions{ margin-bottom:6px; }
 
+  :root{ --claim-results-h: 240px; }          /* 결과박스 높이(원하면 200~280px로 조절) */
+
+/* 내 프로필 찾기 모달 레이아웃 고정 */
+#claimModal .modal-content{
+  display:flex; flex-direction:column; max-height:88vh;
+}
+
+/* 검색 줄과 결과 사이 간격(위쪽 안 들썩이게 얌전하게) */
+#claimModal .search-row{ margin-bottom:8px; }
+
+/* ← 핵심: 결과 영역에 미리 공간을 예약해 둠 */
+#claimModal #claimResults{
+  min-height: 240px;   /* 3~4개 보이게: 200~280px 범위에서 취향대로 */
+  max-height: 320px;   /* 많아지면 여기서 스크롤 */
+  overflow:auto;
+}
+
+/* 비어 있을 때 안내문 (선택) */
+#claimModal #claimResults:empty::before{
+  content:"검색 결과가 여기에 표시됩니다";
+  display:block; text-align:center; color:var(--muted); padding-top:12px;
+}
+
 </style>
 </head>
 <body>
