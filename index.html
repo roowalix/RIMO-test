@@ -4,47 +4,63 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>RIMO — 오늘의 라이딩 크루</title>
+
+<!-- ✅ 공통 테마(색/폭) -->
+<link rel="stylesheet" href="rimo_theme.css?v=20250910">
+
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css?v=20250908" crossorigin />
 <style>
   :root{
-    --bg:#0b0b0f; --fg:#e8e8ef; --muted:#b9b9cc; --line:#232333;
+    /* 이 페이지 고유 토큰(필요시). 카드 테마색은 JS 인라인 스타일로 칠하므로 그대로 유지됨 */
     --chip:#1a1a24; --chipBd:#2f3247;
     --btn:#2A2F4F; --btnHover:#3C4380;
     --imminent-bg: rgba(255,199,94,.16);
     --imminent-bd: rgba(255,199,94,.45);
 
-    /* tabbar (공통) */
+    /* tabbar (공통 스타일은 rimo_theme.css에서, 이 값은 토큰 덮어쓰기 용) */
     --tab-bg:#182039; --tab-bd:#2d3559; --tab-ink:#e6e8ef;
     --tab-pri:#26346d; --tab-pri-bd:#3b53a8;
   }
+
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--fg);
-       font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Helvetica,Arial,sans-serif}
+  body{
+    margin:0;
+    /* 배경/글자색은 rimo_theme.css가 관리 */
+    font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Helvetica,Arial,sans-serif
+  }
 
   /* 헤더 */
-  header{position:sticky;top:0;z-index:5;background:rgba(11,11,15,.9);
-         backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  header{
+    position:sticky;top:0;z-index:5;
+    background:rgba(11,11,15,.9);
+    -webkit-backdrop-filter:blur(8px); /* ✅ 사파리 대응 */
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--border-1);
+  }
   .bar{display:flex;gap:10px;align-items:center;padding:14px 16px;height:56px}
   .logo{font-weight:900}
   .title{font-weight:800;opacity:.9}
   .pill{margin-left:auto;padding:6px 10px;border-radius:999px;background:#151525;color:#b9b9cc;font-size:12px}
 
-  /* 본문 */
-  main{padding:16px; padding-bottom:100px;}
-  #map{height:360px;border-radius:14px;outline:1px solid #232333;margin-bottom:20px}
+  /* 본문 (폭은 rimo_theme.css에서 max-width 통일) */
+  #map{height:360px;border-radius:14px;outline:1px solid var(--border-1);margin-bottom:20px}
   .leaflet-container{z-index:1}
 
   /* 카드 캐러셀 */
   .carousel{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:8px 4px 0}
   .carousel::-webkit-scrollbar{display:none}
-  .card{scroll-snap-align:start;width:304px;flex:0 0 auto;border-radius:14px;padding:14px;
-        display:flex;flex-direction:column;gap:8px;border:1px solid transparent;position:relative}
+  .card{
+    scroll-snap-align:start;width:304px;flex:0 0 auto;border-radius:14px;padding:14px;
+    display:flex;flex-direction:column;gap:8px;border:1px solid transparent;position:relative
+  }
   .card h3{margin:0 0 2px;font-size:18px}
   .meta{font-size:14px;color:var(--muted)}
   .msg{font-size:14px}
   .pillrow{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
-  .chip{padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.06);
-        border:1px solid rgba(255,255,255,.12);font-size:12px;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center}
+  .chip{
+    padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.12);font-size:12px;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center
+  }
 
   /* 출발 임박 배지 */
   .imminent{
@@ -69,66 +85,24 @@
   .pin{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;
        font-weight:900;font-size:12px;color:#0b0b0f;border:2px solid rgba(255,255,255,.9);box-shadow:0 1px 6px rgba(0,0,0,.35)}
 
-  /* 모달(합류 안내) */
+  /* 모달(합류 안내) — 표면/테두리는 공통 CSS 토큰 사용 */
   .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:3000;
          background:rgba(0,0,0,.45);padding:22px 12px}
   .modal.show{display:flex}
-  .sheet{width:100%;max-width:680px;background:#0e1222;border:1px solid #2b304f;border-radius:18px;
-         box-shadow:0 14px 40px rgba(0,0,0,.55);padding:16px}
+  .sheet{max-width:680px}
   .sheet h4{margin:4px 0 10px;font-size:18px}
   .hint{color:#cfd2ff;line-height:1.5;margin-bottom:10px}
-  .pre{background:#0b1020;border:1px solid #293059;border-radius:12px;padding:12px;white-space:pre-wrap;line-height:1.4}
+  .pre{border-radius:12px;white-space:pre-wrap;line-height:1.4}
   .modal-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
   .modal-actions button{flex:1;min-width:110px;max-width:160px;padding:12px 18px;border-radius:12px;border:none;
                         background:var(--btn);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
   .modal-actions button:hover{background:var(--btnHover)}
-  #copyProfileBtn{padding:8px 12px;font-size:12px;min-width:100px;max-width:140px}
 
   /* 하단 네비 */
   .tabbar{position:fixed;left:0;right:0;bottom:16px;z-index:2500;display:flex;gap:12px;justify-content:center}
   .tabbar .tab{background:var(--tab-bg);border:1px solid var(--tab-bd);color:var(--tab-ink);
                padding:12px 18px;border-radius:22px;font-weight:800;text-decoration:none;font-size:14px}
   .tabbar .tab.primary{background:var(--tab-pri);border-color:var(--tab-pri-bd)}
-  /* === RIMO THEME NORMALIZER v1 === */
-:root{
-  --bg:#0b0b0f; --fg:#e8e8ef; --muted:#b9b9cc;
-  --line:#23243a;           /* 통일 */
-  --tile:#101223;           /* 통일: 박스 배경 */
-  --tileBd:#23243a;         /* 통일: 박스 테두리 */
-  --accent:#7aa7ff;
-  --tab-bg:#182039; --tab-bd:#2d3559; --tab-ink:#e6e8ef;
-  --tab-pri:#26346d; --tab-pri-bd:#3b53a8;
-  --container: 720px;       /* PC 폭 통일 */
-}
-
-/* PC/태블릿에서 콘텐츠 폭 통일 */
-main{max-width:var(--container); margin:0 auto; padding:16px; padding-bottom:100px}
-
-/* 드롭다운 가독성 통일 */
-select{color:#fff; background:#0f1020; border:1px solid #2c2f48; border-radius:8px}
-select option{color:#fff; background:#0f1020}
-/* === INDEX SAFE NORMALIZER (width only) === */
-:root{
-  --container: 720px; /* PC 폭 통일 (원하면 880px 등으로 변경) */
-}
-
-/* 콘텐츠 폭만 통일, 나머지 색/카드 스타일은 기존 유지 */
-main{
-  max-width: var(--container);
-  margin: 0 auto;
-  padding: 16px;
-  padding-bottom: 100px;
-}
-
-/* 혹시 이전에 .card 색을 통일해둔 스타일이 있다면 충돌 방지용(선택) */
-/* 인라인 스타일이 이미 있으니 일반적으로 필요없지만, !important로 덮어쓴 적이 있다면 아래를 추가하세요. */
-/*
-.card{
-  background: unset !important;
-  border-color: transparent !important;
-}
-*/
-
 </style>
 </head>
 <body>
@@ -141,7 +115,7 @@ main{
 </header>
 
 <main>
-  <div id="map"></div>
+  <div id="map" class="panel"></div>
   <section id="list" class="carousel"></section>
 </main>
 
@@ -154,7 +128,7 @@ main{
 
 <!-- 합류 안내 모달 -->
 <div class="modal" id="joinModal" role="dialog" aria-modal="true" aria-labelledby="joinTitle">
-  <div class="sheet" id="joinSheet">
+  <div class="sheet panel" id="joinSheet">
     <h4 id="joinTitle">✅ 합류 신청하기</h4>
     <div class="hint">
       아래 버튼으로 <b>운영자 1:1 채팅</b>을 열어 붙여 넣어 주세요. 승인되면 라이더 크루 채팅방으로 초대됩니다.
@@ -176,13 +150,13 @@ const LS_KEY = 'rimo_profile_v1';
 const LS_CREWS = 'rimo_crews_v1';
 const LS_APPS = 'rimo_applications_v1';
 
+/* ✅ 카드/핀/대시라인 테마 유지 */
 const THEMES = {
   red:    { base:'#ff4d4d', cardBg:'rgba(255,77,77,.14)',  border:'rgba(255,77,77,.55)'},
   yellow: { base:'#ffd24d', cardBg:'rgba(255,210,77,.16)', border:'rgba(255,210,77,.55)'},
   blue:   { base:'#5b8cff', cardBg:'rgba(91,140,255,.16)', border:'rgba(91,140,255,.55)'},
-  green:  { base:'#46d37d', cardBg:'rgba(70,211,125,.16)', border:'rgba(70,211,125,.55)'} // ✅ 추가
+  green:  { base:'#46d37d', cardBg:'rgba(70,211,125,.16)', border:'rgba(70,211,125,.55)'}
 };
-
 
 /* 날짜 뱃지 */
 document.getElementById('today').textContent =
@@ -246,6 +220,7 @@ function renderCards(){
     const t=THEMES[c.theme]||THEMES.blue;
     const el=document.createElement('article');
     el.className="card"; el.dataset.id=c.id;
+    /* ✅ 카드 테마색은 인라인으로 그대로 적용 */
     el.style.background=t.cardBg; el.style.border=`1px solid ${t.border}`;
 
     const departAt = new Date();
