@@ -115,6 +115,17 @@
   text-decoration:underline;
   margin:0 8px;
 }
+  /* 내 프로필 찾기 UI 정리 */
+#findMineLink,
+#copyRecovery { display:none !important; }      /* 밑줄 링크·복구복사 숨김 */
+
+#findMineBtn{
+  background:#2c2f48 !important;               /* 예전 세컨더리 색 */
+  color:#fff !important; font-weight:800;
+  border:none; border-radius:8px;
+}
+#findMineBtn:hover{ filter:brightness(1.07); }
+
 </style>
 </head>
 <body>
@@ -622,6 +633,64 @@ document.getElementById("editBtn").addEventListener("click",()=> {
   const openBtn = document.getElementById('findMineBtn') || document.getElementById('findMineLink');
   if(openBtn){
     openBtn.addEventListener('click', (e)=>{ e.preventDefault(); openModal(); });
+  }
+})();
+</script>
+<script>
+/* ==== RIMO | 내 프로필 찾기 UI 클린업 ==== */
+(function cleanClaimUI(){
+  // 0) 예전 텍스트 링크/복구 링크 제거 (있으면)
+  ['findMineLink','copyRecovery'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.remove();
+  });
+  // 혹시 동일 텍스트로 남아있는 <a>도 제거
+  document.querySelectorAll('a').forEach(a=>{
+    const t=a.textContent.trim();
+    if(t==='내 프로필 찾기' || t.indexOf('복구')>-1) a.remove();
+  });
+
+  // 1) 저장 버튼 아래 액션 라인(한 개만) 보장 + 버튼 색 고정
+  const saveBtn = document.getElementById('saveBtn');
+  if(saveBtn){
+    // 중복된 claimActions는 하나만 남기고 제거
+    const lines = document.querySelectorAll('#claimActions');
+    lines.forEach((n,i)=>{ if(i>0) n.remove(); });
+
+    let line = document.getElementById('claimActions');
+    if(!line){
+      line = document.createElement('div');
+      line.id = 'claimActions';
+      line.style.cssText = 'display:flex;justify-content:center;gap:8px;margin-top:6px';
+      line.innerHTML = `
+        <button id="findMineBtn" type="button"
+                style="padding:10px 14px;max-width:200px;background:#2c2f48;color:#fff;font-weight:800;border:none;border-radius:8px">
+          내 프로필 찾기
+        </button>`;
+      saveBtn.insertAdjacentElement('afterend', line);
+    }else{
+      // 안에 링크가 있었다면 싹 비우고 버튼만 다시 주입
+      line.innerHTML = `
+        <button id="findMineBtn" type="button"
+                style="padding:10px 14px;max-width:200px;background:#2c2f48;color:#fff;font-weight:800;border:none;border-radius:8px">
+          내 프로필 찾기
+        </button>`;
+    }
+  }
+
+  // 2) 미리보기 모달(#previewModal) 안에 '복구' 관련 버튼/링크 제거
+  const pm = document.getElementById('previewModal');
+  if(pm){
+    pm.querySelectorAll('button,a').forEach(el=>{
+      if(/복구/.test(el.textContent)) el.remove();
+    });
+  }
+
+  // 3) 모달(내 프로필 찾기)이 이미 구현돼 있다면, 열기 버튼만 연결
+  const openBtn = document.getElementById('findMineBtn');
+  const claimModal = document.getElementById('claimModal');
+  if(openBtn && claimModal){
+    const open = (e)=>{ e.preventDefault(); claimModal.style.display='flex'; };
+    openBtn.addEventListener('click', open);
   }
 })();
 </script>
