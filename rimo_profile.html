@@ -125,16 +125,30 @@
   border:none; border-radius:8px;
 }
 #findMineBtn:hover{ filter:brightness(1.07); }
-/* 내 프로필 찾기 모달 간격 조정 */
-#claimModal #claimResults{           /* ⬇️ '검색' 아래 여백(결과 영역 위여백) 줄이기 */
-  margin-top: 0px !important;        /* 기존 10px → 4px */
+
+  /* --- 내 프로필 찾기 모달 여백/색 보정 --- */
+
+/* 텍스트 링크/복구 버튼은 숨김 유지 */
+#findMineLink, #copyRecovery { display:none !important; }
+
+/* 버튼 색감(예전 세컨더리 톤) */
+#findMineBtn{
+  background:#2c2f48 !important; color:#fff !important;
+  font-weight:800; border:none; border-radius:8px;
 }
-#claimClose{                          /* ⬇️ '닫기' 버튼 아래 여백 늘리기 */
-  margin-bottom: 12px !important;     /* 필요하면 20~24px로 더 키워도 OK */
-}
-#claimModal .modal-content{           /* 모달 바닥 숨쉬기 조금 더 */
-  padding-bottom: 0px;               /* 선택사항 */
-}
+
+/* 검색줄 아래 간격 살짝 ↓ */
+#claimModal .search-row{ margin-bottom:6px; }
+
+/* 결과 리스트 위 여백도 살짝 ↓ */
+#claimModal #claimResults{ margin-top:6px !important; }
+
+/* 닫기 버튼 제거로 모달 바닥 숨쉬기 확보 */
+#claimModal .modal-content{ padding-bottom:12px; }
+
+/* 프리뷰 모달 하단(확인/수정) 버튼 블록 아래 6px 여백 추가 */
+#previewModal .modal-actions{ margin-bottom:6px; }
+
 </style>
 </head>
 <body>
@@ -460,22 +474,27 @@ document.getElementById("editBtn").addEventListener("click",()=> {
 });
 </script>
 
-<!-- ✅ 내 프로필 찾기 모달 -->
+<!-- ✅ 내 프로필 찾기 모달 (닫기 버튼 없음 / 바깥 클릭으로 닫힘) -->
 <div class="modal" id="claimModal" role="dialog" aria-modal="true" aria-labelledby="claimTitle">
   <div class="modal-content panel" style="max-width:520px">
     <h3 id="claimTitle" style="margin:0 0 8px">내 프로필 찾기</h3>
     <p style="color:var(--muted);margin:0 0 10px">이름으로 검색 후 내 프로필을 선택하세요.</p>
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <input id="claimName" type="text" placeholder="이름" style="flex:1;min-width:160px;padding:8px 12px;border:1px solid #2c2f48;border-radius:8px;background:#0f1020;color:#fff">
-      <input id="claimRegion" type="text" placeholder="지역(선택)" style="flex:1;min-width:160px;padding:8px 12px;border:1px solid #2c2f48;border-radius:8px;background:#0f1020;color:#fff">
-      <button id="claimSearch" class="save-btn" style="flex:0 0 auto;padding:10px 14px;border-radius:8px">검색</button>
+
+    <!-- 검색줄 -->
+    <div class="search-row" style="display:flex;gap:8px;flex-wrap:wrap">
+      <input id="claimName" type="text" placeholder="이름"
+             style="flex:1;min-width:160px;padding:8px 12px;border:1px solid #2c2f48;border-radius:8px;background:#0f1020;color:#fff">
+      <input id="claimRegion" type="text" placeholder="지역(선택)"
+             style="flex:1;min-width:160px;padding:8px 12px;border:1px solid #2c2f48;border-radius:8px;background:#0f1020;color:#fff">
+      <button id="claimSearch" class="save-btn"
+              style="flex:0 0 auto;padding:10px 14px;border-radius:8px">검색</button>
     </div>
-    <div id="claimResults" class="claim-list" style="margin-top:10px;display:grid;gap:8px"></div>
-    <div style="display:flex;justify-content:center;margin-top:10px">
-      <button class="edit" id="claimClose" style="padding:10px 14px;border-radius:8px;border:none;color:#fff;background:#2c2f48">닫기</button>
-    </div>
+
+    <!-- 결과 -->
+    <div id="claimResults" class="claim-list" style="margin-top:6px;display:grid;gap:8px"></div>
   </div>
 </div>
+
 
 <script>
 /* ==== RIMO | 내 프로필 찾기 (단일 모듈, 중복 제거/이벤트 위임) ==== */
@@ -597,46 +616,53 @@ document.getElementById("editBtn").addEventListener("click",()=> {
     render(hits);
   }
 
-  /* 4) 모달 내부는 ‘이벤트 위임’으로 한 번에 처리 → 버튼 안 먹는 문제 방지 */
-  modal.addEventListener('click', async (e)=>{
-    if(e.target.closest('#claimClose')){ closeModal(); return; }
-    if(e.target.closest('#claimSearch')){ await doSearch(); return; }
-    const pick = e.target.closest('.claim-pick');
-    if(pick){
-      const row = pick.closest('[data-uid]');
-      if(!row) return;
-      const normalized = JSON.parse(row.dataset.payload||'{}');
+  // 모달 내부 클릭 처리 (이벤트 위임)
+modal.addEventListener('click', async (e)=>{
+  // ⬇️ 바깥(오버레이) 클릭 시 닫기
+  if (e.target === modal) { closeModal(); return; }
 
-      // 4-1) LocalStorage 저장
-      localStorage.setItem(LS_UID, normalized.uid||'');
-      localStorage.setItem(LS_KEY, JSON.stringify(normalized));
+  // 검색
+  if (e.target.closest('#claimSearch')){ await doSearch(); return; }
 
-      // 4-2) 폼 반영
-      const set = (id,val)=>{ const el=document.getElementById(id); if(el) el.value=val; };
-      set('handle', normalized.name);
-      set('bike',   normalized.bike);
-      set('region', normalized.region);
-      set('time',   normalized.time);
-      set('tandem', normalized.tandem);
-      // 아이콘 & 토글
-      window.selectedIcon = normalized.icon || '🏍️';
-      if (typeof updateIconActive==='function') updateIconActive();
-      document.querySelectorAll('.toggles .toggle').forEach(t=>t.classList.remove('active'));
-      (normalized.styles||[]).forEach(v=>{
-        const t=[...document.querySelectorAll('.toggles[data-group="style"] .toggle')].find(x=>x.dataset.value===v);
-        if(t) t.classList.add('active');
-      });
-      (normalized.pace||[]).forEach(v=>{
-        const t=[...document.querySelectorAll('.toggles[data-group="speed"] .toggle')].find(x=>x.dataset.value===v);
-        if(t) t.classList.add('active');
-      });
-      const introEl=document.getElementById('intro');
-      if(introEl) introEl.value=(normalized.intro||'').slice(0,25);
+  // 결과에서 '프로필 발견' 선택
+  const pick = e.target.closest('.claim-pick');
+  if(pick){
+    const row = pick.closest('[data-uid]');
+    if(!row) return;
+    const normalized = JSON.parse(row.dataset.payload||'{}');
 
-      toast('이 기기에 내 프로필 연결 완료');
-      closeModal();
-    }
-  });
+    // 로컬 저장 & 폼 반영
+    localStorage.setItem(LS_UID, normalized.uid||'');
+    localStorage.setItem(LS_KEY, JSON.stringify(normalized));
+
+    const set = (id,val)=>{ const el=document.getElementById(id); if(el) el.value=val; };
+    set('handle', normalized.name);
+    set('bike',   normalized.bike);
+    set('region', normalized.region);
+    set('time',   normalized.time);
+    set('tandem', normalized.tandem);
+
+    window.selectedIcon = normalized.icon || '🏍️';
+    if (typeof updateIconActive==='function') updateIconActive();
+
+    document.querySelectorAll('.toggles .toggle').forEach(t=>t.classList.remove('active'));
+    (normalized.styles||[]).forEach(v=>{
+      const t=[...document.querySelectorAll('.toggles[data-group="style"] .toggle')].find(x=>x.dataset.value===v);
+      if(t) t.classList.add('active');
+    });
+    (normalized.pace||[]).forEach(v=>{
+      const t=[...document.querySelectorAll('.toggles[data-group="speed"] .toggle')].find(x=>x.dataset.value===v);
+      if(t) t.classList.add('active');
+    });
+
+    const introEl=document.getElementById('intro');
+    if(introEl) introEl.value=(normalized.intro||'').slice(0,25);
+
+    try{ showToast('이 기기에 내 프로필 연결 완료'); }catch(_){}
+    closeModal();
+  }
+});
+
 
   /* 5) 열기 버튼 */
   const openBtn = document.getElementById('findMineBtn') || document.getElementById('findMineLink');
