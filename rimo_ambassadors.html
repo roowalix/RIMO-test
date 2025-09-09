@@ -121,19 +121,37 @@
 
   .state{color:var(--muted); font-size:13px; text-align:center; padding:24px 0}
 
-  /* === 매칭 DM 모달 === */
-  .modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:3000;
-         background:rgba(0,0,0,.45); padding:22px 12px}
-  .modal.show{display:flex}
-  .sheet{width:100%; max-width:680px; background:#0e1222; border:1px solid #2b304f; border-radius:18px;
-         box-shadow:0 14px 40px rgba(0,0,0,.55); padding:16px}
-  .sheet h4{margin:4px 0 10px; font-size:18px}
-  .hint{color:#cfd2ff; line-height:1.5; margin-bottom:10px}
-  .pre{background:#0b1020; border:1px solid #293059; border-radius:12px; padding:12px; white-space:pre-wrap; line-height:1.4}
-  .modal-actions{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:14px}
-  .modal-actions button{flex:1; min-width:130px; max-width:220px; padding:12px 18px; border-radius:12px; border:none;
-                        background:#2A2F4F; color:#fff; font-size:15px; font-weight:700; cursor:pointer}
-  .modal-actions button:hover{background:#3C4380}
+  /* === 매칭 DM 모달 스크롤 & 버튼 고정 === */
+.modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:3000;
+       background:rgba(0,0,0,.45); padding:22px 12px}
+.modal.show{display:flex}
+.sheet{
+  width:100%; max-width:680px; background:#0e1222; border:1px solid #2b304f; border-radius:18px;
+  box-shadow:0 14px 40px rgba(0,0,0,.55); padding:16px;
+  display:flex; flex-direction:column; max-height:88vh;  /* ✅ 시트 전체 높이 제한 */
+}
+.sheet h4{margin:4px 0 10px; font-size:18px}
+.hint{color:#cfd2ff; line-height:1.5; margin-bottom:10px}
+
+/* 미리보기(본문) — 길어지면 스크롤 */
+.pre{
+  background:#0b1020; border:1px solid #293059; border-radius:12px; padding:12px; white-space:pre-wrap; line-height:1.4;
+  max-height:48vh; overflow:auto;  /* ✅ 본문 스크롤 */
+}
+
+/* 하단 버튼 바 — 항상 보이기 */
+.modal-actions{
+  display:flex; gap:10px; justify-content:center; flex-wrap:wrap;
+  position:sticky; bottom:0;   /* ✅ 시트 내부에서 하단 고정 */
+  background:linear-gradient(180deg, rgba(14,18,34,0) 0%, #0e1222 40%);
+  padding-top:12px; margin-top:12px; border-top:1px solid #2b304f;
+}
+.modal-actions button{
+  flex:1; min-width:130px; max-width:220px; padding:12px 18px; border-radius:12px; border:none;
+  background:#2A2F4F; color:#fff; font-size:15px; font-weight:700; cursor:pointer
+}
+.modal-actions button:hover{background:#3C4380}
+
   .toast{position:fixed; left:50%; bottom:22px; transform:translateX(-50%); padding:10px 14px; background:rgba(0,0,0,.78);
          color:#fff; border-radius:10px; font-size:13px; display:none; z-index:5000; border:1px solid rgba(255,255,255,.12)}
   .toast.show{display:block; animation:fade 2.2s ease}
@@ -362,31 +380,20 @@ const dmPreview = document.getElementById('dmPreview');
 function composeDM(me, target){
   const stylesT = (target.styles||[]).join(' · ') || '-';
   const paceT   = (target.pace||[]).join(' · ') || '-';
-  const stylesM = (me.profile.styles||[]).join(' · ') || '-';
-  const paceM   = (me.profile.pace||[]).join(' · ') || '-';
 
   return (
-`[🤝 매칭 희망] ${target.name || ''} 님 (uid:${target.uid||'-'})
+`[🤝 매칭 희망] ${target.name || ''}
 
-— 대상 라이더
-📍 지역: ${target.region || '-'}
 🏍️ 기종: ${target.bike || '-'}
-⏰ 시간: ${target.time || '-'}
-👥 탠덤: ${target.tandem || '-'}
+📍 지역: ${target.region || '-'}
+⏰ 시간: ${target.time || '-'}  |  👥 탠덤: ${target.tandem || '-'}
 🎯 스타일/페이스: ${stylesT} / ${paceT}
 💬 소개: ${target.intro || '-'}
 
-— 신청자 정보
-👤 닉네임: ${me.profile.name || '이름 미입력'} ${me.profile.icon||''}
-📍 지역: ${me.profile.region || '-'}
-🏍️ 기종: ${me.profile.bike || '-'}
-⏰ 가능 시간: ${me.profile.time || '-'}
-👥 탠덤: ${me.profile.tandem || '-'}
-🎯 스타일/페이스: ${stylesM} / ${paceM}
-
-* 위 내용으로 매칭 희망합니다.`
+* 위 라이더와 매칭 희망합니다.`
   );
 }
+
 
 async function copyText(txt){
   try{
