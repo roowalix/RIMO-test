@@ -4,62 +4,41 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>RIMO — 엠버서더</title>
+
+<!-- ✅ 공통 테마 -->
+<link rel="stylesheet" href="rimo_theme.css?v=20250910" />
+
 <style>
-  :root{
-    --bg:#0b0b0f; --fg:#e8e8ef; --muted:#b9b9cc; --line:#23243a;
-    --tile:#101223; --tileBd:#23243a;
-    --accent:#7aa7ff; --meBg:rgba(122,167,255,.10); --meBd:rgba(122,167,255,.55);
-
-    --tab-bg:#182039; --tab-bd:#2d3559; --tab-ink:#e6e8ef;
-    --tab-pri:#26346d; --tab-pri-bd:#3b53a8;
-  }
-
   *{box-sizing:border-box}
   body{
-    margin:0; background:var(--bg); color:var(--fg);
+    margin:0;
     font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Helvetica,Arial,sans-serif;
   }
 
+  /* 헤더(공통 톤 + 사파리 블러) */
   header{
-    position:sticky; top:0; z-index:5; background:rgba(11,11,15,.9);
-    backdrop-filter:blur(8px); border-bottom:1px solid #232333;
+    position:sticky; top:0; z-index:5;
+    background:rgba(11,11,15,.9);
+    -webkit-backdrop-filter:blur(8px);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--border-1);
   }
   .bar{display:flex; gap:10px; align-items:center; padding:14px 16px; height:56px}
   .logo{font-weight:900}
   .title{font-weight:800; opacity:.9}
 
-  main{
-    padding:16px; max-width:720px; margin:0 auto;
-    display:flex; flex-direction:column; gap:12px;
-    padding-bottom:120px;
-  }
+  /* 메인 폭은 rimo_theme.css에서 통일 */
+  main{display:flex; flex-direction:column; gap:12px}
 
-  .card{
-    background:var(--tile);
-    border:1px solid var(--tileBd);
-    border-radius:16px;
-    padding:10px 12px;
-    display:flex; flex-direction:column; gap:7px;margin-bottom:10px;
-  }
-  .card.me{
-    background:var(--meBg);
-    border-color:var(--meBd);
-    box-shadow:0 0 0 1px var(--meBd) inset;
-  }
-  .meBadge{
-    margin-left:8px;
-    padding:3px 7px;
-    font-size:11px; font-weight:800;
-    color:#cfe0ff;
-    background:rgba(122,167,255,.15);
-    border:1px solid rgba(122,167,255,.35);
-    border-radius:999px;
-  }
+  /* 카드: 공통 표면은 .amb-card로 적용 */
+  .card.amb-card{ padding:10px 12px; display:flex; flex-direction:column; gap:7px; margin-bottom:10px }
+  /* 내 카드 하이라이트는 rimo_theme.css의 .amb-card.me 사용 */
 
   .head{display:flex; gap:14px; align-items:center}
   .avatar{
     width:72px; height:72px; border-radius:50%;
-    background:#1a1c2f; font-size:36px; display:flex; align-items:center; justify-content:center; flex:0 0 auto;
+    background:var(--surface-2); border:1px solid var(--border-2);
+    font-size:36px; display:flex; align-items:center; justify-content:center; flex:0 0 auto;
   }
   .idcol{min-width:0; flex:1}
   .nameRow{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
@@ -67,17 +46,27 @@
     margin:0; font-size:16px; font-weight:800; line-height: 1.2;
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
+  .meBadge{
+    padding:3px 7px;
+    font-size:11px; font-weight:800;
+    color:#cfe0ff;
+    background:rgba(122,167,255,.15);
+    border:1px solid rgba(122,167,255,.35);
+    border-radius:999px;
+  }
   .intro{
     margin:4px 0 0;
     font-weight:600;
     font-size:13px;
     color:var(--fg);
   }
+  .sub{margin:6px 0 0; color:var(--muted); font-size:13px}
+
   .matchBtn{
     margin-left:auto;
     display:inline-flex; align-items:center; gap:6px;
     padding:6px 8px; border-radius:999px;
-    background:#1a1c2f; border:0px solid #2b2e54; color:#e6e9ff;
+    background:var(--surface-2); border:1px solid var(--border-2); color:#e6e9ff;
     font-size:12px; font-weight:600; cursor:pointer;
     transition:box-shadow .15s ease, transform .15s ease, border-color .15s ease, background-color .15s ease;
   }
@@ -87,8 +76,8 @@
     box-shadow:0 0 12px rgba(122,167,255,.5), 0 0 0 2px rgba(122,167,255,.25) inset;
     transform:translateY(-1px);
   }
-  .sub{margin:6px 0 0; color:var(--muted); font-size:13px}
 
+  /* 스타일/페이스 태그 */
   .traits{
     display:grid;
     grid-template-columns:repeat(6, max-content);
@@ -98,9 +87,8 @@
   .tag{
     display:inline-flex; align-items:center; justify-content:center;
     padding:6px 9px; border-radius:999px;
-    background:#1a1c2f; border:0px solid #2b2e54;
-    font-size:10px; font-weight:500; color:#e6e9ff;
-    white-space:nowrap;
+    background:var(--surface-2); border:1px solid var(--border-2);
+    font-size:10px; font-weight:500; color:#e6e9ff; white-space:nowrap;
   }
   .tag.style.pill-urban   {background:#1e2d55;border-color:#2c4484}
   .tag.style.pill-curve   {background:#2a1f56;border-color:#40307a}
@@ -109,52 +97,34 @@
   .tag.pace.pill-balanced {background:#3a341e;border-color:#5a4f2f}
   .tag.pace.pill-dynamic  {background:#3a1f1f;border-color:#5a2f2f}
 
-  .tabbar{
-    position:fixed; left:0; right:0; bottom:16px; z-index:2500;
-    display:flex; gap:12px; justify-content:center;
+  /* 하단 네비는 rimo_theme.css로 통일됨 */
+
+  /* === 매칭 DM 모달: 스크롤 + 버튼 고정 === */
+  .modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:3000;
+         background:rgba(0,0,0,.45); padding:22px 12px}
+  .modal.show{display:flex}
+  .sheet{width:100%; max-width:680px}
+  .sheet.panel{max-height:88vh; display:flex; flex-direction:column}
+  .sheet h4{margin:4px 0 10px; font-size:18px}
+  .hint{color:#cfd2ff; line-height:1.5; margin-bottom:10px}
+  .pre{max-height:48vh; overflow:auto; white-space:pre-wrap; line-height:1.4}
+  .modal-actions{
+    display:flex; gap:10px; justify-content:center; flex-wrap:wrap;
+    position:sticky; bottom:0;
+    background:linear-gradient(180deg, rgba(14,18,34,0) 0%, var(--surface-1) 40%);
+    padding-top:12px; margin-top:12px; border-top:1px solid var(--border-1);
   }
-  .tabbar .tab{
-    background:var(--tab-bg); border:1px solid var(--tab-bd); color:var(--tab-ink);
-    padding:12px 18px; border-radius:22px; font-weight:800; text-decoration:none; font-size:14px;
+  .modal-actions button{
+    flex:1; min-width:130px; max-width:220px; padding:12px 18px; border-radius:12px; border:none;
+    background:#2A2F4F; color:#fff; font-size:15px; font-weight:700; cursor:pointer
   }
-  .tabbar .tab.primary{background:var(--tab-pri); border-color:var(--tab-pri-bd)}
+  .modal-actions button:hover{background:#3C4380}
 
-  .state{color:var(--muted); font-size:13px; text-align:center; padding:24px 0}
-
-  /* === 매칭 DM 모달 스크롤 & 버튼 고정 === */
-.modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:3000;
-       background:rgba(0,0,0,.45); padding:22px 12px}
-.modal.show{display:flex}
-.sheet{
-  width:100%; max-width:680px; background:#0e1222; border:1px solid #2b304f; border-radius:18px;
-  box-shadow:0 14px 40px rgba(0,0,0,.55); padding:16px;
-  display:flex; flex-direction:column; max-height:88vh;  /* ✅ 시트 전체 높이 제한 */
-}
-.sheet h4{margin:4px 0 10px; font-size:18px}
-.hint{color:#cfd2ff; line-height:1.5; margin-bottom:10px}
-
-/* 미리보기(본문) — 길어지면 스크롤 */
-.pre{
-  background:#0b1020; border:1px solid #293059; border-radius:12px; padding:12px; white-space:pre-wrap; line-height:1.4;
-  max-height:48vh; overflow:auto;  /* ✅ 본문 스크롤 */
-}
-
-/* 하단 버튼 바 — 항상 보이기 */
-.modal-actions{
-  display:flex; gap:10px; justify-content:center; flex-wrap:wrap;
-  position:sticky; bottom:0;   /* ✅ 시트 내부에서 하단 고정 */
-  background:linear-gradient(180deg, rgba(14,18,34,0) 0%, #0e1222 40%);
-  padding-top:12px; margin-top:12px; border-top:1px solid #2b304f;
-}
-.modal-actions button{
-  flex:1; min-width:130px; max-width:220px; padding:12px 18px; border-radius:12px; border:none;
-  background:#2A2F4F; color:#fff; font-size:15px; font-weight:700; cursor:pointer
-}
-.modal-actions button:hover{background:#3C4380}
-
-  .toast{position:fixed; left:50%; bottom:22px; transform:translateX(-50%); padding:10px 14px; background:rgba(0,0,0,.78);
-         color:#fff; border-radius:10px; font-size:13px; display:none; z-index:5000; border:1px solid rgba(255,255,255,.12)}
-  .toast.show{display:block; animation:fade 2.2s ease}
+  /* 토스트 2초 유지 */
+  .toast{position:fixed; left:50%; bottom:22px; transform:translateX(-50%); padding:10px 14px;
+         background:rgba(0,0,0,.78); color:#fff; border-radius:10px; font-size:13px; display:none; z-index:5000;
+         border:1px solid rgba(255,255,255,.12)}
+  .toast.show{display:block; animation:fade 2s ease}
   @keyframes fade{0%{opacity:0;transform:translateX(-50%) translateY(6px)}
                   10%{opacity:1;transform:translateX(-50%) translateY(0)}
                   90%{opacity:1}
@@ -171,10 +141,13 @@
 
 <main>
   <section id="list" aria-label="엠버서더 목록">
-    <div class="state" id="stateMsg">불러오는 중…</div>
+    <div class="state" id="stateMsg" style="color:var(--muted); text-align:center; padding:24px 0; font-size:13px">
+      불러오는 중…
+    </div>
   </section>
 </main>
 
+<!-- 하단 네비 -->
 <nav class="tabbar" aria-label="하단 네비게이션">
   <a href="index.html" class="tab">메인</a>
   <a href="rimo_profile.html" class="tab">프로필</a>
@@ -183,12 +156,12 @@
 
 <!-- ✅ 매칭희망 DM 모달 -->
 <div class="modal" id="dmModal" role="dialog" aria-modal="true" aria-labelledby="dmTitle">
-  <div class="sheet" id="dmSheet">
+  <div class="sheet panel" id="dmSheet">
     <h4 id="dmTitle">🤝 매칭 희망 DM 보내기</h4>
     <div class="hint">
       아래 메시지가 자동 복사됩니다. <b>카카오 1:1 채팅</b>을 열어 <b>붙여 넣기</b>만 하세요.
     </div>
-    <div id="dmPreview" class="pre"></div>
+    <div id="dmPreview" class="pre panel" style="padding:12px"></div>
     <div class="modal-actions">
       <button id="openDM">카카오톡 열기</button>
       <button id="copyDM">다시 복사</button>
@@ -197,6 +170,7 @@
     </div>
   </div>
 </div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -206,6 +180,7 @@ const LS_KEY    = 'rimo_profile_v1';  // 내 프로필 로컬
 const LS_UID    = 'rimo_uid_v1';      // 내 uid 로컬
 const ADMIN_DM  = "http://pf.kakao.com/_ceUDn/chat"; // 운영자 1:1 채널
 
+/* 태그 메타 */
 const STYLE_META = {
   Urban:{cls:'pill-urban',  label:'Urban'},
   Curve:{cls:'pill-curve',  label:'Curve'},
@@ -217,10 +192,14 @@ const PACE_META = {
   Dynamic: {cls:'pill-dynamic',  label:'Dynamic'},
 };
 
-function showToast(msg){
+/* 토스트 2초 */
+function showToast(msg, ms=2000){
   const t=document.getElementById('toast');
-  t.textContent=msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'), 2200);
+  t.textContent=msg;
+  t.style.animationDuration=(ms/1000)+'s';
+  t.classList.add('show');
+  clearTimeout(window._toastTimer);
+  window._toastTimer=setTimeout(()=>t.classList.remove('show'), ms);
 }
 
 function meLocal() {
@@ -230,10 +209,10 @@ function meLocal() {
   return { uid, profile };
 }
 
-/* GET ?action=listProfiles&ts=... */
+/* 서버에서 목록 불러오기(GET) */
 async function loadProfiles(){
   const url = `${REG_URL}?action=listProfiles&ts=${Date.now()}`;
-  const res = await fetch(url);
+  const res = await fetch(url, {cache:'no-store'});
   const text = await res.text();
   let json;
   try { json = JSON.parse(text); } catch(_) { throw new Error('목록 응답 파싱 실패'); }
@@ -241,7 +220,7 @@ async function loadProfiles(){
   return json.data;
 }
 
-/* 내 프로필 고정 정렬 */
+/* 내 프로필 맨 위 고정 + 나머지는 최신순(ts DESC) */
 function pinMineFirst(items){
   const me = meLocal();
   const myName = (me.profile && me.profile.name) ? String(me.profile.name).trim() : null;
@@ -267,13 +246,13 @@ function tagEl(cls, text){
   return div;
 }
 
+/* 렌더 */
 function renderList(items){
   const listEl = document.getElementById('list');
   listEl.innerHTML = '';
 
   const me = meLocal();
   const myName = (me.profile && me.profile.name) ? String(me.profile.name).trim() : null;
-
   const sorted = pinMineFirst(items);
 
   sorted.forEach(a=>{
@@ -281,7 +260,7 @@ function renderList(items){
                  (!me.uid && myName && a.name && myName === a.name);
 
     const card = document.createElement('article');
-    card.className = 'card' + (isMe ? ' me' : '');
+    card.className = 'card amb-card' + (isMe ? ' me' : '');
 
     const head = document.createElement('div');
     head.className = 'head';
@@ -321,16 +300,18 @@ function renderList(items){
     }
     nameRow.appendChild(btn);
 
+    // 소개
     if (a.intro){
       const intro = document.createElement('p');
       intro.className = 'intro';
-      intro.textContent =a.intro? `"${String(a.intro).slice(0,25)}"`:'자기 소개가 없습니다';
+      intro.textContent = `"${String(a.intro).slice(0,25)}"`;
       idcol.appendChild(nameRow);
       idcol.appendChild(intro);
     } else {
       idcol.appendChild(nameRow);
     }
 
+    // 지역 · 기종
     const sub = document.createElement('p');
     sub.className = 'sub';
     const region = a.region ? `${a.region} · ` : '';
@@ -341,6 +322,7 @@ function renderList(items){
     head.appendChild(avatar);
     head.appendChild(idcol);
 
+    // 스타일/페이스
     const traits = document.createElement('div');
     traits.className = 'traits';
     const styles = Array.isArray(a.styles) ? a.styles : [];
@@ -349,7 +331,6 @@ function renderList(items){
       ...styles.map(s => ({type:'style', key:s})),
       ...pace.map(p => ({type:'pace',  key:p}))
     ];
-
     if(all.length === 0){
       traits.appendChild(tagEl('style', '-'));
     }else{
@@ -372,7 +353,7 @@ function renderList(items){
   });
 }
 
-/* ====== DM 모달 로직 ====== */
+/* ====== DM 모달 ====== */
 const dmModal   = document.getElementById('dmModal');
 const dmSheet   = document.getElementById('dmSheet');
 const dmPreview = document.getElementById('dmPreview');
@@ -394,13 +375,9 @@ function composeDM(me, target){
   );
 }
 
-
 async function copyText(txt){
-  try{
-    await navigator.clipboard.writeText(txt);
-    return true;
-  }catch(_){
-    // fallback
+  try{ await navigator.clipboard.writeText(txt); return true; }
+  catch(_){
     const ta=document.createElement('textarea');
     ta.value=txt; document.body.appendChild(ta);
     ta.select(); document.execCommand('copy'); ta.remove();
@@ -409,7 +386,6 @@ async function copyText(txt){
 }
 
 let _currentTarget = null;
-
 function openDMModal(target){
   _currentTarget = target;
   const me = meLocal();
@@ -418,21 +394,14 @@ function openDMModal(target){
   copyText(txt).then(()=> showToast('메시지 복사 완료'));
   dmModal.classList.add('show');
 }
-
 function closeDMModal(){
   dmModal.classList.remove('show');
   _currentTarget = null;
 }
 
-document.getElementById('openDM').onclick = ()=>{
-  window.open(ADMIN_DM, '_blank'); // 카카오 채널 1:1 열기
-};
-document.getElementById('copyDM').onclick = ()=>{
-  copyText(dmPreview.textContent).then(()=> showToast('다시 복사 완료'));
-};
-document.getElementById('editProfile').onclick = ()=>{
-  location.href='rimo_profile.html';
-};
+document.getElementById('openDM').onclick = ()=> window.open(ADMIN_DM, '_blank');
+document.getElementById('copyDM').onclick = ()=> copyText(dmPreview.textContent).then(()=> showToast('다시 복사 완료'));
+document.getElementById('editProfile').onclick = ()=> location.href='rimo_profile.html';
 document.getElementById('closeDM').onclick = closeDMModal;
 dmModal.addEventListener('click', closeDMModal);
 dmSheet.addEventListener('click', e=>e.stopPropagation());
@@ -446,30 +415,31 @@ dmSheet.addEventListener('click', e=>e.stopPropagation());
     const items = await loadProfiles();
     if(state) state.remove();
 
+    // 정규화(방탄)
     const normalized = items.map(r => {
-  // 혹시 서버가 raw를 내려주는 상황까지 대비(현재는 안 내림)
-  let intro = r.intro || '';
-  if (!intro && r.raw) {
-    try { const raw = typeof r.raw === 'string' ? JSON.parse(r.raw) : r.raw;
-          intro = raw && raw.intro ? String(raw.intro) : ''; } catch(_){}
-  }
-  intro = String(intro).slice(0,25); // 안전 슬라이스
+      let intro = r.intro || '';
+      if (!intro && r.raw) {
+        try {
+          const raw = typeof r.raw === 'string' ? JSON.parse(r.raw) : r.raw;
+          intro = raw && raw.intro ? String(raw.intro) : '';
+        } catch(_) {}
+      }
+      intro = String(intro).slice(0,25);
 
-  return {
-    uid: r.uid || '',
-    icon: r.icon || '🏍️',
-    name: r.name || '라이더',
-    region: r.region || '',
-    bike: r.bike || '',
-    styles: Array.isArray(r.styles) ? r.styles : [],
-    pace: Array.isArray(r.pace) ? r.pace : [],
-    intro,
-    time: r.time || '',
-    tandem: r.tandem || '',
-    ts: r.ts || 0
-  };
-});
-
+      return {
+        uid: r.uid || '',
+        icon: r.icon || '🏍️',
+        name: r.name || '라이더',
+        region: r.region || '',
+        bike: r.bike || '',
+        styles: Array.isArray(r.styles) ? r.styles : [],
+        pace: Array.isArray(r.pace) ? r.pace : [],
+        intro,
+        time: r.time || '',
+        tandem: r.tandem || '',
+        ts: r.ts || 0
+      };
+    });
 
     renderList(normalized);
   }catch(err){
