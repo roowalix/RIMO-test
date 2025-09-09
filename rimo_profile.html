@@ -40,49 +40,25 @@
   .form-row label{width:var(--label-width);font-size:14px;font-weight:700;white-space:nowrap}
   .field{flex:1}
 
- /* 지역 | 값   /   탠덤 | 값 — 항상 1행 2열(왼쪽 더 넓게) */
-.form-row.split{
-  display:grid;
-  grid-template-columns: 2fr auto 1fr; /* 지역(넓게) | 슬래시 | 탠덤 */
-  column-gap: 12px;
-  align-items: center;
-}
-
-/* 각 칸: 라벨 | 셀렉트 나란히 */
-.form-row.split .col{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  min-width:0; /* 좁은화면 압축 허용 */
-}
-
-/* 라벨: “지역|”, “탠덤|”의 ‘|’은 CSS로 붙임 */
-.form-row.split label.lab{
-  width:auto;                 /* 기존 라벨 고정폭 무시 */
-  font-size:14px; font-weight:700;
-  white-space:nowrap; color:var(--muted);
-  display:inline-flex; align-items:center;
-}
-.form-row.split label.lab::after{
-  content:"|";
-  opacity:.6;
-  margin:0 6px;
-}
-
-/* 가운데 슬래시(시각 구분용) */
-.form-row.split .mid{
-  color:var(--muted);
-  opacity:.6;
-  user-select:none;
-  display:flex; align-items:center; justify-content:center;
-  min-width: 10px;
-}
-.form-row.split .mid::before{ content:"/"; }
-
-/* 입력 너비 */
-.form-row.split .field{ flex:1; min-width:0; }
-.form-row.split select{ width:100%; }
-
+  /* ✅ 지역 / 탠덤 : 항상 1행 2열, 왼쪽(지역) 더 넓게, 라벨은 흰색 */
+  .form-row.split{
+    display:grid;
+    grid-template-columns: minmax(0,1.6fr) minmax(0,1fr);
+    column-gap:14px;
+    align-items:center;
+  }
+  .form-row.split .col{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    min-width:0; /* 좁은 화면에서도 압축 가능 */
+  }
+  .form-row.split .col label{
+    width:auto;                 /* 라벨 고정폭 해제 */
+    font-size:14px; font-weight:700;
+    white-space:nowrap;
+    color:#fff;                 /* ✅ 흰색으로 통일 */
+  }
 
   textarea{resize:none;height:40px}
 
@@ -106,7 +82,8 @@
     font-size:28px;cursor:pointer;transition:.15s ease;color:#fff}
   .icon-btn.active{border-color:var(--accent);box-shadow:0 0 10px rgba(122,167,255,.4);transform:scale(1.05)}
   .intro-box{width:calc(48px*5 + 10px*4);margin:8px 0 0}
-  #intro{width:100%;text-align:center;font-size:13px}
+  /* 폰트 상속 & 정렬만 유지 (크기는 공통 입력 14px 상속) */
+  #intro{width:100%;text-align:center}
 
   .save-btn{width:100%;padding:14px;margin-top:10px;font-size:15px;font-weight:700;background:#2a5bff;border:none;color:#fff;border-radius:10px;cursor:pointer}
   .save-btn[disabled]{opacity:.6;cursor:not-allowed}
@@ -157,45 +134,42 @@
       <label>이름</label>
       <div class="field"><input id="handle" type="text" placeholder="예: RIMO rider" autocomplete="nickname"></div>
     </div>
+
     <div class="form-row">
       <label>기종</label>
       <div class="field"><input id="bike" type="text" placeholder="예: Honda MSX125" autocomplete="off"></div>
     </div>
 
-    <!-- ✅ 지역 | 탠덤: 항상 1행 2열 -->
-   <div class="form-row split">
-  <div class="col">
-    <label class="lab" for="region">지역</label>
-    <div class="field">
-      <select id="region">
-        <option value="">지역 선택</option>
-        <option>서울 강남구</option><option>서울 강동구</option><option>서울 강북구</option>
-        <option>서울 강서구</option><option>서울 관악구</option><option>서울 광진구</option>
-        <option>서울 구로구</option><option>서울 금천구</option><option>서울 노원구</option>
-        <option>서울 도봉구</option><option>서울 동대문구</option><option>서울 동작구</option>
-        <option>서울 마포구</option><option>서울 서대문구</option><option>서울 서초구</option>
-        <option>서울 성동구</option><option>서울 성북구</option><option>서울 송파구</option>
-        <option>서울 양천구</option><option>서울 영등포구</option><option>서울 용산구</option>
-        <option>서울 은평구</option><option>서울 종로구</option><option>서울 중구</option>
-        <option>서울 중랑구</option>
-      </select>
+    <!-- ✅ 지역 / 탠덤 — 1행 2열, 라벨 흰색, 구분자 없음 -->
+    <div class="form-row split">
+      <div class="col">
+        <label for="region">지역</label>
+        <div class="field">
+          <select id="region">
+            <option value="">지역 선택</option>
+            <option>서울 강남구</option><option>서울 강동구</option><option>서울 강북구</option>
+            <option>서울 강서구</option><option>서울 관악구</option><option>서울 광진구</option>
+            <option>서울 구로구</option><option>서울 금천구</option><option>서울 노원구</option>
+            <option>서울 도봉구</option><option>서울 동대문구</option><option>서울 동작구</option>
+            <option>서울 마포구</option><option>서울 서대문구</option><option>서울 서초구</option>
+            <option>서울 성동구</option><option>서울 성북구</option><option>서울 송파구</option>
+            <option>서울 양천구</option><option>서울 영등포구</option><option>서울 용산구</option>
+            <option>서울 은평구</option><option>서울 종로구</option><option>서울 중구</option>
+            <option>서울 중랑구</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="col">
+        <label for="tandem">탠덤</label>
+        <div class="field">
+          <select id="tandem">
+            <option value="허용">허용</option>
+            <option value="불가">불가</option>
+          </select>
+        </div>
+      </div>
     </div>
-  </div>
-
-  <!-- 가운데 슬래시 구분자 -->
-  <div class="mid" aria-hidden="true"></div>
-
-  <div class="col">
-    <label class="lab" for="tandem">탠덤</label>
-    <div class="field">
-      <select id="tandem">
-        <option value="허용">허용</option>
-        <option value="불가">불가</option>
-      </select>
-    </div>
-  </div>
-</div>
-
 
     <div class="form-row">
       <label>시간대</label>
@@ -218,6 +192,7 @@
         <span class="toggle" data-value="Tour">Tour</span>
       </div>
     </div>
+
     <div class="form-row">
       <label>페이스</label>
       <div class="toggles" data-group="speed">
