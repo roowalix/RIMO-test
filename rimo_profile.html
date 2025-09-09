@@ -40,23 +40,49 @@
   .form-row label{width:var(--label-width);font-size:14px;font-weight:700;white-space:nowrap}
   .field{flex:1}
 
-  /* ✅ 지역 | 탠덤: 항상 1행 2열 */
-  .form-row.split{
-    display:grid;
-    grid-template-columns: minmax(0,1fr) minmax(0,1fr);
-    gap: 10px;
-    align-items: start;
-  }
-  .form-row.split .col{
-    display:flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-  .form-row.split .col label{
-    width:auto;                 /* 라벨 고정폭 해제 */
-    font-size:14px; font-weight:700;
-    white-space:nowrap;
-  }
+ /* 지역 | 값   /   탠덤 | 값 — 항상 1행 2열(왼쪽 더 넓게) */
+.form-row.split{
+  display:grid;
+  grid-template-columns: 2fr auto 1fr; /* 지역(넓게) | 슬래시 | 탠덤 */
+  column-gap: 12px;
+  align-items: center;
+}
+
+/* 각 칸: 라벨 | 셀렉트 나란히 */
+.form-row.split .col{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:0; /* 좁은화면 압축 허용 */
+}
+
+/* 라벨: “지역|”, “탠덤|”의 ‘|’은 CSS로 붙임 */
+.form-row.split label.lab{
+  width:auto;                 /* 기존 라벨 고정폭 무시 */
+  font-size:14px; font-weight:700;
+  white-space:nowrap; color:var(--muted);
+  display:inline-flex; align-items:center;
+}
+.form-row.split label.lab::after{
+  content:"|";
+  opacity:.6;
+  margin:0 6px;
+}
+
+/* 가운데 슬래시(시각 구분용) */
+.form-row.split .mid{
+  color:var(--muted);
+  opacity:.6;
+  user-select:none;
+  display:flex; align-items:center; justify-content:center;
+  min-width: 10px;
+}
+.form-row.split .mid::before{ content:"/"; }
+
+/* 입력 너비 */
+.form-row.split .field{ flex:1; min-width:0; }
+.form-row.split select{ width:100%; }
+
 
   textarea{resize:none;height:40px}
 
@@ -137,34 +163,39 @@
     </div>
 
     <!-- ✅ 지역 | 탠덤: 항상 1행 2열 -->
-    <div class="form-row split">
-      <div class="col">
-        <label>지역</label>
-        <div class="field">
-          <select id="region">
-            <option value="">지역 선택</option>
-            <option>서울 강남구</option><option>서울 강동구</option><option>서울 강북구</option>
-            <option>서울 강서구</option><option>서울 관악구</option><option>서울 광진구</option>
-            <option>서울 구로구</option><option>서울 금천구</option><option>서울 노원구</option>
-            <option>서울 도봉구</option><option>서울 동대문구</option><option>서울 동작구</option>
-            <option>서울 마포구</option><option>서울 서대문구</option><option>서울 서초구</option>
-            <option>서울 성동구</option><option>서울 성북구</option><option>서울 송파구</option>
-            <option>서울 양천구</option><option>서울 영등포구</option><option>서울 용산구</option>
-            <option>서울 은평구</option><option>서울 종로구</option><option>서울 중구</option>
-            <option>서울 중랑구</option>
-          </select>
-        </div>
-      </div>
-      <div class="col">
-        <label>탠덤</label>
-        <div class="field">
-          <select id="tandem">
-            <option value="허용">허용</option>
-            <option value="불가">불가</option>
-          </select>
-        </div>
-      </div>
+   <div class="form-row split">
+  <div class="col">
+    <label class="lab" for="region">지역</label>
+    <div class="field">
+      <select id="region">
+        <option value="">지역 선택</option>
+        <option>서울 강남구</option><option>서울 강동구</option><option>서울 강북구</option>
+        <option>서울 강서구</option><option>서울 관악구</option><option>서울 광진구</option>
+        <option>서울 구로구</option><option>서울 금천구</option><option>서울 노원구</option>
+        <option>서울 도봉구</option><option>서울 동대문구</option><option>서울 동작구</option>
+        <option>서울 마포구</option><option>서울 서대문구</option><option>서울 서초구</option>
+        <option>서울 성동구</option><option>서울 성북구</option><option>서울 송파구</option>
+        <option>서울 양천구</option><option>서울 영등포구</option><option>서울 용산구</option>
+        <option>서울 은평구</option><option>서울 종로구</option><option>서울 중구</option>
+        <option>서울 중랑구</option>
+      </select>
     </div>
+  </div>
+
+  <!-- 가운데 슬래시 구분자 -->
+  <div class="mid" aria-hidden="true"></div>
+
+  <div class="col">
+    <label class="lab" for="tandem">탠덤</label>
+    <div class="field">
+      <select id="tandem">
+        <option value="허용">허용</option>
+        <option value="불가">불가</option>
+      </select>
+    </div>
+  </div>
+</div>
+
 
     <div class="form-row">
       <label>시간대</label>
