@@ -383,12 +383,13 @@ function composeDM(me, target){
 
   return (
 `[🤝 매칭 희망] ${target.name || ''}
+💬 소개: ${target.intro || '-'}
 
 🏍️ 기종: ${target.bike || '-'}
-📍 지역: ${target.region || '-'}
-⏰ 시간: ${target.time || '-'}  |  👥 탠덤: ${target.tandem || '-'}
+📍 지역: ${target.region || '-'}  |  👥 탠덤: ${target.tandem || '-'}
+⏰ 시간: ${target.time || '-'}
 🎯 스타일/페이스: ${stylesT} / ${paceT}
-💬 소개: ${target.intro || '-'}
+
 
 * 위 라이더와 매칭 희망합니다.`
   );
