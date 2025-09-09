@@ -220,7 +220,26 @@
 </div>
 
 <script>
-const REG_URL = "https://script.google.com/macros/s/AKfycbyA5VFehWwalOiwemyHK8i1dGr_Of_tZLQjyUWLdgblrT9lJxWQcRzACnv4O8cxkAos/exec";
+const REG_URL = "https://script.google.com/macros/s/AKfycbz28V6oZkCuFlwpN6ouGKoZKAcHQkveNMPhJZxjA2Er_WUbFh7nO1XwfqPXIZjs4OTq/exec";
+
+async function registerProfile(profile){
+  try{
+    const res = await fetch(REG_URL, {
+      method: 'POST',
+      headers: { 'Content-Type':'text/plain;charset=utf-8' }, // ★ preflight 회피
+      body: JSON.stringify({ action:'registerProfile', profile })
+    });
+    // Apps Script가 JSON을 반환하므로 텍스트→JSON 파싱 시도
+    const txt = await res.text();
+    let j = {};
+    try { j = JSON.parse(txt); } catch(_) {}
+    if (!res.ok || !j.ok) throw new Error('Server said NO: '+txt);
+    return true;
+  }catch(err){
+    alert('네트워크/서버 오류: ' + err.message);
+    return false;
+  }
+}
 const LS_KEY = 'rimo_profile_v1';
 let selectedIcon="🏍️";
 
