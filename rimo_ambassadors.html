@@ -5,87 +5,93 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>RIMO — 엠버서더</title>
 
-<!-- ✅ 공통 테마 -->
-<link rel="stylesheet" href="rimo_theme.css?v=20250911" />
+<!-- ✅ 공통 테마 (있어도 페이지 내 롤백 스타일이 우선 적용) -->
+<link rel="stylesheet" href="rimo_theme.css?v=rollback1" />
 
 <style>
   *{box-sizing:border-box}
   body{
     margin:0;
+    background:#0b0b0f; color:#e8e8ef;
     font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Helvetica,Arial,sans-serif;
   }
 
-  /* 헤더(공통 톤 + 사파리 블러) */
+  /* 헤더 */
   header{
     position:sticky; top:0; z-index:5;
     background:rgba(11,11,15,.9);
     -webkit-backdrop-filter:blur(8px);
     backdrop-filter:blur(8px);
-    border-bottom:1px solid var(--border-1);
+    border-bottom:1px solid #23243a;
   }
   .bar{display:flex; gap:10px; align-items:center; padding:14px 16px; height:56px}
   .logo{font-weight:900}
   .title{font-weight:800; opacity:.9}
 
-  /* 메인 폭은 rimo_theme.css에서 통일 */
-  main{display:flex; flex-direction:column; gap:12px}
+  /* 메인 폭 (필요 시 테마와 중복되어도 무해) */
+  main{padding:16px; max-width:720px; margin:0 auto; display:flex; flex-direction:column; gap:12px; padding-bottom:100px}
 
-  /* 카드: 공통 표면은 .amb-card로 적용 */
-  .card.amb-card{ padding:10px 12px; display:flex; flex-direction:column; gap:7px; margin-bottom:10px }
-  /* 내 카드 하이라이트는 rimo_theme.css의 .amb-card.me 사용 */
+  /* 카드(롤백 톤) */
+  .card.amb-card{
+    background:#101223;
+    border:1px solid #23243a;
+    border-radius:16px;
+    padding:10px 12px;
+    display:flex; flex-direction:column; gap:7px;
+    margin-bottom:10px;
+  }
+  /* 내 카드 강조가 필요하면 여기에 추가해도 됨
+  .amb-card.me{ box-shadow:0 0 0 2px rgba(122,167,255,.25) inset; }
+  */
 
   .head{display:flex; gap:14px; align-items:center}
   .avatar{
     width:72px; height:72px; border-radius:50%;
-    background:var(--surface-2); border:1px solid var(--border-2);
+    background:#1a1c2f; border:1px solid #2b2e54;
     font-size:36px; display:flex; align-items:center; justify-content:center; flex:0 0 auto;
   }
   .idcol{min-width:0; flex:1}
   .nameRow{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
   .name{
-    margin:0; font-size:16px; font-weight:800; line-height: 1.2;
+    margin:0; font-size:16px; font-weight:800; line-height:1.2;
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
   .meBadge{
-    padding:3px 7px;
-    font-size:11px; font-weight:800;
-    color:#cfe0ff;
-    background:rgba(122,167,255,.15);
-    border:1px solid rgba(122,167,255,.35);
+    padding:3px 7px; font-size:11px; font-weight:800; color:#cfe0ff;
+    background:rgba(122,167,255,.15); border:1px solid rgba(122,167,255,.35);
     border-radius:999px;
   }
-  .intro{
-    margin:4px 0 0;
-    font-weight:600;
-    font-size:13px;
-    color:var(--fg);
-  }
-  .sub{margin:6px 0 0; color:var(--muted); font-size:13px}
+  .intro{ margin:4px 0 0; font-weight:600; font-size:13px; color:#e8e8ef }
+  .sub{   margin:6px 0 0; color:#b9b9cc; font-size:13px }
 
   .matchBtn{
     margin-left:auto;
     display:inline-flex; align-items:center; gap:6px;
     padding:6px 8px; border-radius:999px;
-    background:var(--surface-2); border:1px solid var(--border-2); color:#e6e9ff;
+    background:#1a1c2f; border:1px solid #2b2e54; color:#e6e9ff;
     font-size:12px; font-weight:600; cursor:pointer;
-    transition:box-shadow .15s ease, transform .15s ease, border-color .15s ease, background-color .15s ease;
+    transition:box-shadow .15s ease, transform .15s ease;
   }
   .matchBtn.active{
-    border-color:var(--accent);
+    border-color:#7aa7ff;
     background:rgba(122,167,255,.16);
     box-shadow:0 0 12px rgba(122,167,255,.5), 0 0 0 2px rgba(122,167,255,.25) inset;
     transform:translateY(-1px);
   }
 
-  /* 스타일/페이스 태그 */
+  /* 스타일/페이스 칩 — ★롤백 핵심★ */
   .traits{
     display:grid;
     grid-template-columns:repeat(6, max-content);
     gap:6px;
     justify-content:flex-start;
   }
-.tag{ padding:var(--pill-py) var(--pill-px); font-size:var(--pill-font); }
- 
+  .tag{
+    display:inline-flex; align-items:center; justify-content:center;
+    padding:6px 9px; border-radius:999px;
+    background:#1a1c2f; border:1px solid #2b2e54;
+    font-size:10px; font-weight:500; color:#e6e9ff; white-space:nowrap;
+  }
   .tag.style.pill-urban   {background:#1e2d55;border-color:#2c4484}
   .tag.style.pill-curve   {background:#2a1f56;border-color:#40307a}
   .tag.style.pill-tour    {background:#1e3b3a;border-color:#2f5f5d}
@@ -93,22 +99,42 @@
   .tag.pace.pill-balanced {background:#3a341e;border-color:#5a4f2f}
   .tag.pace.pill-dynamic  {background:#3a1f1f;border-color:#5a2f2f}
 
-  /* 하단 네비는 rimo_theme.css로 통일됨 */
+  /* 하단 네비(가운데 정렬 강제) */
+  .tabbar{
+    position:fixed; left:0; right:0; bottom:16px; z-index:2500;
+    display:flex; justify-content:center; gap:12px;
+  }
+  .tabbar .tab{
+    background:#182039; border:1px solid #2d3559; color:#e6e8ef;
+    padding:12px 18px; border-radius:22px; font-weight:800; text-decoration:none; font-size:14px;
+  }
+  .tabbar .tab.primary{ background:#26346d; border-color:#3b53a8 }
 
-  /* === 매칭 DM 모달: 스크롤 + 버튼 고정 === */
+  /* 로딩/에러 */
+  .state{color:#b9b9cc; font-size:13px; text-align:center; padding:24px 0}
+
+  /* 매칭 DM 모달 (스크롤 OK + 버튼 고정) */
   .modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:3000;
          background:rgba(0,0,0,.45); padding:22px 12px}
   .modal.show{display:flex}
   .sheet{width:100%; max-width:680px}
-  .sheet.panel{max-height:88vh; display:flex; flex-direction:column}
+  .sheet.panel{
+    background:#0e1222; border:1px solid #2b304f; border-radius:18px;
+    box-shadow:0 14px 40px rgba(0,0,0,.55);
+    max-height:88vh; display:flex; flex-direction:column; padding:16px;
+  }
   .sheet h4{margin:4px 0 10px; font-size:18px}
   .hint{color:#cfd2ff; line-height:1.5; margin-bottom:10px}
-  .pre{max-height:48vh; overflow:auto; white-space:pre-wrap; line-height:1.4}
+  .pre{
+    background:#0b1020; border:1px solid #293059; border-radius:12px;
+    padding:12px; white-space:pre-wrap; line-height:1.4;
+    max-height:48vh; overflow:auto;
+  }
   .modal-actions{
     display:flex; gap:10px; justify-content:center; flex-wrap:wrap;
     position:sticky; bottom:0;
-    background:linear-gradient(180deg, rgba(14,18,34,0) 0%, var(--surface-1) 40%);
-    padding-top:12px; margin-top:12px; border-top:1px solid var(--border-1);
+    background:linear-gradient(180deg, rgba(14,18,34,0) 0%, #0e1222 40%);
+    padding-top:12px; margin-top:12px; border-top:1px solid #2b304f;
   }
   .modal-actions button{
     flex:1; min-width:130px; max-width:220px; padding:12px 18px; border-radius:12px; border:none;
@@ -116,7 +142,7 @@
   }
   .modal-actions button:hover{background:#3C4380}
 
-  /* 토스트 2초 유지 */
+  /* 토스트 */
   .toast{position:fixed; left:50%; bottom:22px; transform:translateX(-50%); padding:10px 14px;
          background:rgba(0,0,0,.78); color:#fff; border-radius:10px; font-size:13px; display:none; z-index:5000;
          border:1px solid rgba(255,255,255,.12)}
@@ -137,9 +163,7 @@
 
 <main>
   <section id="list" aria-label="엠버서더 목록">
-    <div class="state" id="stateMsg" style="color:var(--muted); text-align:center; padding:24px 0; font-size:13px">
-      불러오는 중…
-    </div>
+    <div class="state" id="stateMsg">불러오는 중…</div>
   </section>
 </main>
 
@@ -154,10 +178,8 @@
 <div class="modal" id="dmModal" role="dialog" aria-modal="true" aria-labelledby="dmTitle">
   <div class="sheet panel" id="dmSheet">
     <h4 id="dmTitle">🤝 매칭 희망 DM 보내기</h4>
-    <div class="hint">
-      아래 메시지가 자동 복사됩니다. <b>카카오 1:1 채팅</b>을 열어 <b>붙여 넣기</b>만 하세요.
-    </div>
-    <div id="dmPreview" class="pre panel" style="padding:12px"></div>
+    <div class="hint">아래 메시지가 자동 복사됩니다. <b>카카오 1:1 채팅</b>을 열어 <b>붙여 넣기</b>만 하세요.</div>
+    <div id="dmPreview" class="pre"></div>
     <div class="modal-actions">
       <button id="openDM">카카오톡 열기</button>
       <button id="copyDM">다시 복사</button>
@@ -172,11 +194,11 @@
 <script>
 /* ===== 설정 ===== */
 const REG_URL   = "https://script.google.com/macros/s/AKfycbwHArsmGi2vsSfUsAgPLjMIG8p3iC_n3xryML6XETFPViQIDpYG0DGTSqIUejdz0Ss/exec";
-const LS_KEY    = 'rimo_profile_v1';  // 내 프로필 로컬
-const LS_UID    = 'rimo_uid_v1';      // 내 uid 로컬
-const ADMIN_DM  = "http://pf.kakao.com/_ceUDn/chat"; // 운영자 1:1 채널
+const LS_KEY    = 'rimo_profile_v1';
+const LS_UID    = 'rimo_uid_v1';
+const ADMIN_DM  = "http://pf.kakao.com/_ceUDn/chat";
 
-/* 태그 메타 */
+/* 메타 */
 const STYLE_META = {
   Urban:{cls:'pill-urban',  label:'Urban'},
   Curve:{cls:'pill-curve',  label:'Curve'},
@@ -188,7 +210,7 @@ const PACE_META = {
   Dynamic: {cls:'pill-dynamic',  label:'Dynamic'},
 };
 
-/* 토스트 2초 */
+/* 토스트 */
 function showToast(msg, ms=2000){
   const t=document.getElementById('toast');
   t.textContent=msg;
@@ -198,6 +220,7 @@ function showToast(msg, ms=2000){
   window._toastTimer=setTimeout(()=>t.classList.remove('show'), ms);
 }
 
+/* 내 프로필 로컬 */
 function meLocal() {
   let uid = null, profile = {};
   try { uid = localStorage.getItem(LS_UID) || null; } catch(_){}
@@ -205,7 +228,7 @@ function meLocal() {
   return { uid, profile };
 }
 
-/* 서버에서 목록 불러오기(GET) */
+/* 목록 로드 */
 async function loadProfiles(){
   const url = `${REG_URL}?action=listProfiles&ts=${Date.now()}`;
   const res = await fetch(url, {cache:'no-store'});
@@ -216,7 +239,7 @@ async function loadProfiles(){
   return json.data;
 }
 
-/* 내 프로필 맨 위 고정 + 나머지는 최신순(ts DESC) */
+/* 내 프로필 맨 위 고정 + 최신순 */
 function pinMineFirst(items){
   const me = meLocal();
   const myName = (me.profile && me.profile.name) ? String(me.profile.name).trim() : null;
@@ -292,7 +315,7 @@ function renderList(items){
       btn.onclick = ()=> location.href='rimo_profile.html';
     }else{
       btn.innerHTML = '🤝 매칭희망';
-      btn.onclick = ()=> openDMModal(a); // ✅ DM 모달 오픈
+      btn.onclick = ()=> openDMModal(a);
     }
     nameRow.appendChild(btn);
 
@@ -395,7 +418,7 @@ function closeDMModal(){
   _currentTarget = null;
 }
 
-document.getElementById('openDM').onclick = ()=> window.open(ADMIN_DM, '_blank');
+document.getElementById('openDM').onclick = ()=> window.open("http://pf.kakao.com/_ceUDn/chat", '_blank');
 document.getElementById('copyDM').onclick = ()=> copyText(dmPreview.textContent).then(()=> showToast('다시 복사 완료'));
 document.getElementById('editProfile').onclick = ()=> location.href='rimo_profile.html';
 document.getElementById('closeDM').onclick = closeDMModal;
@@ -411,7 +434,7 @@ dmSheet.addEventListener('click', e=>e.stopPropagation());
     const items = await loadProfiles();
     if(state) state.remove();
 
-    // 정규화(방탄)
+    // 정규화
     const normalized = items.map(r => {
       let intro = r.intro || '';
       if (!intro && r.raw) {
