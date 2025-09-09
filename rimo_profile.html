@@ -38,7 +38,22 @@
     width:100%;padding:8px 12px;border-radius:8px;border:1px solid #2c2f48;
     background:#0f1020;color:#fff;font-size:14px;
   }
-  select option{color:#000}
+  /* ✅ 드롭다운 텍스트 색상 흰색으로 통일 */
+select {
+  color:#fff;               /* 텍스트 흰색 */
+  background:#0f1020;       /* 드롭다운 배경 */
+  border:1px solid #2c2f48;
+  padding:8px 12px;
+  border-radius:8px;
+  font-size:14px;
+  appearance:none;
+}
+
+/* ✅ 옵션도 흰색 */
+select option {
+  color:#fff;
+  background:#0f1020;       /* 옵션 배경도 어두운 톤 */
+}
   textarea{resize:none;height:40px}
 
   .toggles{display:flex;gap:4px;flex-wrap:wrap;margin:4px 0}
