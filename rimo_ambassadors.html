@@ -31,7 +31,7 @@
   main{
     padding:16px; max-width:720px; margin:0 auto;
     display:flex; flex-direction:column; gap:12px;
-    padding-bottom:100px;
+    padding-bottom:120px;
   }
 
   .card{
@@ -41,7 +41,6 @@
     padding:10px 12px;
     display:flex; flex-direction:column; gap:7px;margin-bottom:10px;
   }
-  /* ✅ 내 프로필 하이라이트 */
   .card.me{
     background:var(--meBg);
     border-color:var(--meBd);
@@ -121,6 +120,27 @@
   .tabbar .tab.primary{background:var(--tab-pri); border-color:var(--tab-pri-bd)}
 
   .state{color:var(--muted); font-size:13px; text-align:center; padding:24px 0}
+
+  /* === 매칭 DM 모달 === */
+  .modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:3000;
+         background:rgba(0,0,0,.45); padding:22px 12px}
+  .modal.show{display:flex}
+  .sheet{width:100%; max-width:680px; background:#0e1222; border:1px solid #2b304f; border-radius:18px;
+         box-shadow:0 14px 40px rgba(0,0,0,.55); padding:16px}
+  .sheet h4{margin:4px 0 10px; font-size:18px}
+  .hint{color:#cfd2ff; line-height:1.5; margin-bottom:10px}
+  .pre{background:#0b1020; border:1px solid #293059; border-radius:12px; padding:12px; white-space:pre-wrap; line-height:1.4}
+  .modal-actions{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:14px}
+  .modal-actions button{flex:1; min-width:130px; max-width:220px; padding:12px 18px; border-radius:12px; border:none;
+                        background:#2A2F4F; color:#fff; font-size:15px; font-weight:700; cursor:pointer}
+  .modal-actions button:hover{background:#3C4380}
+  .toast{position:fixed; left:50%; bottom:22px; transform:translateX(-50%); padding:10px 14px; background:rgba(0,0,0,.78);
+         color:#fff; border-radius:10px; font-size:13px; display:none; z-index:5000; border:1px solid rgba(255,255,255,.12)}
+  .toast.show{display:block; animation:fade 2.2s ease}
+  @keyframes fade{0%{opacity:0;transform:translateX(-50%) translateY(6px)}
+                  10%{opacity:1;transform:translateX(-50%) translateY(0)}
+                  90%{opacity:1}
+                  100%{opacity:0}}
 </style>
 </head>
 <body>
@@ -143,11 +163,30 @@
   <a href="rimo_ambassadors.html" class="tab primary">엠버서더</a>
 </nav>
 
+<!-- ✅ 매칭희망 DM 모달 -->
+<div class="modal" id="dmModal" role="dialog" aria-modal="true" aria-labelledby="dmTitle">
+  <div class="sheet" id="dmSheet">
+    <h4 id="dmTitle">🤝 매칭 희망 DM 보내기</h4>
+    <div class="hint">
+      아래 메시지가 자동 복사됩니다. <b>카카오 1:1 채팅</b>을 열어 <b>붙여 넣기</b>만 하세요.
+    </div>
+    <div id="dmPreview" class="pre"></div>
+    <div class="modal-actions">
+      <button id="openDM">카카오톡 열기</button>
+      <button id="copyDM">다시 복사</button>
+      <button id="editProfile">프로필 수정</button>
+      <button id="closeDM">닫기</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
 <script>
 /* ===== 설정 ===== */
-const REG_URL   = "https://script.google.com/macros/s/AKfycbzdOZDlDa8wcOt9XPCYM9HnNRS6n4fpxiEOfd5v9QEAXLICK0LERjHNM2-G0nOQ3BcV/exec";
+const REG_URL   = "https://script.google.com/macros/s/AKfycby0QQwqAIYq-uy-HFJSZ-ZDSglSETeB-llXpUuUAN4_LJop0WfcvKbLJspJSx8pRRvu/exec";
 const LS_KEY    = 'rimo_profile_v1';  // 내 프로필 로컬
 const LS_UID    = 'rimo_uid_v1';      // 내 uid 로컬
+const ADMIN_DM  = "http://pf.kakao.com/_ceUDn/chat"; // 운영자 1:1 채널
 
 const STYLE_META = {
   Urban:{cls:'pill-urban',  label:'Urban'},
@@ -160,14 +199,17 @@ const PACE_META = {
   Dynamic: {cls:'pill-dynamic',  label:'Dynamic'},
 };
 
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
 function meLocal() {
-  let uid = null, name = null;
+  let uid = null, profile = {};
   try { uid = localStorage.getItem(LS_UID) || null; } catch(_){}
-  try {
-    const p = JSON.parse(localStorage.getItem(LS_KEY) || 'null');
-    if (p && p.name) name = String(p.name).trim();
-  } catch(_){}
-  return { uid, name };
+  try { profile = JSON.parse(localStorage.getItem(LS_KEY) || 'null') || {}; } catch(_){}
+  return { uid, profile };
 }
 
 /* GET ?action=listProfiles&ts=... */
@@ -184,25 +226,18 @@ async function loadProfiles(){
 /* 내 프로필 고정 정렬 */
 function pinMineFirst(items){
   const me = meLocal();
-  if (!me.uid && !me.name) return items.slice();
+  const myName = (me.profile && me.profile.name) ? String(me.profile.name).trim() : null;
 
   const arr = items.slice();
   let myIdx = -1;
-
-  // 1) uid 최우선
   if (me.uid) myIdx = arr.findIndex(x => x.uid && String(x.uid) === me.uid);
-  // 2) uid 없으면 이름 폴백
-  if (myIdx === -1 && me.name) {
-    myIdx = arr.findIndex(x => x.name && String(x.name).trim() === me.name);
-  }
+  if (myIdx === -1 && myName) myIdx = arr.findIndex(x => x.name && String(x.name).trim() === myName);
 
   if (myIdx > -1) {
     const mine = arr.splice(myIdx, 1)[0];
-    // 나머지 최신순 정렬(옵션)
     arr.sort((a,b) => (b.ts || 0) - (a.ts || 0));
     return [mine, ...arr];
   } else {
-    // 못 찾으면 전체 최신순
     return arr.sort((a,b) => (b.ts || 0) - (a.ts || 0));
   }
 }
@@ -219,15 +254,15 @@ function renderList(items){
   listEl.innerHTML = '';
 
   const me = meLocal();
+  const myName = (me.profile && me.profile.name) ? String(me.profile.name).trim() : null;
 
-  // 내 카드 최상단 고정
   const sorted = pinMineFirst(items);
 
   sorted.forEach(a=>{
-    const card = document.createElement('article');
     const isMe = (me.uid && a.uid === me.uid) ||
-                 (!me.uid && me.name && a.name && me.name === a.name);
+                 (!me.uid && myName && a.name && myName === a.name);
 
+    const card = document.createElement('article');
     card.className = 'card' + (isMe ? ' me' : '');
 
     const head = document.createElement('div');
@@ -249,7 +284,6 @@ function renderList(items){
 
     nameRow.appendChild(name);
 
-    // ✅ 내 프로필 배지
     if (isMe) {
       const badge = document.createElement('span');
       badge.className = 'meBadge';
@@ -265,11 +299,10 @@ function renderList(items){
       btn.onclick = ()=> location.href='rimo_profile.html';
     }else{
       btn.innerHTML = '🤝 매칭희망';
-      btn.onclick = ()=> alert('매칭희망 수집은 곧 연결됩니다 🙂');
+      btn.onclick = ()=> openDMModal(a); // ✅ DM 모달 오픈
     }
     nameRow.appendChild(btn);
 
-    // intro(선택값)
     if (a.intro){
       const intro = document.createElement('p');
       intro.className = 'intro';
@@ -290,7 +323,6 @@ function renderList(items){
     head.appendChild(avatar);
     head.appendChild(idcol);
 
-    // 태그
     const traits = document.createElement('div');
     traits.className = 'traits';
     const styles = Array.isArray(a.styles) ? a.styles : [];
@@ -322,6 +354,83 @@ function renderList(items){
   });
 }
 
+/* ====== DM 모달 로직 ====== */
+const dmModal   = document.getElementById('dmModal');
+const dmSheet   = document.getElementById('dmSheet');
+const dmPreview = document.getElementById('dmPreview');
+
+function composeDM(me, target){
+  const stylesT = (target.styles||[]).join(' · ') || '-';
+  const paceT   = (target.pace||[]).join(' · ') || '-';
+  const stylesM = (me.profile.styles||[]).join(' · ') || '-';
+  const paceM   = (me.profile.pace||[]).join(' · ') || '-';
+
+  return (
+`[🤝 매칭 희망] ${target.name || ''} 님 (uid:${target.uid||'-'})
+
+— 대상 라이더
+📍 지역: ${target.region || '-'}
+🏍️ 기종: ${target.bike || '-'}
+⏰ 시간: ${target.time || '-'}
+👥 탠덤: ${target.tandem || '-'}
+🎯 스타일/페이스: ${stylesT} / ${paceT}
+💬 소개: ${target.intro || '-'}
+
+— 신청자 정보
+👤 닉네임: ${me.profile.name || '이름 미입력'} ${me.profile.icon||''}
+📍 지역: ${me.profile.region || '-'}
+🏍️ 기종: ${me.profile.bike || '-'}
+⏰ 가능 시간: ${me.profile.time || '-'}
+👥 탠덤: ${me.profile.tandem || '-'}
+🎯 스타일/페이스: ${stylesM} / ${paceM}
+
+* 위 내용으로 매칭 희망합니다.`
+  );
+}
+
+async function copyText(txt){
+  try{
+    await navigator.clipboard.writeText(txt);
+    return true;
+  }catch(_){
+    // fallback
+    const ta=document.createElement('textarea');
+    ta.value=txt; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy'); ta.remove();
+    return true;
+  }
+}
+
+let _currentTarget = null;
+
+function openDMModal(target){
+  _currentTarget = target;
+  const me = meLocal();
+  const txt = composeDM(me, target);
+  dmPreview.textContent = txt;
+  copyText(txt).then(()=> showToast('메시지 복사 완료'));
+  dmModal.classList.add('show');
+}
+
+function closeDMModal(){
+  dmModal.classList.remove('show');
+  _currentTarget = null;
+}
+
+document.getElementById('openDM').onclick = ()=>{
+  window.open(ADMIN_DM, '_blank'); // 카카오 채널 1:1 열기
+};
+document.getElementById('copyDM').onclick = ()=>{
+  copyText(dmPreview.textContent).then(()=> showToast('다시 복사 완료'));
+};
+document.getElementById('editProfile').onclick = ()=>{
+  location.href='rimo_profile.html';
+};
+document.getElementById('closeDM').onclick = closeDMModal;
+dmModal.addEventListener('click', closeDMModal);
+dmSheet.addEventListener('click', e=>e.stopPropagation());
+
+/* ====== 부트 ====== */
 (async function init(){
   const state = document.getElementById('stateMsg');
   if(state) state.textContent = '불러오는 중…';
@@ -330,7 +439,6 @@ function renderList(items){
     const items = await loadProfiles();
     if(state) state.remove();
 
-    // 서버가 region/intro를 넘겨주므로 그대로 사용
     const normalized = items.map(r => ({
       uid: r.uid || '',
       icon: r.icon || '🏍️',
@@ -340,6 +448,8 @@ function renderList(items){
       styles: Array.isArray(r.styles) ? r.styles : [],
       pace: Array.isArray(r.pace) ? r.pace : [],
       intro: r.intro || '',
+      time: r.time || '',
+      tandem: r.tandem || '',
       ts: r.ts || 0
     }));
 
