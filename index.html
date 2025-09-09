@@ -5,16 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>RIMO — 오늘의 라이딩 크루</title>
 
-<!-- 공통 테마 -->
 <link rel="stylesheet" href="rimo_theme.css?v=20250911">
-
-<!-- Leaflet -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin />
 
 <style>
   :root{
-    /* 페이지 토큰 */
-    --chip:#1a1a24; --chipBd:#2f3247;
     --btn:#2A2F4F; --btnHover:#3C4380;
     --imminent-bg: rgba(255,199,94,.16);
     --imminent-bd: rgba(255,199,94,.45);
@@ -25,17 +20,13 @@
   }
 
   *{box-sizing:border-box}
-  body{
-    margin:0;
-    font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Helvetica,Arial,sans-serif;
-  }
+  body{ margin:0; font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Helvetica,Arial,sans-serif; }
 
   /* 헤더 */
   header{
     position:sticky; top:0; z-index:5;
     background:rgba(11,11,15,.9);
-    -webkit-backdrop-filter:blur(8px);
-    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
     border-bottom:1px solid var(--border-1);
   }
   .bar{display:flex;gap:10px;align-items:center;padding:14px 16px;height:56px}
@@ -44,7 +35,7 @@
   .pill{margin-left:auto;padding:6px 10px;border-radius:999px;background:#151525;color:#b9b9cc;font-size:12px}
 
   /* 본문 */
-  main{padding:16px;max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:14px; padding-bottom:120px;} /* 탭바 가림 방지 */
+  main{padding:16px;max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:14px;padding-bottom:120px}
   #map{height:360px;border-radius:14px;outline:1px solid var(--border-1)}
   .leaflet-container{z-index:1}
 
@@ -58,14 +49,21 @@
   .card h3{margin:0 0 2px;font-size:18px}
   .meta{font-size:14px;color:var(--muted)}
   .msg{font-size:14px}
+
+  /* 칩(=필) */
   .pillrow{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
   .chip{
-    padding:8px 12px;border-radius:999px;background:var(--pill-bg, rgba(255,255,255,.06));
-    border:1px solid var(--pill-bd, rgba(255,255,255,.12));
-    color:var(--pill-ink, #e6e8ef);
-    font-size:var(--pill-font,12px);
-    white-space:nowrap;display:inline-flex;align-items:center;justify-content:center
+    padding:8px 14px; border-radius:999px; font-size:12px; font-weight:700;
+    display:inline-flex; align-items:center; justify-content:center;
+    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); color:#e6e8ef;
   }
+  /* 엠버서더와 동일 팔레트 */
+  .chip.pill-urban   {background:#1e2d55; border-color:#2c4484}
+  .chip.pill-curve   {background:#2a1f56; border-color:#40307a}
+  .chip.pill-tour    {background:#1e3b3a; border-color:#2f5f5d}
+  .chip.pill-easy    {background:#1f3a1f; border-color:#2f5a2f}
+  .chip.pill-balanced{background:#3a341e; border-color:#5a4f2f}
+  .chip.pill-dynamic {background:#3a1f1f; border-color:#5a2f2f}
 
   /* 출발 임박 배지 */
   .imminent{
@@ -90,16 +88,14 @@
   .pin{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;
        font-weight:900;font-size:12px;color:#0b0b0f;border:2px solid rgba(255,255,255,.9);box-shadow:0 1px 6px rgba(0,0,0,.35)}
 
-  /* 모달(합류 안내) */
+  /* 모달 */
   .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:4000;
          background:rgba(0,0,0,.45);padding:22px 12px}
   .modal.show{display:flex}
   #joinSheet.panel{
-    width:calc(100% - 24px);
-    max-width:680px;
-    background:#0e1222; border:1px solid #2b304f; border-radius:18px;
-    box-shadow:0 14px 40px rgba(0,0,0,.55);
-    padding:16px 16px 20px;  /* 하단 여유 */
+    width:calc(100% - 24px); max-width:680px;
+    background:#0e1222; border:1px solid #2b304f; border-radius:18px; box-shadow:0 14px 40px rgba(0,0,0,.55);
+    padding:16px 16px 20px;
   }
   #joinSheet h4{margin:4px 0 10px;font-size:18px}
   .hint{color:#cfd2ff;line-height:1.5;margin-bottom:10px}
@@ -108,11 +104,9 @@
     padding:12px; white-space:pre-wrap; line-height:1.4;
     min-height:96px; max-height:42vh; overflow:auto; color:#e6e9ff;
   }
-  .modal-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px; padding-bottom:6px}
-  .modal-actions button{
-    flex:1; min-width:110px; max-width:160px; padding:12px 18px; border-radius:12px; border:none;
-    background:var(--btn); color:#fff; font-size:15px; font-weight:700; cursor:pointer
-  }
+  .modal-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px;padding-bottom:6px}
+  .modal-actions button{flex:1;min-width:110px;max-width:160px;padding:12px 18px;border-radius:12px;border:none;
+                        background:var(--btn);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
   .modal-actions button:hover{background:var(--btnHover)}
 
   /* 하단 네비 */
@@ -120,14 +114,10 @@
   .tabbar .tab{background:var(--tab-bg);border:1px solid var(--tab-bd);color:var(--tab-ink);
                padding:12px 18px;border-radius:22px;font-weight:800;text-decoration:none;font-size:14px}
   .tabbar .tab.primary{background:var(--tab-pri);border-color:var(--tab-pri-bd)}
+  body.modal-open .tabbar{pointer-events:none;opacity:.28;filter:saturate(.2) blur(1px);transform:translateY(2px)}
 
-  /* 모달 열릴 때 바닥 탭바 비활성/반투명 */
-  body.modal-open .tabbar{
-    pointer-events:none;
-    opacity:.28;
-    filter:saturate(.2) blur(1px);
-    transform:translateY(2px);
-  }
+  /* 혹시 남아 있던 상단 필터 버튼 숨김(안전망) */
+  .filter-btn{display:none !important}
 </style>
 </head>
 <body>
@@ -144,7 +134,6 @@
   <section id="list" class="carousel"></section>
 </main>
 
-<!-- 하단 네비 -->
 <nav class="tabbar" aria-label="하단 네비게이션">
   <a href="index.html" class="tab primary">메인</a>
   <a href="rimo_profile.html" class="tab">프로필</a>
@@ -155,9 +144,7 @@
 <div class="modal" id="joinModal" role="dialog" aria-modal="true" aria-labelledby="joinTitle">
   <div class="sheet panel" id="joinSheet">
     <h4 id="joinTitle">✅ 합류 신청하기</h4>
-    <div class="hint">
-      아래 버튼으로 <b>운영자 1:1 채팅</b>을 열어 붙여 넣어 주세요. 승인되면 라이더 크루 채팅방으로 초대됩니다.
-    </div>
+    <div class="hint">아래 버튼으로 <b>운영자 1:1 채팅</b>을 열어 붙여 넣어 주세요. 승인되면 라이더 크루 채팅방으로 초대됩니다.</div>
     <div id="preview" class="pre"></div>
     <div class="modal-actions">
       <button id="goAdmin">이대로 신청하기</button>
@@ -167,17 +154,15 @@
   </div>
 </div>
 
-<!-- Leaflet -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin></script>
-
 <script>
 /* 상수 */
 const ADMIN_DM = "http://pf.kakao.com/_ceUDn/chat";
-const LS_KEY = 'rimo_profile_v1';
+const LS_KEY   = 'rimo_profile_v1';
 const LS_CREWS = 'rimo_crews_v1';
-const LS_APPS = 'rimo_applications_v1';
+const LS_APPS  = 'rimo_applications_v1';
 
-/* 카드/핀 테마 */
+/* 테마 */
 const THEMES = {
   red:    { base:'#ff4d4d', cardBg:'rgba(255,77,77,.14)',  border:'rgba(255,77,77,.55)'},
   yellow: { base:'#ffd24d', cardBg:'rgba(255,210,77,.16)', border:'rgba(255,210,77,.55)'},
@@ -189,13 +174,11 @@ const THEMES = {
 document.getElementById('today').textContent =
   new Date().toLocaleDateString('ko-KR',{month:'long',day:'numeric',weekday:'short'});
 
-/* 발행된 카드 불러오기 */
-let crews = [];
-try { crews = JSON.parse(localStorage.getItem(LS_CREWS) || '[]'); }
-catch(e) { crews = []; }
-
-if (!crews.length) {
-  crews = [{
+/* 발행된 카드 */
+let crews=[];
+try{ crews = JSON.parse(localStorage.getItem(LS_CREWS)||'[]'); }catch(_){ crews=[]; }
+if(!crews.length){
+  crews=[{
     id:"demo1", theme:"blue", title:"<예시 카드 — 관리자에서 발행하세요>",
     time:"10월 10일 19:00", from:"출발지", to:"도착지",
     lat:37.5665, lng:126.9780, toLat:37.55, toLng:127.0,
@@ -204,26 +187,23 @@ if (!crews.length) {
 }
 
 /* 지도 */
-const map = L.map('map',{scrollWheelZoom:true});
+const map=L.map('map',{scrollWheelZoom:true});
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
-const group = L.featureGroup().addTo(map);
-const arcs = L.layerGroup().addTo(map);
+const group=L.featureGroup().addTo(map);
+const arcs=L.layerGroup().addTo(map);
 
 function makePin(color,label){
-  return L.divIcon({
-    className:'pin',
+  return L.divIcon({className:'pin',
     html:`<div class="pin" style="background:${color}">${label}</div>`,
-    iconSize:[28,28], iconAnchor:[14,14]
+    iconSize:[28,28],iconAnchor:[14,14]
   });
 }
-
 function arcCoords(aLat,aLng,bLat,bLng,k=0.18){
   const x1=aLng,y1=aLat,x2=bLng,y2=bLat,mx=(x1+x2)/2,my=(y1+y2)/2;
   const vx=x2-x1,vy=y2-y1,len=Math.hypot(vx,vy)||1;
   const nx=-vy/len,ny=vx/len; let off=len*k; if(off<0.01) off=0.01;
   const cx=mx+nx*off,cy=my+ny*off; return [[y1,x1],[cy,cx],[y2,x2]];
 }
-
 function renderMap(){
   group.clearLayers(); arcs.clearLayers();
   const bounds=L.latLngBounds([]);
@@ -239,9 +219,22 @@ function renderMap(){
 }
 renderMap();
 
+/* 칩 클래스 매핑 (엠버서더와 동일 색) */
+function chipClass(label){
+  switch(String(label).toLowerCase()){
+    case 'urban':    return 'pill-urban';
+    case 'curve':    return 'pill-curve';
+    case 'tour':     return 'pill-tour';
+    case 'easy':     return 'pill-easy';
+    case 'balanced': return 'pill-balanced';
+    case 'dynamic':  return 'pill-dynamic';
+    default:         return '';
+  }
+}
+
 /* 카드 렌더링 */
 const listEl=document.getElementById('list');
-const chip=s=>`<span class="chip">${s}</span>`;
+function chip(label){ return `<span class="chip ${chipClass(label)}">${label}</span>`; }
 
 function renderCards(){
   listEl.innerHTML="";
@@ -251,8 +244,8 @@ function renderCards(){
     el.className="card"; el.dataset.id=c.id;
     el.style.background=t.cardBg; el.style.border=`1px solid ${t.border}`;
 
-    // 출발 임박 판단(필요 시 실제 시간 비교 로직으로 교체)
-    const immin = false;
+    // 출발 임박 플래그(예시)
+    const immin=false;
 
     el.innerHTML=`
       <h3>${c.title}</h3>
@@ -261,7 +254,7 @@ function renderCards(){
       <div class="msg">💬 ${c.msg}</div>
       ${immin ? `<div class="imminent">🚦 출발 임박</div>` : ``}
       <div class="pillrow">
-        ${c.styles.map(chip).join("")}
+        ${(c.styles||[]).map(chip).join("")}
         ${c.cc ? chip(c.cc) : ""}
       </div>
       <button class="join">👥 ${c.peopleNow}/${c.peopleMax} · ✅ 합류 신청</button>
@@ -272,27 +265,21 @@ function renderCards(){
 }
 renderCards();
 
-/* 합류 모달 */
-const modal = document.getElementById('joinModal');
-const sheet = document.getElementById('joinSheet');
-const preview = document.getElementById('preview');
+/* 모달 */
+const modal=document.getElementById('joinModal');
+const sheet=document.getElementById('joinSheet');
+const preview=document.getElementById('preview');
 
-function closeJoinModal(){
-  modal.classList.remove('show');
-  document.body.classList.remove('modal-open');
-}
-modal.addEventListener('click', closeJoinModal);      // 바깥 클릭 닫기
-sheet.addEventListener('click', (e)=> e.stopPropagation());
+function closeJoinModal(){ modal.classList.remove('show'); document.body.classList.remove('modal-open'); }
+modal.addEventListener('click', closeJoinModal);
+sheet.addEventListener('click', e=>e.stopPropagation());
 
-document.getElementById('editProfile').onclick = ()=> location.href='rimo_profile.html';
+document.getElementById('editProfile').onclick=()=> location.href='rimo_profile.html';
 
-function loadProfile(){
-  try{ return JSON.parse(localStorage.getItem(LS_KEY)||'{}'); }
-  catch(e){ return {}; }
-}
+function loadProfile(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)||'{}'); }catch(_){ return {}; } }
 function composeText(crew, profile){
-  const styles = (profile.styles || []).join(' · ') || '-';
-  const paces  = (profile.pace   || []).join(' · ') || '-';
+  const styles=(profile.styles||[]).join(' · ') || '-';
+  const paces =(profile.pace  ||[]).join(' · ') || '-';
   return (
 `[✅ 합류 신청] ${crew.title}
 📍 출발 → 도착
@@ -309,39 +296,24 @@ ${styles} · ${paces}`
 }
 async function copyText(txt){
   try{ await navigator.clipboard.writeText(txt); return true; }
-  catch(e){
-    const ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta);
-    ta.select(); document.execCommand('copy'); ta.remove(); return true;
-  }
+  catch(_){ const ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta);
+            ta.select(); document.execCommand('copy'); ta.remove(); return true; }
 }
 function saveApplication(crew, text){
-  let apps = [];
-  try { apps = JSON.parse(localStorage.getItem(LS_APPS)||'[]'); } catch(e){ apps = []; }
-  apps.unshift({
-    id: 'app'+Math.random().toString(36).slice(2,7),
-    ts: Date.now(),
-    crewId: crew.id,
-    title: crew.title,
-    from: crew.from,
-    to: crew.to,
-    text
-  });
+  let apps=[]; try{ apps=JSON.parse(localStorage.getItem(LS_APPS)||'[]'); }catch(_){ apps=[]; }
+  apps.unshift({ id:'app'+Math.random().toString(36).slice(2,7), ts:Date.now(),
+                 crewId:crew.id, title:crew.title, from:crew.from, to:crew.to, text });
   localStorage.setItem(LS_APPS, JSON.stringify(apps));
 }
 function openJoinModal(crew){
-  const profile = loadProfile();
-  const text = composeText(crew, profile);
-  preview.textContent = text;
+  const profile=loadProfile();
+  const text=composeText(crew, profile);
+  preview.textContent=text;
   copyText(text);
-
-  document.body.classList.add('modal-open');  // 탭바 비활성/반투명
+  document.body.classList.add('modal-open');
   modal.classList.add('show');
-
-  document.getElementById('goAdmin').onclick = ()=>{
-    saveApplication(crew, text);
-    location.href = ADMIN_DM;
-  };
-  document.getElementById('copyProfileBtn').onclick = ()=> copyText(text);
+  document.getElementById('goAdmin').onclick=()=>{ saveApplication(crew, text); location.href=ADMIN_DM; };
+  document.getElementById('copyProfileBtn').onclick=()=> copyText(text);
 }
 </script>
 </body>
