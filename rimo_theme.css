@@ -94,3 +94,52 @@ select option{color:#fff; background:var(--surface-3)}
   /* 이미 rimo_theme.css에 있음: 배경/테두리/폰트 등 */
 }
 
+/* ===== Pill(칩/태그/토글) 공통 토큰 ===== */
+:root{
+  /* 기본 색상 */
+  --pill-bg:#1a1c2f;
+  --pill-bd:#2c2f48;
+  --pill-ink:#e6e9ff;
+
+  /* 메인/엠버서더 칩 사이즈 */
+  --pill-px:12px;
+  --pill-py:8px;
+  --pill-font:12px;
+}
+
+/* ===== 메인/엠버서더에서 쓰는 칩/태그 통일 ===== */
+/* (.chip: index, .tag: ambassadors) */
+.pill, .chip, .tag{
+  background:var(--pill-bg);
+  border:1px solid var(--pill-bd);
+  color:var(--pill-ink);
+  padding:var(--pill-py) var(--pill-px);
+  border-radius:999px;
+  font-size:var(--pill-font);
+  font-weight:600;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  white-space:nowrap;
+}
+
+/* (엠버서더) 스타일/페이스의 컬러 강조가 필요하면 여기서만 살짝 톤만 보정 */
+.tag.style.pill-urban   {background:#1e2d55; border-color:#2c4484}
+.tag.style.pill-curve   {background:#2a1f56; border-color:#40307a}
+.tag.style.pill-tour    {background:#1e3b3a; border-color:#2f5f5d}
+.tag.pace.pill-easy     {background:#1f3a1f; border-color:#2f5a2f}
+.tag.pace.pill-balanced {background:#3a341e; border-color:#5a4f2f}
+.tag.pace.pill-dynamic  {background:#3a1f1f; border-color:#5a2f2f}
+
+/* ===== 프로필의 토글(크기는 현행 유지, 색만 통일) ===== */
+.toggle{
+  background:var(--pill-bg);
+  border:1px solid var(--pill-bd);
+  color:var(--pill-ink);
+}
+.toggle.active{
+  border-color:var(--accent);
+  background:rgba(122,167,255,.16);
+  box-shadow:0 0 10px rgba(122,167,255,.45);
+}
+
