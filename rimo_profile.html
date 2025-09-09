@@ -10,42 +10,68 @@
 <style>
   :root{ --label-width:40px; }
   *{box-sizing:border-box}
-  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Helvetica,Arial,sans-serif}
-  header{position:sticky; top:0; z-index:5; background:rgba(11,11,15,.9); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); border-bottom:1px solid var(--border-1)}
+  body{ margin:0; font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Helvetica,Arial,sans-serif; }
+
+  header{
+    position:sticky; top:0; z-index:5;
+    background:rgba(11,11,15,.9);
+    -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--border-1);
+  }
   .bar{display:flex;gap:10px;align-items:center;padding:14px 16px;height:56px}
-  .logo{font-weight:900}.title{font-weight:800;opacity:.9}
+  .logo{font-weight:900}
+  .title{font-weight:800;opacity:.9}
+
   main{display:flex;flex-direction:column;gap:12px}
   .panel{padding:12px;display:flex;flex-direction:column;gap:10px}
 
   .form-row{display:flex;align-items:center;gap:6px;margin-bottom:0}
+  .form-row.top{align-items:flex-start}
   .form-row label{width:var(--label-width);font-size:14px;font-weight:700;white-space:nowrap}
   .field{flex:1;min-width:0}
 
-  /* 지역/탠덤 1행 2열 (원하면 위/아래로 나눠도 됨) */
-  .form-row.split{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);column-gap:14px;align-items:center}
+  /* 지역/탠덤 1행 2열 */
+  .form-row.split{
+    display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);
+    column-gap:14px; align-items:center;
+  }
   .form-row.split .col{display:flex;align-items:center;gap:6px;min-width:0}
-  .form-row.split .col label{width:var(--label-width);font-size:14px;font-weight:700;white-space:nowrap;color:#fff}
-  /* 탠덤 열만 살짝 타이트하게 */
+  .form-row.split .col label{width:var(--label-width);font-size:14px;font-weight:700;color:#fff;white-space:nowrap}
+  /* 탠덤(오른쪽)만 살짝 더 붙여서 ‘허용’ 잘림 방지 */
   .form-row.split .col:nth-child(2){ gap:4px }
   .form-row.split .col:nth-child(2) label{ width:calc(var(--label-width) - 8px) }
   .form-row.split .col:nth-child(2) .field{ flex:1 1 auto; min-width:0 }
-  .form-row.split .col:nth-child(2) select{ width:100% }
+  .form-row.split select{ width:100% }
 
   textarea{resize:none;height:40px}
+
   .toggles{display:flex;gap:10px;flex-wrap:wrap;margin:0}
-  .toggle{display:inline-flex;align-items:center;gap:12px;padding:8px 12px;border-radius:999px;cursor:pointer}
-  .toggle.active{background:rgba(122,167,255,.16);box-shadow:0 0 10px rgba(122,167,255,.45);font-weight:800;transform:translateY(-1px) scale(1.03)}
+  .toggle{
+    display:inline-flex;align-items:center;gap:12px;padding:8px 12px;border-radius:999px;
+    color:#e6e9ff;font-size:13px;cursor:pointer;user-select:none;white-space:nowrap;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .toggle.active{
+    border-color:var(--accent); background:rgba(122,167,255,.16);
+    box-shadow:0 0 10px rgba(122,167,255,.45); transform:translateY(-1px) scale(1.03);
+    font-weight:800;
+  }
+
   .profile-icons{display:flex;flex-direction:column;align-items:center;gap:10px;margin:0}
   .icons{display:grid;grid-template-columns:repeat(5,48px);grid-auto-rows:48px;gap:10px;justify-content:center}
-  .icon-btn{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer}
-  .icon-btn.active{box-shadow:0 0 10px rgba(122,167,255,.4);transform:scale(1.05)}
+  .icon-btn{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:28px;cursor:pointer;transition:.15s ease;color:#fff}
+  .icon-btn.active{border-color:var(--accent);box-shadow:0 0 10px rgba(122,167,255,.4);transform:scale(1.05)}
   .intro-box{width:calc(48px*5 + 10px*4);margin:8px 0 0}
   #intro{width:100%;text-align:center}
-  .save-btn{width:100%;padding:14px;margin-top:10px;font-size:15px;font-weight:700;border:none;border-radius:10px;cursor:pointer}
+
+  .save-btn{width:100%;padding:14px;margin-top:10px;font-size:15px;font-weight:700;background:#2a5bff;border:none;color:#fff;border-radius:10px;cursor:pointer}
   .save-btn[disabled]{opacity:.6;cursor:not-allowed}
 
   .tabbar{position:fixed;left:0;right:0;bottom:16px;z-index:2500;display:flex;gap:12px;justify-content:center}
-  .tabbar .tab{padding:12px 18px;border-radius:22px;font-weight:800;text-decoration:none;font-size:14px}
+  .tabbar .tab{background:var(--tab-bg);border:1px solid var(--tab-bd);color:var(--tab-ink);
+    padding:12px 18px;border-radius:22px;font-weight:800;text-decoration:none;font-size:14px}
+  .tabbar .tab.primary{background:var(--tab-pri);border-color:var(--tab-pri-bd)}
 
   .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.5);z-index:3000;padding:16px}
   .modal.show{display:flex}
@@ -54,16 +80,21 @@
   .avatar{width:72px;height:72px;border-radius:50%;font-size:36px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
   .idcol{min-width:0}
   .name{margin:0 0 4px;font-size:18px;font-weight:800}
-  .sub{margin:0;opacity:.85;font-size:13px}
+  .sub{margin:0;color:var(--muted);font-size:13px}
   .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
   .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
   .tag{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 10px;border-radius:999px;font-size:12px;white-space:nowrap}
   .modal-actions{display:flex;gap:12px;justify-content:center;margin-top:6px}
-  .modal-actions button{flex:1;padding:12px;border-radius:10px;border:none;font-size:14px;font-weight:800;cursor:pointer}
+  .modal-actions button{flex:1;padding:12px;border-radius:10px;border:none;font-size:14px;font-weight:800;cursor:pointer;color:#fff}
+  .modal-actions .ok{background:#2a5bff}
+  .modal-actions .edit{background:#2c2f48}
 
   .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);padding:10px 14px;background:rgba(0,0,0,.78);color:#fff;border-radius:10px;font-size:13px;display:none;z-index:5000;border:1px solid rgba(255,255,255,.12)}
   .toast.show{display:block;animation:fade 2s ease}
-  @keyframes fade{0%{opacity:0;transform:translateX(-50%) translateY(6px)}10%{opacity:1;transform:translateX(-50%) translateY(0)}90%{opacity:1}100%{opacity:0}}
+  @keyframes fade{0%{opacity:0;transform:translateX(-50%) translateY(6px)}
+                  10%{opacity:1;transform:translateX(-50%) translateY(0)}
+                  90%{opacity:1}
+                  100%{opacity:0}}
 </style>
 </head>
 <body>
@@ -80,7 +111,6 @@
       <label>이름</label>
       <div class="field"><input id="handle" type="text" placeholder="예: RIMO rider" autocomplete="nickname"></div>
     </div>
-
     <div class="form-row">
       <label>기종</label>
       <div class="field"><input id="bike" type="text" placeholder="예: Honda MSX125" autocomplete="off"></div>
@@ -174,7 +204,6 @@
   <a href="rimo_ambassadors.html" class="tab">엠버서더</a>
 </nav>
 
-<!-- 미리보기 -->
 <div class="modal" id="previewModal">
   <div class="modal-content panel">
     <div class="card-head">
@@ -200,31 +229,43 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const REG_URL  = "https://script.google.com/macros/s/AKfycbz1P-KpgNGKUGqFDA20-QxUdcqsEEcWo8HEXtwQMW6voSnf6eHg18gi1yT7HpVzZCX6xw/exec";
-const LS_KEY   = 'rimo_profile_v1';
-const LS_UID   = 'rimo_uid_v1';
-const LS_TOKEN = 'rimo_write_token_v1';
+const REG_URL = "https://script.google.com/macros/s/AKfycbzsfNcNhFpAmNX5cQfUP_VagMveyRy2dqY1Zjg5v9NxIWyHkuOGrNS_EXla44YYYmM3cQ/exec";
+const LS_KEY  = 'rimo_profile_v1';
+const LS_UID  = 'rimo_uid_v1';
 let selectedIcon = "🏍️";
 
-function getUID(){
-  let uid = localStorage.getItem(LS_UID);
-  if(!uid){
-    uid = "u_" + Math.random().toString(36).slice(2) + Date.now().toString(36);
-    localStorage.setItem(LS_UID, uid);
+/* -------- UID: URL > localStorage > cookie > 새생성 -------- */
+function getParam(name){ try{ return new URL(location.href).searchParams.get(name); }catch(_){ return null; } }
+function setCookie(k,v,days=365){
+  const d=new Date(); d.setTime(d.getTime()+days*864e5);
+  document.cookie = `${k}=${encodeURIComponent(v)}; expires=${d.toUTCString()}; path=/; SameSite=Lax`;
+}
+function getCookie(k){
+  const m = document.cookie.match(new RegExp('(?:^|; )'+k+'=([^;]*)'));
+  return m ? decodeURIComponent(m[1]) : null;
+}
+function ensureUID(){
+  const q = getParam('uid');
+  if (q){ localStorage.setItem(LS_UID, q); setCookie(LS_UID, q); return q; }
+  let u = localStorage.getItem(LS_UID) || getCookie(LS_UID);
+  if (!u){
+    u = 'u_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+    localStorage.setItem(LS_UID, u); setCookie(LS_UID, u);
   }
-  return uid;
+  return u;
 }
 
-function showToast(msg, ms = 2000){
+/* -------- Toast -------- */
+function showToast(msg, ms=2000){
   const t = document.getElementById('toast');
   t.textContent = msg;
-  t.style.animationDuration = (ms/1000) + 's';
+  t.style.animationDuration = (ms/1000)+'s';
   t.classList.add('show');
   clearTimeout(window._toastTimer);
   window._toastTimer = setTimeout(()=> t.classList.remove('show'), ms);
 }
 
-// 아이콘
+/* -------- UI helpers -------- */
 const iconWrap = document.getElementById("iconSelect");
 iconWrap.addEventListener("click", e=>{
   const btn = e.target.closest(".icon-btn");
@@ -233,30 +274,108 @@ iconWrap.addEventListener("click", e=>{
   updateIconActive();
 });
 function updateIconActive(){
-  iconWrap.querySelectorAll(".icon-btn").forEach(b=>{
+  iconWrap.querySelectorAll(".icon-btn").forEach(b => {
     b.classList.toggle("active", b.dataset.icon === selectedIcon);
   });
 }
-updateIconActive();
 
-// 토글
-document.querySelectorAll('.toggles').forEach(group=>{
-  group.addEventListener('click',e=>{
-    if(e.target.classList.contains('toggle')) e.target.classList.toggle('active');
-  });
-});
-
-// 로컬 반영
-(function hydrate(){
+/* -------- Remote fetch (read) by uid (프리필용) -------- */
+async function fetchProfileByUid(uid){
   try{
-    const saved = JSON.parse(localStorage.getItem(LS_KEY)||'null');
-    if(saved){
-      handle.value = saved.name || '';
-      bike.value   = saved.bike || '';
-      region.value = saved.region || '';
-      time.value   = saved.time || '';
-      tandem.value = saved.tandem || '허용';
+    const res = await fetch(`${REG_URL}?action=listProfiles&ts=${Date.now()}`, {cache:'no-store'});
+    const j = await res.json();
+    if (j && j.ok && Array.isArray(j.data)){
+      return j.data.find(r => String(r.uid||'') === String(uid)) || null;
+    }
+  }catch(e){ console.warn('fetchProfileByUid fail', e); }
+  return null;
+}
+
+/* -------- Collect / Save -------- */
+function collectProfile(){
+  const styles = [...document.querySelectorAll('.toggles[data-group="style"] .toggle.active')].map(el=>el.dataset.value);
+  const pace   = [...document.querySelectorAll('.toggles[data-group="speed"] .toggle.active')].map(el=>el.dataset.value);
+  const introVal = (document.getElementById('intro').value||'').slice(0,25);
+  return {
+    uid: ensureUID(),
+    name: document.getElementById('handle').value.trim(),
+    bike: document.getElementById('bike').value.trim(),
+    region: document.getElementById('region').value,
+    styles, pace,
+    time: document.getElementById('time').value,
+    tandem: document.getElementById('tandem').value,
+    icon: selectedIcon,
+    intro: introVal
+  };
+}
+function saveProfileLocal(p){
+  localStorage.setItem(LS_KEY, JSON.stringify(p));
+  localStorage.setItem(LS_UID, p.uid);
+  setCookie(LS_UID, p.uid);
+}
+async function saveProfileRemote(p){
+  const res = await fetch(REG_URL, {
+    method:"POST",
+    headers:{ "Content-Type":"text/plain;charset=utf-8" }, // preflight 회피
+    body: JSON.stringify({ action:"registerProfile", profile:p })
+  });
+  const out = await res.json().catch(()=>({ok:false,msg:'응답 파싱 실패'}));
+  return out;
+}
+
+/* -------- Preview -------- */
+function showPreview(p){
+  document.getElementById('avatarPreview').textContent = p.icon || '🏍️';
+  document.getElementById('namePreview').textContent   = p.name || '라이더 이름';
+  document.getElementById('bikePreview').textContent   = `${p.region? p.region+' · ' : ''}${p.bike||'바이크 미입력'}`;
+  document.getElementById('timePreview').textContent   = p.time || '-';
+  document.getElementById('tandemPreview').textContent = `탠덤 ${p.tandem||'-'}`;
+  document.getElementById('styleGrid').innerHTML = p.styles.map(s=>`<div class="tag">${s}</div>`).join('');
+  document.getElementById('paceGrid').innerHTML  = p.pace.map(s=>`<div class="tag">${s}</div>`).join('');
+  document.getElementById('previewModal').classList.add('show');
+}
+
+/* -------- Hydrate (URL uid > remote > local) -------- */
+async function hydrate(){
+  const urlUid = getParam('uid');
+  const ls = localStorage.getItem(LS_KEY);
+
+  // 1) URL에 uid가 있으면 그걸로 원격 프리필 시도
+  if (urlUid){
+    localStorage.setItem(LS_UID, urlUid); setCookie(LS_UID, urlUid);
+    const remote = await fetchProfileByUid(urlUid);
+    if (remote){
+      // 원격 → 폼
+      selectedIcon = remote.icon || '🏍️'; updateIconActive();
+      document.getElementById('handle').value = remote.name || '';
+      document.getElementById('bike').value   = remote.bike || '';
+      document.getElementById('region').value = remote.region || '';
+      document.getElementById('time').value   = remote.time || '';
+      document.getElementById('tandem').value = remote.tandem || '허용';
+      (remote.styles||[]).forEach(v=>{
+        const el = [...document.querySelectorAll('.toggles[data-group="style"] .toggle')].find(x=>x.dataset.value===v);
+        if(el) el.classList.add('active');
+      });
+      (remote.pace||[]).forEach(v=>{
+        const el = [...document.querySelectorAll('.toggles[data-group="speed"] .toggle')].find(x=>x.dataset.value===v);
+        if(el) el.classList.add('active');
+      });
+      document.getElementById('intro').value = (remote.intro || '').slice(0,25);
+      return;
+    }
+    // 원격에 없으면 로컬 시도(새 기기/캐시초기화 직후일 수 있음)
+  }
+
+  // 2) 로컬 프리필
+  if (ls){
+    try{
+      const saved = JSON.parse(ls);
       selectedIcon = saved.icon || '🏍️'; updateIconActive();
+      document.getElementById('handle').value = saved.name || '';
+      document.getElementById('bike').value   = saved.bike || '';
+      document.getElementById('region').value = saved.region || '';
+      document.getElementById('time').value   = saved.time || '';
+      document.getElementById('tandem').value = saved.tandem || '허용';
       (saved.styles||[]).forEach(v=>{
         const el = [...document.querySelectorAll('.toggles[data-group="style"] .toggle')].find(x=>x.dataset.value===v);
         if(el) el.classList.add('active');
@@ -265,77 +384,39 @@ document.querySelectorAll('.toggles').forEach(group=>{
         const el = [...document.querySelectorAll('.toggles[data-group="speed"] .toggle')].find(x=>x.dataset.value===v);
         if(el) el.classList.add('active');
       });
-      intro.value = saved.intro || '';
+      document.getElementById('intro').value = saved.intro || '';
+    }catch(_){}
+  }
+
+  // 3) 아무것도 없으면 UID만 보장
+  ensureUID();
+}
+
+/* -------- Wire up -------- */
+updateIconActive();
+document.querySelectorAll('.toggles').forEach(group=>{
+  group.addEventListener('click',e=>{
+    if(e.target.classList.contains('toggle')){
+      e.target.classList.toggle('active');
     }
-  }catch(_){}
-})();
-
-function collectProfile(){
-  const styles = [...document.querySelectorAll('.toggles[data-group="style"] .toggle.active')].map(el=>el.dataset.value);
-  const pace   = [...document.querySelectorAll('.toggles[data-group="speed"] .toggle.active')].map(el=>el.dataset.value);
-  return {
-    uid: getUID(),
-    name: handle.value.trim(),
-    bike: bike.value.trim(),
-    region: region.value,
-    styles, pace,
-    time: time.value,
-    tandem: tandem.value,
-    icon: selectedIcon,
-    intro: (intro.value||'').slice(0,25)
-  };
-}
-function saveProfileLocal(p){ localStorage.setItem(LS_KEY, JSON.stringify(p)); }
-
-async function saveProfileRemote(p){
-  const token = localStorage.getItem(LS_TOKEN) || '';
-  const res = await fetch(REG_URL, {
-    method: "POST",
-    headers: { "Content-Type": "text/plain;charset=utf-8" }, // preflight 회피
-    body: JSON.stringify({ action:"registerProfile", profile: p, writeToken: token })
   });
-  const out = await res.json().catch(()=>({ok:false, msg:'응답 파싱 실패'}));
-  return out;
-}
+});
 
-function showPreview(p){
-  avatarPreview.textContent = p.icon || '🏍️';
-  namePreview.textContent   = p.name || '라이더 이름';
-  bikePreview.textContent   = `${p.region? p.region+' · ' : ''}${p.bike||'바이크 미입력'}`;
-  timePreview.textContent   = p.time || '-';
-  tandemPreview.textContent = `탠덤 ${p.tandem||'-'}`;
-  styleGrid.innerHTML = p.styles.map(s=>`<div class="tag">${s}</div>`).join('');
-  paceGrid.innerHTML  = p.pace.map(s=>`<div class="tag">${s}</div>`).join('');
-  previewModal.classList.add('show');
-}
+(async ()=>{ await hydrate(); })();
 
 const saveBtn = document.getElementById("saveBtn");
-const handle  = document.getElementById("handle");
-const bike    = document.getElementById("bike");
-const region  = document.getElementById("region");
-const time    = document.getElementById("time");
-const tandem  = document.getElementById("tandem");
-const intro   = document.getElementById("intro");
-
 saveBtn.addEventListener("click", async ()=>{
   const p = collectProfile();
   if(!p.name){ showToast("이름을 입력해 주세요."); return; }
+
   saveBtn.disabled = true;
   try{
     saveProfileLocal(p);
     const out = await saveProfileRemote(p);
     if(out.ok){
-      if(out.writeToken) localStorage.setItem(LS_TOKEN, out.writeToken);
       showToast("✅ 프로필 저장 완료");
-      // 내 링크 자동 복사 (다른 기기에서 ?me=uid 로 내 프로필 복구)
-      try{
-        const link = new URL('rimo_ambassadors.html', location.href);
-        link.searchParams.set('me', p.uid);
-        await navigator.clipboard.writeText(link.href);
-        showToast("내 링크 복사됨");
-      }catch(_){}
       showPreview(p);
-    } else {
+    }else{
       showToast("⚠️ 저장 실패: " + (out.msg || "알 수 없는 오류"));
     }
   }catch(err){
@@ -345,8 +426,12 @@ saveBtn.addEventListener("click", async ()=>{
   }
 });
 
-confirmBtn.addEventListener("click", ()=> previewModal.classList.remove('show'));
-editBtn.addEventListener("click", ()=> previewModal.classList.remove('show'));
+document.getElementById("confirmBtn").addEventListener("click",()=> {
+  document.getElementById('previewModal').classList.remove('show');
+});
+document.getElementById("editBtn").addEventListener("click",()=> {
+  document.getElementById('previewModal').classList.remove('show');
+});
 </script>
 </body>
 </html>
