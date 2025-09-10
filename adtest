@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>RIMO — 어드민 · 크루 생성</title>
+
+<!-- 공통 테마 -->
+<link rel="stylesheet" href="rimo_theme.css?v=20250911" />
+
+<style>
+  :root{
+    /* 공통 토큰 */
+    --accent:#2a5bff;
+    --accent-glow: rgba(122,167,255,.45);
+
+    /* 기본 칩 배경/테두리 */
+    --chip-bg:#101223; 
+    --chip-bd:#2b2e54;
+
+    /* 기본 컨트롤 룩(높이/둥글기/폰트 등) */
+    --control-h: 44px;
+    --control-radius: 12px;
+    --control-bg: #0f1020;
+    --control-bd: #2c2f48;
+    --control-ink: #fff;
+    --control-ph: #9aa0b6;
+    --control-font: 14px;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Helvetica,Arial,sans-serif;
+  }
+
+  /* 헤더 */
+  header{
+    position:sticky; top:0; z-index:5;
+    background:rgba(11,11,15,.9);
+    -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--border-1);
+  }
+  .bar{display:flex;gap:10px;align-items:center;padding:14px 16px;height:56px}
+  .logo{font-weight:900}
+  .title{font-weight:800;opacity:.9}
+  .home{margin-left:auto;font-size:22px}
+
+  /* 본문 */
+  main{display:flex;flex-direction:column;gap:12px}
+  .panel{padding:12px;display:flex;flex-direction:column;gap:12px}
+
+  /* 폼 공통 */
+  .form-row{display:flex;align-items:center;gap:8px}
+  .form-row label{width:64px;font-weight:800;white-space:nowrap}
+  .field{flex:1;min-width:0}
+  .field input,
+  .field select,
+  .field textarea{
+    appearance:none; width:100%;
+    height:var(--control-h);
+    padding:12px 14px;
+    border:1px solid var(--control-bd);
+    border-radius:var(--control-radius);
+    background:var(--control-bg);
+    color:var(--control-ink);
+    font-size:var(--control-font);
+    font-family:inherit;
+  }
+  .field textarea{height:96px; resize:vertical}
+  .field input::placeholder,
+  .field textarea::placeholder{color:var(--control-ph)}
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus{
+    outline:none;
+    border-color:var(--accent);
+    box-shadow:
+      0 0 0 2px rgba(122,167,255,.25) inset,
+      0 0 12px rgba(122,167,255,.28);
+  }
+
+  /* 2열 폼(정원/테마처럼 좌우로) */
+  .form-row.split{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap:12px; row-gap:8px;
+    align-items:center;
+  }
+  .form-row.split .col{display:flex;align-items:center;gap:8px;min-width:0}
+  .form-row.split .col label{width:64px}
+
+  /* 토글(필 버튼) */
+  .toggles{display:flex;flex-wrap:wrap;gap:10px}
+  .toggle{
+    display:inline-flex;align-items:center;justify-content:center;
+    padding:10px 14px;border-radius:999px;
+    border:1px solid var(--chip-bd);
+    background:var(--chip-bg);
+    color:#fff;                    /* 요구사항: 글자 흰색 */
+    font-weight:700;font-size:14px;
+    cursor:pointer; user-select:none; white-space:nowrap;
+    transition:.15s ease;
+  }
+  .toggle.active{
+    border-color:var(--accent);
+    background:rgba(122,167,255,.16);
+    box-shadow:
+      0 0 0 2px rgba(122,167,255,.25) inset,
+      0 0 12px var(--accent-glow); /* 요구사항: 파란 글로우 */
+    transform:translateY(-1px) scale(1.03);
+  }
+
+  /* 액션 버튼 */
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap}
+  .btn{
+    flex:1; min-width:120px;
+    padding:14px; border-radius:12px; border:none; cursor:pointer;
+    color:#fff; font-weight:800; background:var(--accent);
+  }
+  .btn.secondary{background:#2c2f48}
+
+  /* 하단 탭바(어드민 메뉴) */
+  .adminbar{
+    position:fixed; left:0; right:0; bottom:12px; z-index:20;
+    display:flex; gap:12px; justify-content:center; flex-wrap:wrap;
+  }
+  .adminbar a{
+    text-decoration:none; font-weight:800; color:var(--tab-ink);
+    background:var(--tab-bg); border:1px solid var(--tab-bd);
+    padding:12px 16px; border-radius:18px; font-size:14px;
+  }
+  .adminbar a.primary{background:var(--tab-pri); border-color:var(--tab-pri-bd)}
+
+  /* === 모바일 튜닝 (요구사항) === */
+  @media (max-width: 480px){
+    /* 라벨↔입력 간격 축소 */
+    .form-row{ gap:6px; }
+    .form-row label{ width: 44px; }             /* 좌 라벨 폭 축소 */
+    .form-row.split .col label{ width: 34px; }  /* 정원/테마 라벨은 더 타이트 */
+
+    /* 정원/테마 1행 2열 강제 */
+    .form-row.split{
+      grid-template-columns: 1fr 1fr;
+      column-gap:10px;
+    }
+
+    /* 컨트롤 조금 컴팩트 */
+    .field input, .field select{ height: 42px; padding: 10px 12px; }
+  }
+
+  /* 더 좁은 화면 대응 */
+  @media (max-width: 360px){
+    .form-row label{ width: 38px; }
+    .form-row.split .col label{ width: 30px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <div class="logo">🏍️ RIMO</div>
+    <div class="title">어드민 · 크루 생성</div>
+    <a class="home" href="index.html" aria-label="메인으로">🏠</a>
+  </div>
+</header>
+
+<main>
+  <section class="panel">
+    <!-- 제목 -->
+    <div class="form-row">
+      <label for="title">제목</label>
+      <div class="field">
+        <input id="title" type="text" placeholder="예: &lt;가을맞이 카페 라이딩&gt;">
+      </div>
+    </div>
+
+    <!-- 출발 일시 -->
+    <div class="form-row">
+      <label for="when">출발 일시</label>
+      <div class="field">
+        <!-- 텍스트 입력을 유지(운영방식에 맞게) -->
+        <input id="when" type="text" placeholder="예: 9월 20일 23:00">
+      </div>
+    </div>
+
+    <!-- 출발지 / 도착지 -->
+    <div class="form-row">
+      <label for="from">출발지</label>
+      <div class="field">
+        <input id="from" type="text" placeholder="예: GS25 한강르네상스 반포2호점">
+      </div>
+    </div>
+    <div class="form-row">
+      <label for="to">도착지</label>
+      <div class="field">
+        <input id="to" type="text" placeholder="예: RSG 성수">
+      </div>
+    </div>
+
+    <!-- 정원 / 테마 (2열) -->
+    <div class="form-row split">
+      <div class="col">
+        <label for="cap">정원</label>
+        <div class="field">
+          <input id="cap" type="number" min="1" max="30" value="4">
+        </div>
+      </div>
+      <div class="col">
+        <label for="theme">테마</label>
+        <div class="field">
+          <select id="theme">
+            <option value="blue">blue</option>
+            <option value="red">red</option>
+            <option value="yellow">yellow</option>
+            <option value="green">green</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 배기량 -->
+    <div class="form-row">
+      <label for="cc">배기량</label>
+      <div class="field">
+        <select id="cc">
+          <option>전체</option>
+          <option>125cc 이하</option>
+          <option>150–300cc</option>
+          <option>400–700cc</option>
+          <option>750cc 이상</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 스타일 -->
+    <div class="form-row">
+      <label>스타일</label>
+      <div class="field">
+        <div class="toggles" id="styleToggles">
+          <span class="toggle" data-v="Urban">Urban</span>
+          <span class="toggle" data-v="Curve">Curve</span>
+          <span class="toggle" data-v="Tour">Tour</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 페이스 -->
+    <div class="form-row">
+      <label>페이스</label>
+      <div class="field">
+        <div class="toggles" id="paceToggles">
+          <span class="toggle" data-v="Easy">Easy</span>
+          <span class="toggle" data-v="Balanced">Balanced</span>
+          <span class="toggle" data-v="Dynamic">Dynamic</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 추가 메시지 -->
+    <div class="form-row">
+      <label for="msg">메시지</label>
+      <div class="field">
+        <textarea id="msg" placeholder="간단한 안내/조건 등을 적어주세요"></textarea>
+      </div>
+    </div>
+
+    <!-- 액션 -->
+    <div class="btn-row">
+      <button class="btn" id="publishBtn">발행하기</button>
+      <button class="btn secondary" id="resetBtn">리셋</button>
+    </div>
+  </section>
+</main>
+
+<!-- 어드민 하단 메뉴(예시) -->
+<nav class="adminbar" aria-label="어드민 메뉴">
+  <a href="rimo_admin_create.html" class="primary">크루 생성</a>
+  <a href="rimo_admin_match.html">매칭 관리</a>
+  <a href="rimo_admin_route.html">루트 제안</a>
+  <a href="rimo_admin_review.html">후기 관리</a>
+  <a href="rimo_admin_db.html">DB관리</a>
+</nav>
+
+<script>
+  // 칩 토글 공통
+  function wireToggles(containerId){
+    const el = document.getElementById(containerId);
+    el.addEventListener('click', e=>{
+      const t = e.target.closest('.toggle');
+      if(!t) return;
+      t.classList.toggle('active');
+    });
+    return () => [...el.querySelectorAll('.toggle.active')].map(n=>n.dataset.v);
+  }
+  const getStyles = wireToggles('styleToggles');
+  const getPaces  = wireToggles('paceToggles');
+
+  // 로컬 저장소 키(메인 페이지와 동일하게)
+  const LS_CREWS = 'rimo_crews_v1';
+
+  // 발행
+  document.getElementById('publishBtn').addEventListener('click', ()=>{
+    const title = document.getElementById('title').value.trim();
+    const when  = document.getElementById('when').value.trim();
+    const from  = document.getElementById('from').value.trim();
+    const to    = document.getElementById('to').value.trim();
+    const cap   = Number(document.getElementById('cap').value||4);
+    const theme = document.getElementById('theme').value;
+    const cc    = document.getElementById('cc').value;
+    const msg   = document.getElementById('msg').value.trim();
+    const styles= getStyles();
+    const pace  = getPaces();
+
+    if(!title || !when || !from || !to){
+      alert('제목/일시/출발지/도착지를 입력해 주세요.');
+      return;
+    }
+
+    // 저장 형식은 메인(index)에서 쓰는 구조에 맞춰 예시로 생성
+    let crews = [];
+    try{ crews = JSON.parse(localStorage.getItem(LS_CREWS)||'[]'); }catch(_){}
+    crews.unshift({
+      id: 'c_'+Math.random().toString(36).slice(2,9),
+      theme,
+      title,
+      time: when,
+      from, to,
+      // TODO: 필요시 위치 좌표 입력/지오코딩 후 넣기
+      lat: 37.5665, lng:126.9780,
+      toLat:37.55,  toLng:127.0,
+      peopleNow: 0, peopleMax: cap,
+      styles, cc, pace, msg
+    });
+    localStorage.setItem(LS_CREWS, JSON.stringify(crews));
+    alert('발행 완료! 메인 화면에서 카드가 보입니다.');
+  });
+
+  // 리셋
+  document.getElementById('resetBtn').addEventListener('click', ()=>{
+    document.querySelectorAll('input, textarea').forEach(i=> i.value='');
+    document.querySelectorAll('.toggle').forEach(t=> t.classList.remove('active'));
+    document.getElementById('cap').value = 4;
+    document.getElementById('theme').value = 'blue';
+    document.getElementById('cc').value = '전체';
+  });
+</script>
+</body>
+</html>
