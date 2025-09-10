@@ -37,20 +37,20 @@
   .pair-46{display:grid;grid-template-columns:4fr 6fr;gap:10px} /* 인원(두 칸) : 테마  = 4:6 */
   @media (max-width:720px){ .two, .pair-46{grid-template-columns:1fr} }
 
-  /* 칩 버튼 */
-  .chips{display:flex;gap:8px;flex-wrap:wrap}
-  .chip{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;background:var(--chip-bg);border:1px solid var(--chip-bd);cursor:pointer;font-size:13px}
-  .chip.on{background:var(--chip-on);border-color:var(--chip-on-bd)}
-  .chip .x{display:none}
-  .chip.on .x{display:inline}
 
-    /* 엠버서더와 동일 팔레트 */
-  .chip.pill-urban   {background:#1e2d55; border-color:#2c4484}
-  .chip.pill-curve   {background:#2a1f56; border-color:#40307a}
-  .chip.pill-tour    {background:#1e3b3a; border-color:#2f5f5d}
-  .chip.pill-easy    {background:#1f3a1f; border-color:#2f5a2f}
-  .chip.pill-balanced{background:#3a341e; border-color:#5a4f2f}
-  .chip.pill-dynamic {background:#3a1f1f; border-color:#5a2f2f}
+   /*토글로 변경*/
+  .chips{display:flex;gap:10px;flex-wrap:wrap;margin:0}
+  .chip{
+    display:inline-flex;align-items:center;gap:14px;padding:8px 12px;border-radius:999px;
+    color:#e6e9ff;font-size:13px;cursor:pointer;user-select:none;white-space:nowrap;
+    transition:transform .15s ease, box-shadow .15s ease;
+    background:var(--chip-bg); border:1px solid var(--chip-bd);
+  }
+  .chip.active{
+    border-color:var(--accent); background:rgba(122,167,255,.16);
+    box-shadow:0 0 10px var(--accent-glow); transform:translateY(-1px) scale(1.03);
+    font-weight:800;
+  }
 
   /* 숫자/좌표 보조 버튼 */
   .inline{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
