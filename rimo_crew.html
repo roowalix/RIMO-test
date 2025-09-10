@@ -26,19 +26,14 @@
   .panel h3{margin:0 0 12px;font-size:16px}
 
   /* 행/라벨/필드 */
-  .row{display:grid;grid-template-columns:40px 1fr;gap:0;align-items:center;margin:10px 0}
+  .row{display:grid;grid-template-columns:40px 1fr;gap:0px;align-items:center;margin:10px 0}
   @media (max-width:560px){ .row{grid-template-columns:80px 1fr} }
-  .row > label{
-    font-weight:700;color:#cfd1e8;font-size:14px;
-    justify-self:end; text-align:right; /* 라벨을 오른쪽 끝에 붙여 시각 간격 축소 */
-  }
+  .row > label{width: var(--label-width);font-weight:700;color:#cfd1e8;font-size:14px}
   .field{display:block}
   input,select,textarea{
-    width:100%;padding-left:8px;border-radius:10px;border:1px solid #2c2f48;background:#0f1020;color:#fff;font-size:14px
+    width:100%;padding:10px 12px;border-radius:10px;border:1px solid #2c2f48;background:#0f1020;color:#fff;font-size:14px
   }
-  /* 메시지 폼을 다른 폼과 동일 높이로 고정 */
-  textarea{height:40px;min-height:40px;max-height:40px;resize:none;overflow-y:auto}
-
+  textarea{min-height:90px;resize:vertical}
   .hint{color:var(--muted);font-size:12px;margin-top:6px}
 
   .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -99,7 +94,7 @@
       <label for="c_datetime">일시</label>
       <div class="field">
         <input id="c_datetime" type="datetime-local" step="1800">
-      </div>
+         </div>
     </div>
 
     <!-- 출발/도착 지명 -->
@@ -138,12 +133,12 @@
       <div class="field"><div id="paceChips" class="chips"></div></div>
     </div>
 
-    <!-- 메시지 (높이 고정) -->
+    <!-- 메시지 (30자 이내) -->
     <div class="row">
       <label for="c_msg">메시지</label>
       <div class="field">
         <textarea id="c_msg" maxlength="30" placeholder="30자 이내"></textarea>
-      </div>
+              </div>
     </div>
 
     <hr style="border:none;border-top:1px solid var(--line);margin:16px 0">
@@ -347,6 +342,7 @@ function loadDraft(){
   qs('#c_capacity_min').value=d.capacity_min||'';
   qs('#c_capacity').value=d.capacity||'';
   qs('#c_theme').value=d.theme||'blue';
+  updateMsgCount();
 }
 function saveDraft(){
   const form=getForm();
@@ -391,6 +387,10 @@ function renderCards(){
 }
 
 /* ---------- 이벤트/초기화 ---------- */
+function updateMsgCount(){
+  qs('#msgCount').textContent = (qs('#c_msg').value||'').length;
+}
+
 (function init(){
   // 칩
   renderChips('styleChips', STYLE_OPTS, []);
@@ -398,6 +398,9 @@ function renderCards(){
 
   // datetime 기본값
   qs('#c_datetime').value = toLocalDatetimeValue(new Date());
+
+  // 메시지 카운트
+  qs('#c_msg').addEventListener('input', updateMsgCount);
 
   // 버튼
   qs('#btnDraft').addEventListener('click', saveDraft);
