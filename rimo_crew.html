@@ -8,7 +8,8 @@
   :root{
     --bg:#0b0b0f; --fg:#e8e8ef; --muted:#b9b9cc; --line:#232333;
     --tile:#141627; --tile2:#101223; --accent:#7aa7ff; --good:#2aa84a; --bad:#ff5d5d;
-    --chip-bg:#14172a; --chip-bd:#2b2e54; --chip-on:#27306a; --chip-on-bd:#3a4aa2;
+    --chip-bg:#14172a; --chip-bd:#2b2e54;
+    --accent-glow: rgba(122,167,255,.35);
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Arial,sans-serif}
@@ -34,31 +35,31 @@
   }
 
   .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .pair-46{display:grid;grid-template-columns:4fr 6fr;gap:10px} /* 인원(두 칸) : 테마  = 4:6 */
+  .pair-46{display:grid;grid-template-columns:4fr 6fr;gap:10px}
   @media (max-width:720px){ .two, .pair-46{grid-template-columns:1fr} }
 
-  /*토글로 변경(현재 chips 클래스 유지)*/
-  .chips{display:flex;gap:10px;flex-wrap:wrap;margin:0}
-  .chip{
+  /* rimo_profile 스타일 토글 */
+  .toggles{display:flex;gap:10px;flex-wrap:wrap;margin:0}
+  .toggle{
     display:inline-flex;align-items:center;gap:14px;padding:8px 12px;border-radius:999px;
     color:#e6e9ff;font-size:13px;cursor:pointer;user-select:none;white-space:nowrap;
     transition:transform .15s ease, box-shadow .15s ease;
     background:var(--chip-bg); border:1px solid var(--chip-bd);
   }
-  .chip.active{
+  .toggle.active{
     border-color:var(--accent); background:rgba(122,167,255,.16);
-    box-shadow:0 0 10px rgba(122,167,255,.35); transform:translateY(-1px) scale(1.03);
+    box-shadow:0 0 10px var(--accent-glow); transform:translateY(-1px) scale(1.03);
     font-weight:800;
   }
 
-  /* 숫자/좌표 보조 버튼 */
+  /* 버튼 */
   .inline{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
   .btn{padding:10px 14px;border-radius:10px;border:1px solid #2b2e48;background:#1b1d2e;color:#fff;cursor:pointer}
   .btn.small{padding:8px 10px;font-size:12px}
   .btn.primary{background:#2a5bff;border-color:#3d6aff}
   .btnbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 
-  /* 카드 목록 */
+  /* 카드 */
   .cards{display:grid;gap:10px;margin-top:10px}
   .card{background:#141628;border:1px solid var(--line);border-radius:12px;padding:12px}
   .card .tt{font-weight:800}
@@ -92,7 +93,7 @@
       </div>
     </div>
 
-    <!-- 일시: 네이티브 날짜·시간 선택기 -->
+    <!-- 일시 -->
     <div class="row">
       <label for="c_datetime">일시</label>
       <div class="field">
@@ -100,18 +101,31 @@
       </div>
     </div>
 
-    <!-- 출발/도착 지명 -->
+    <!-- 출발: 지명 + (아래) 좌표 -->
     <div class="row">
       <label for="c_from">출발</label>
-      <div class="field"><input id="c_from" placeholder="예: GS25 한강르네상스 반포2호"></div>
+      <div class="field">
+        <input id="c_from" placeholder="예: GS25 한강르네상스 반포2호">
+        <div class="two" style="margin-top:8px">
+          <input id="from_lat" type="number" step="any" placeholder="위도 (예: 37.5665)" inputmode="decimal" min="-90" max="90">
+          <input id="from_lng" type="number" step="any" placeholder="경도 (예: 126.9780)" inputmode="decimal" min="-180" max="180">
+        </div>
+      </div>
     </div>
 
+    <!-- 도착: 지명 + (아래) 좌표 -->
     <div class="row">
       <label for="c_to">도착</label>
-      <div class="field"><input id="c_to" placeholder="예: RSG 성수"></div>
+      <div class="field">
+        <input id="c_to" placeholder="예: RSG 성수">
+        <div class="two" style="margin-top:8px">
+          <input id="to_lat" type="number" step="any" placeholder="위도" inputmode="decimal" min="-90" max="90">
+          <input id="to_lng" type="number" step="any" placeholder="경도" inputmode="decimal" min="-180" max="180">
+        </div>
+      </div>
     </div>
 
-    <!-- 배기량 드롭다운 -->
+    <!-- 배기량 -->
     <div class="row">
       <label for="c_cc">배기량</label>
       <div class="field">
@@ -126,17 +140,17 @@
       </div>
     </div>
 
-    <!-- 스타일/페이스 칩 -->
+    <!-- 스타일/페이스 토글 -->
     <div class="row">
       <label>스타일</label>
-      <div class="field"><div id="styleChips" class="chips"></div></div>
+      <div class="field"><div id="styleToggles" class="toggles"></div></div>
     </div>
     <div class="row">
       <label>페이스</label>
-      <div class="field"><div id="paceChips" class="chips"></div></div>
+      <div class="field"><div id="paceToggles" class="toggles"></div></div>
     </div>
 
-    <!-- 메시지 (30자 이내) -->
+    <!-- 메시지 (단일 줄) -->
     <div class="row">
       <label for="c_msg">메시지</label>
       <div class="field">
@@ -144,32 +158,9 @@
       </div>
     </div>
 
-    <hr style="border:none;border-top:1px solid var(--line);margin:0px 0">
+    <hr style="border:none;border-top:1px solid var(--line);margin:0">
 
-    <!-- 좌표 -->
-    <div class="row">
-      <label>출발 지정<br><span style="font-size:12px;color:#9ea1c9">위도, 경도</span></label>
-      <div class="field two">
-        <input id="from_lat" type="number" step="any" placeholder="위도 (예: 37.5665 또는 '33.509768, 126.511954' 붙여넣기 가능)" inputmode="decimal" min="-90" max="90">
-        <div class="inline">
-          <input id="from_lng" type="number" step="any" placeholder="경도" inputmode="decimal" min="-180" max="180">
-          <button class="btn small" id="btnPasteFrom">📋 붙여넣기</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="row">
-      <label>도착 지정<br><span style="font-size:12px;color:#9ea1c9">위도, 경도</span></label>
-      <div class="field two">
-        <input id="to_lat" type="number" step="any" placeholder="위도 (붙여넣기 자동 분리 지원)" inputmode="decimal" min="-90" max="90">
-        <div class="inline">
-          <input id="to_lng" type="number" step="any" placeholder="경도" inputmode="decimal" min="-180" max="180">
-          <button class="btn small" id="btnPasteTo">📋 붙여넣기</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- 인원( ) / ( )  +  테마 드롭다운 (4:6) -->
+    <!-- 인원/테마 -->
     <div class="row">
       <label>인원 / 테마</label>
       <div class="field pair-46">
@@ -194,7 +185,6 @@
     </div>
   </section>
 
-  <!-- 발행된 라이딩 카드 목록 -->
   <section class="panel">
     <h3>발행된 라이딩 카드 목록</h3>
     <div id="cards" class="cards"></div>
@@ -223,9 +213,9 @@
 
 <script>
 /* ---------- 기본 설정 ---------- */
-const MAIN_URL = "https://roowalix.github.io/RIMO-test/index.html"; // 필요 시 교체
+const MAIN_URL = "https://roowalix.github.io/RIMO-test/index.html";
 
-/* ---------- 칩 옵션 ---------- */
+/* ---------- 옵션 ---------- */
 const STYLE_OPTS = ["Urban","Curve","Tour"];
 const PACE_OPTS  = ["Easy","Balanced","Dynamic"];
 
@@ -234,26 +224,28 @@ const qs=(s,p=document)=>p.querySelector(s);
 const qsa=(s,p=document)=>Array.from(p.querySelectorAll(s));
 const save=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
 const load=(k,def)=>{try{return JSON.parse(localStorage.getItem(k)||JSON.stringify(def))}catch(e){return def}};
-function makeChip(label,on=false){
+
+/* ===== 토글 렌더링 ===== */
+function makeToggle(label, active=false){
   const el=document.createElement('button');
   el.type='button';
-  el.className='chip'+(on?' active':'');   // ★ rimo_profile 느낌: active 클래스로 표시
+  el.className='toggle'+(active?' active':'');
   el.dataset.val=label;
-  el.textContent=label;
+  el.textContent = label;
   el.addEventListener('click',()=> el.classList.toggle('active'));
   return el;
 }
-function renderChips(id,opts,sel=[]){
-  const box=qs('#'+id); box.innerHTML='';
-  opts.forEach(o=>box.appendChild(makeChip(o,sel.includes(o))));
+function renderToggles(containerId, options, selected=[]){
+  const box=qs('#'+containerId); box.innerHTML='';
+  options.forEach(opt=> box.appendChild(makeToggle(opt, selected.includes(opt))) );
 }
-function selectedChips(id){
-  return qsa('#'+id+' .chip.active').map(c=>c.dataset.val);
+function selectedToggles(containerId){
+  return qsa('#'+containerId+' .toggle.active').map(el=>el.dataset.val);
 }
+
+/* 날짜 포맷 */
 function pad(n){return String(n).padStart(2,'0')}
 function formatKDate(dt){return `${dt.getMonth()+1}월 ${dt.getDate()}일 ${pad(dt.getHours())}:${pad(dt.getMinutes())}`}
-
-/* datetime-local value ↔ Date */
 function toLocalDatetimeValue(d){
   const y=d.getFullYear(), m=pad(d.getMonth()+1), day=pad(d.getDate()), hh=pad(d.getHours()), mi=pad(d.getMinutes());
   return `${y}-${m}-${day}T${hh}:${mi}`;
@@ -268,64 +260,7 @@ function getDateFromInput(){
   return new Date(Y, M-1, D, h, m||0, 0);
 }
 
-/* ---------- 좌표 파서 & 스마트 붙여넣기 ---------- */
-/* 텍스트에서 위도/경도 추출: "33.509768, 126.511954" 또는 구글맵 URL(@lat,lng or q=lat,lng) 등 */
-function extractCoords(text){
-  if(!text) return null;
-  text = String(text).trim();
-
-  // 1) @lat,lng 패턴 (구글맵 공유 링크)
-  let m = text.match(/@(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)/);
-  if(!m){
-    // 2) q=lat,lng 쿼리
-    m = text.match(/[?&]q=(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)/);
-  }
-  if(!m){
-    // 3) 텍스트 안의 첫 두 개 숫자
-    const nums = text.match(/-?\d+(?:\.\d+)?/g);
-    if(nums && nums.length>=2) m=[, nums[0], nums[1]];
-  }
-  if(!m) return null;
-
-  let lat = parseFloat(m[1]), lng = parseFloat(m[2]);
-  // lat 범위 체크 후 필요시 스왑(lng,lat로 붙여넣은 경우 대비)
-  if(Math.abs(lat)>90 && Math.abs(lng)<=90){ const t=lat; lat=lng; lng=t; }
-  if(Math.abs(lat)>90 || Math.abs(lng)>180) return null;
-  return {lat, lng};
-}
-
-/* 버튼으로 붙여넣기 (기존 기능 개선: extractCoords 사용) */
-async function pasteCoords(targetLatId,targetLngId){
-  try{
-    const text = await navigator.clipboard.readText();
-    const c = extractCoords(text);
-    if(c){
-      qs('#'+targetLatId).value = c.lat;
-      qs('#'+targetLngId).value = c.lng;
-    }else{
-      alert('좌표를 인식하지 못했습니다. 예: "33.509768, 126.511954" 형식으로 복사해 주세요.');
-    }
-  }catch(e){ alert('클립보드 접근이 차단되었습니다. 브라우저 권한을 확인하세요.'); }
-}
-
-/* 입력칸에 직접 붙여넣어도 위/경도 모두 채우기 */
-function attachSmartPaste(latId,lngId){
-  const latEl = qs('#'+latId);
-  const lngEl = qs('#'+lngId);
-  const handler = (e)=>{
-    const text = e.clipboardData?.getData('text');
-    const c = extractCoords(text);
-    if(c){
-      e.preventDefault();
-      latEl.value = c.lat;
-      lngEl.value = c.lng;
-    }
-  };
-  latEl.addEventListener('paste', handler);
-  lngEl.addEventListener('paste', handler);
-}
-
-/* ---------- 폼 수집 ---------- */
+/* 폼 수집 */
 function getForm(){
   const dt = getDateFromInput() || new Date();
   return {
@@ -339,8 +274,8 @@ function getForm(){
     to_lat: parseFloat(qs('#to_lat').value||''),
     to_lng: parseFloat(qs('#to_lng').value||''),
     cc: qs('#c_cc').value,
-    styles: selectedChips('styleChips'),
-    pace: selectedChips('paceChips'),
+    styles: selectedToggles('styleToggles'),
+    pace: selectedToggles('paceToggles'),
     message: qs('#c_msg').value.trim(),
     capacity_min: parseInt(qs('#c_capacity_min').value||'0',10),
     capacity: parseInt(qs('#c_capacity').value||'0',10),
@@ -348,7 +283,7 @@ function getForm(){
   };
 }
 
-/* ---------- 유효성 ---------- */
+/* 유효성 */
 function validate(form){
   const errs=[];
   if(!form.title) errs.push('제목을 입력하세요.');
@@ -360,17 +295,16 @@ function validate(form){
   return errs;
 }
 
-/* ---------- 저장/발행/초기화 ---------- */
+/* 저장/발행/초기화 */
 const DRAFT_KEY='rimo_create_draft_v4';
 const PUBLIST_KEY='rimo_published_cards_v1';
 
 function loadDraft(){
   const d=load(DRAFT_KEY,null);
-  // 칩 먼저
-  renderChips('styleChips', STYLE_OPTS, d?.styles||[]);
-  renderChips('paceChips',  PACE_OPTS,  d?.pace||[]);
 
-  // datetime 초기값
+  renderToggles('styleToggles', STYLE_OPTS, d?.styles||[]);
+  renderToggles('paceToggles',  PACE_OPTS,  d?.pace||[]);
+
   const now = new Date();
   const dt = d?.datetime ? new Date(d.datetime) : now;
   qs('#c_datetime').value = toLocalDatetimeValue(dt);
@@ -411,7 +345,7 @@ function resetForm(){
   location.reload();
 }
 
-/* ---------- 카드 렌더 ---------- */
+/* 카드 렌더 */
 function renderCards(){
   const box=qs('#cards'); box.innerHTML='';
   const list = load(PUBLIST_KEY,[]);
@@ -431,31 +365,18 @@ function renderCards(){
   });
 }
 
-/* ---------- 이벤트/초기화 ---------- */
+/* 초기화 */
 (function init(){
-  // 칩
-  renderChips('styleChips', STYLE_OPTS, []);
-  renderChips('paceChips',  PACE_OPTS,  []);
+  renderToggles('styleToggles', STYLE_OPTS, []);
+  renderToggles('paceToggles',  PACE_OPTS,  []);
 
-  // datetime 기본값
   qs('#c_datetime').value = toLocalDatetimeValue(new Date());
-
-  // 버튼
-  qs('#btnDraft').addEventListener('click', saveDraft);
-  qs('#btnPublish').addEventListener('click', publish);
-  qs('#btnReset').addEventListener('click', resetForm);
-  qs('#btnPasteFrom').addEventListener('click', ()=>pasteCoords('from_lat','from_lng'));
-  qs('#btnPasteTo').addEventListener('click', ()=>pasteCoords('to_lat','to_lng'));
-
-  // ★ 스마트 붙여넣기: 위/경도 입력칸 아무 데나 붙여넣으면 두 칸 모두 채움
-  attachSmartPaste('from_lat','from_lng');
-  attachSmartPaste('to_lat','to_lng');
 
   // 드래프트 복원 & 카드 목록
   loadDraft();
   renderCards();
 
-  // 헤더 홈 이동
+  // 홈 이동
   qs('#goMain')?.addEventListener('click',(e)=>{
     if(!MAIN_URL || MAIN_URL==="#"){ e.preventDefault(); alert("MAIN_URL을 메인주소로 설정하세요."); return; }
     window.open(MAIN_URL,'_blank');
