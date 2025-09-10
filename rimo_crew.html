@@ -5,21 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>RIMO — 어드민 · 크루 생성</title>
 
-<!-- 공통 테마 -->
 <link rel="stylesheet" href="rimo_theme.css?v=20250911" />
 
 <style>
   :root{
-    /* 공통 토큰 */
     --accent:#2a5bff;
     --accent-glow: rgba(122,167,255,.45);
 
-    /* 기본 칩 배경/테두리 */
-    --chip-bg:#101223; 
-    --chip-bd:#2b2e54;
-
-    /* 기본 컨트롤 룩(높이/둥글기/폰트 등) */
-    --control-h: 44px;
+    /* 프로필 페이지와 동일한 폼 스펙 */
+    --control-h: 38px;
     --control-radius: 12px;
     --control-bg: #0f1020;
     --control-bd: #2c2f48;
@@ -29,10 +23,7 @@
   }
 
   *{box-sizing:border-box}
-  body{
-    margin:0;
-    font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Helvetica,Arial,sans-serif;
-  }
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Helvetica,Arial,sans-serif;}
 
   /* 헤더 */
   header{
@@ -50,109 +41,73 @@
   main{display:flex;flex-direction:column;gap:12px}
   .panel{padding:12px;display:flex;flex-direction:column;gap:12px}
 
-  /* 폼 공통 */
-  .form-row{display:flex;align-items:center;gap:8px}
-  .form-row label{width:64px;font-weight:800;white-space:nowrap}
+  /* 폼 레이아웃 (라벨/여백/폰트 = 프로필 페이지와 동일) */
+  .form-row{display:flex;align-items:center;gap:6px}
+  .form-row label{width:48px;font-weight:800;white-space:nowrap;font-size:14px}
   .field{flex:1;min-width:0}
-  .field input,
-  .field select,
-  .field textarea{
-    appearance:none; width:100%;
-    height:var(--control-h);
-    padding:12px 14px;
-    border:1px solid var(--control-bd);
-    border-radius:var(--control-radius);
-    background:var(--control-bg);
-    color:var(--control-ink);
-    font-size:var(--control-font);
-    font-family:inherit;
+  .field input,.field select,.field textarea{
+    appearance:none;width:100%;height:var(--control-h);
+    padding:10px 12px;border:1px solid var(--control-bd);
+    border-radius:var(--control-radius);background:var(--control-bg);
+    color:var(--control-ink);font-size:var(--control-font);font-family:inherit;
   }
-  .field textarea{height:96px; resize:vertical}
-  .field input::placeholder,
-  .field textarea::placeholder{color:var(--control-ph)}
-  .field input:focus,
-  .field select:focus,
-  .field textarea:focus{
-    outline:none;
-    border-color:var(--accent);
-    box-shadow:
-      0 0 0 2px rgba(122,167,255,.25) inset,
-      0 0 12px rgba(122,167,255,.28);
+  .field textarea{height:96px;resize:vertical}
+  .field input::placeholder,.field textarea::placeholder{color:var(--control-ph)}
+  .field input:focus,.field select:focus,.field textarea:focus{
+    outline:none;border-color:var(--accent);
+    box-shadow:0 0 0 2px rgba(122,167,255,.25) inset,0 0 12px rgba(122,167,255,.28);
   }
 
-  /* 2열 폼(정원/테마처럼 좌우로) */
+  /* 정원/테마 2열 */
   .form-row.split{
-    display:grid;
-    grid-template-columns: 1fr 1fr;
-    column-gap:12px; row-gap:8px;
-    align-items:center;
+    display:grid;grid-template-columns:1fr 1fr;
+    column-gap:10px;row-gap:8px;align-items:center;
   }
-  .form-row.split .col{display:flex;align-items:center;gap:8px;min-width:0}
-  .form-row.split .col label{width:64px}
+  .form-row.split .col{display:flex;align-items:center;gap:6px;min-width:0}
+  .form-row.split .col label{width:38px;font-size:14px}
 
-  /* 토글(필 버튼) */
-  .toggles{display:flex;flex-wrap:wrap;gap:10px}
-  .toggle{
+  /* 칩 버튼(스타일/페이스 전용으로 스코프 제한) */
+  .panel .toggles{display:flex;flex-wrap:wrap;gap:10px}
+  .panel .toggles .toggle{
     display:inline-flex;align-items:center;justify-content:center;
-    padding:10px 14px;border-radius:999px;
-    border:1px solid var(--chip-bd);
-    background:var(--chip-bg);
-    color:#fff;                    /* 요구사항: 글자 흰색 */
-    font-weight:700;font-size:14px;
-    cursor:pointer; user-select:none; white-space:nowrap;
-    transition:.15s ease;
+    padding:8px 12px;border-radius:999px;border:1px solid #2b2e54;
+    background:#101223;color:#fff;font-weight:700;font-size:14px;
+    cursor:pointer;user-select:none;white-space:nowrap;transition:.15s ease;
   }
-  .toggle.active{
-    border-color:var(--accent);
-    background:rgba(122,167,255,.16);
-    box-shadow:
-      0 0 0 2px rgba(122,167,255,.25) inset,
-      0 0 12px var(--accent-glow); /* 요구사항: 파란 글로우 */
+  .panel .toggles .toggle.active{
+    border-color:var(--accent);background:rgba(122,167,255,.16);
+    box-shadow:0 0 0 2px rgba(122,167,255,.25) inset,0 0 12px var(--accent-glow);
     transform:translateY(-1px) scale(1.03);
   }
 
-  /* 액션 버튼 */
+  /* 버튼 */
   .btn-row{display:flex;gap:10px;flex-wrap:wrap}
-  .btn{
-    flex:1; min-width:120px;
-    padding:14px; border-radius:12px; border:none; cursor:pointer;
-    color:#fff; font-weight:800; background:var(--accent);
-  }
+  .btn{flex:1;min-width:120px;padding:12px;border-radius:12px;border:none;cursor:pointer;
+       color:#fff;font-weight:800;background:var(--accent)}
   .btn.secondary{background:#2c2f48}
 
-  /* 하단 탭바(어드민 메뉴) */
+  /* 하단 네비 (아이콘+텍스트 복원) */
   .adminbar{
-    position:fixed; left:0; right:0; bottom:12px; z-index:20;
-    display:flex; gap:12px; justify-content:center; flex-wrap:wrap;
+    position:fixed;left:0;right:0;bottom:12px;z-index:20;
+    display:flex;gap:12px;justify-content:center;flex-wrap:wrap
   }
-  .adminbar a{
-    text-decoration:none; font-weight:800; color:var(--tab-ink);
-    background:var(--tab-bg); border:1px solid var(--tab-bd);
-    padding:12px 16px; border-radius:18px; font-size:14px;
+  .adminbar .tab{
+    display:inline-flex;align-items:center;gap:8px;
+    text-decoration:none;font-weight:800;color:var(--tab-ink);
+    background:var(--tab-bg);border:1px solid var(--tab-bd);
+    padding:12px 16px;border-radius:22px;font-size:14px
   }
-  .adminbar a.primary{background:var(--tab-pri); border-color:var(--tab-pri-bd)}
+  .adminbar .tab .ico{font-size:18px;line-height:1}
+  .adminbar .tab.primary{background:var(--tab-pri);border-color:var(--tab-pri-bd)}
 
-  /* === 모바일 튜닝 (요구사항) === */
-  @media (max-width: 480px){
-    /* 라벨↔입력 간격 축소 */
-    .form-row{ gap:6px; }
-    .form-row label{ width: 44px; }             /* 좌 라벨 폭 축소 */
-    .form-row.split .col label{ width: 34px; }  /* 정원/테마 라벨은 더 타이트 */
-
-    /* 정원/테마 1행 2열 강제 */
-    .form-row.split{
-      grid-template-columns: 1fr 1fr;
-      column-gap:10px;
-    }
-
-    /* 컨트롤 조금 컴팩트 */
-    .field input, .field select{ height: 42px; padding: 10px 12px; }
+  /* 모바일 미세조정 */
+  @media (max-width:480px){
+    .form-row label{width:44px}
+    .form-row.split .col label{width:34px}
   }
-
-  /* 더 좁은 화면 대응 */
-  @media (max-width: 360px){
-    .form-row label{ width: 38px; }
-    .form-row.split .col label{ width: 30px; }
+  @media (max-width:360px){
+    .form-row label{width:40px}
+    .form-row.split .col label{width:30px}
   }
 </style>
 </head>
@@ -175,11 +130,10 @@
       </div>
     </div>
 
-    <!-- 출발 일시 -->
+    <!-- 일시 -->
     <div class="form-row">
-      <label for="when">출발 일시</label>
+      <label for="when">일시</label>
       <div class="field">
-        <!-- 텍스트 입력을 유지(운영방식에 맞게) -->
         <input id="when" type="text" placeholder="예: 9월 20일 23:00">
       </div>
     </div>
@@ -198,7 +152,7 @@
       </div>
     </div>
 
-    <!-- 정원 / 테마 (2열) -->
+    <!-- 정원 / 테마 -->
     <div class="form-row split">
       <div class="col">
         <label for="cap">정원</label>
@@ -257,7 +211,7 @@
       </div>
     </div>
 
-    <!-- 추가 메시지 -->
+    <!-- 메시지 -->
     <div class="form-row">
       <label for="msg">메시지</label>
       <div class="field">
@@ -273,17 +227,16 @@
   </section>
 </main>
 
-<!-- 어드민 하단 메뉴(예시) -->
+<!-- 하단 네비 (아이콘+텍스트) -->
 <nav class="adminbar" aria-label="어드민 메뉴">
-  <a href="rimo_admin_create.html" class="primary">크루 생성</a>
-  <a href="rimo_admin_match.html">매칭 관리</a>
-  <a href="rimo_admin_route.html">루트 제안</a>
-  <a href="rimo_admin_review.html">후기 관리</a>
-  <a href="rimo_admin_db.html">DB관리</a>
+  <a href="rimo_admin_create.html" class="tab primary"><span class="ico">🛠️</span><span class="txt">크루 생성</span></a>
+  <a href="rimo_admin_match.html" class="tab"><span class="ico">🤝</span><span class="txt">매칭 관리</span></a>
+  <a href="rimo_admin_route.html" class="tab"><span class="ico">🗺️</span><span class="txt">루트 제안</span></a>
+  <a href="rimo_admin_review.html" class="tab"><span class="ico">📝</span><span class="txt">후기 관리</span></a>
+  <a href="rimo_admin_db.html" class="tab"><span class="ico">🗄️</span><span class="txt">DB관리</span></a>
 </nav>
 
 <script>
-  // 칩 토글 공통
   function wireToggles(containerId){
     const el = document.getElementById(containerId);
     el.addEventListener('click', e=>{
@@ -296,10 +249,8 @@
   const getStyles = wireToggles('styleToggles');
   const getPaces  = wireToggles('paceToggles');
 
-  // 로컬 저장소 키(메인 페이지와 동일하게)
   const LS_CREWS = 'rimo_crews_v1';
 
-  // 발행
   document.getElementById('publishBtn').addEventListener('click', ()=>{
     const title = document.getElementById('title').value.trim();
     const when  = document.getElementById('when').value.trim();
@@ -317,7 +268,6 @@
       return;
     }
 
-    // 저장 형식은 메인(index)에서 쓰는 구조에 맞춰 예시로 생성
     let crews = [];
     try{ crews = JSON.parse(localStorage.getItem(LS_CREWS)||'[]'); }catch(_){}
     crews.unshift({
@@ -326,7 +276,6 @@
       title,
       time: when,
       from, to,
-      // TODO: 필요시 위치 좌표 입력/지오코딩 후 넣기
       lat: 37.5665, lng:126.9780,
       toLat:37.55,  toLng:127.0,
       peopleNow: 0, peopleMax: cap,
@@ -336,7 +285,6 @@
     alert('발행 완료! 메인 화면에서 카드가 보입니다.');
   });
 
-  // 리셋
   document.getElementById('resetBtn').addEventListener('click', ()=>{
     document.querySelectorAll('input, textarea').forEach(i=> i.value='');
     document.querySelectorAll('.toggle').forEach(t=> t.classList.remove('active'));
