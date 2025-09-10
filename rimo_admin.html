@@ -87,13 +87,19 @@
     backdrop-filter:blur(10px);
     border-top:1px solid var(--line);
   }
-  .btmnav .wrap {
-    max-width:980px;
-    margin:0 auto;
-    display:grid;
-    grid-template-columns:repeat(5, minmax(0, 1fr)); /* 버튼 폭 약 5% 넓힘 */
-    gap:10px;
-    padding:8px;
+.btmnav .wrap {
+    max-width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    padding: 8px;
+}
+
+.btmnav .navitem {
+    width: 182px;   /* 절대값으로 고정 */
+    flex-shrink: 0; /* 화면 줄어도 버튼 폭 유지 */
+}
+
   }
   .navitem {
     display:flex;
