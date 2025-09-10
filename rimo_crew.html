@@ -79,7 +79,8 @@
 
 <main>
   <section class="panel">
-    
+    <h3>크루 생성</h3>
+
     <!-- 제목 -->
     <div class="row">
       <label for="c_title">제목</label>
@@ -88,16 +89,12 @@
       </div>
     </div>
 
-    <!-- 일시: 월/일/시 드롭다운 -->
+    <!-- 일시: 네이티브 날짜·시간 선택기 -->
     <div class="row">
-      <label>일시</label>
-      <div class="field two">
-        <select id="sel_month" title="월"></select>
-        <div class="two">
-          <select id="sel_day" title="일"></select>
-          <select id="sel_hour" title="시"></select>
-        </div>
-        <div class="hint">(월/일/시 선택 기능)</div>
+      <label for="c_datetime">일시</label>
+      <div class="field">
+        <input id="c_datetime" type="datetime-local" step="1800">
+        <div class="hint">(네이티브 날짜·시간 선택기 — 30분 간격)</div>
       </div>
     </div>
 
@@ -231,7 +228,7 @@ const MAIN_URL = "https://roowalix.github.io/RIMO-test/index.html"; // 필요 �
 const STYLE_OPTS = ["Urban","Curve","Tour"];
 const PACE_OPTS  = ["Easy","Balanced","Dynamic"];
 
-/* ---------- 툴 ---------- */
+/* ---------- 유틸 ---------- */
 const qs=(s,p=document)=>p.querySelector(s);
 const qsa=(s,p=document)=>Array.from(p.querySelectorAll(s));
 const save=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
@@ -251,43 +248,31 @@ function renderChips(id,opts,sel=[]){
 }
 function selectedChips(id){ return qsa('#'+id+' .chip.on').map(c=>c.dataset.val); }
 function pad(n){return String(n).padStart(2,'0')}
-function formatKDate(dt){return `${dt.getMonth()+1}월 ${dt.getDate()}일 ${pad(dt.getHours())}:00`}
+function formatKDate(dt){return `${dt.getMonth()+1}월 ${dt.getDate()}일 ${pad(dt.getHours())}:${pad(dt.getMinutes())}`}
 
-/* ---------- 월/일/시 채우기 ---------- */
-function fillMonthDayHour(){
-  const m=qs('#sel_month'), d=qs('#sel_day'), h=qs('#sel_hour');
-  m.innerHTML = Array.from({length:12},(_,i)=>`<option value="${i+1}">${i+1}월</option>`).join('');
-  h.innerHTML = Array.from({length:24},(_,i)=>`<option value="${i}">${i}시</option>`).join('');
-  const today=new Date();
-  m.value = today.getMonth()+1;
-  h.value = today.getHours();
-
-  function refillDay(){
-    const month=parseInt(m.value,10);
-    const year = new Date().getFullYear();
-    const days = new Date(year, month, 0).getDate();
-    const cur = parseInt(d.value||'1',10);
-    d.innerHTML = Array.from({length:days},(_,i)=>`<option value="${i+1}">${i+1}일</option>`).join('');
-    d.value = Math.min(cur,days);
-  }
-  refillDay();
-  m.addEventListener('change', refillDay);
+/* datetime-local value ↔ Date */
+function toLocalDatetimeValue(d){
+  const y=d.getFullYear(), m=pad(d.getMonth()+1), day=pad(d.getDate()), hh=pad(d.getHours()), mi=pad(d.getMinutes());
+  return `${y}-${m}-${day}T${hh}:${mi}`;
+}
+function getDateFromInput(){
+  const v = qs('#c_datetime').value;
+  if(!v) return null;
+  const [date,time] = v.split('T');
+  if(!date||!time) return null;
+  const [Y,M,D] = date.split('-').map(Number);
+  const [h,m] = time.split(':').map(Number);
+  return new Date(Y, M-1, D, h, m||0, 0);
 }
 
 /* ---------- 좌표 붙여넣기 ---------- */
 async function pasteCoords(targetLatId,targetLngId){
   try{
     const text = await navigator.clipboard.readText();
-    // "lat, lng" 혹은 "lng, lat" 모두 시도
     const nums = text.split(/[,\s]+/).map(v=>parseFloat(v)).filter(v=>!Number.isNaN(v));
     if(nums.length>=2){
       const [a,b]=nums;
-      // 한국 맥락에선 위도(약 33~38), 경도(약 124~132)
-      const looksLikeLat = (v)=> v>=-90 && v<=90;
-      const looksLikeLng = (v)=> v>=-180 && v<=180;
       let lat=a, lng=b;
-      // 간단한 판단 교정
-      if(looksLikeLng(a) && Math.abs(a)>90 && looksLikeLat(b)){ lat=b; lng=a; }
       qs('#'+targetLatId).value = lat;
       qs('#'+targetLngId).value = lng;
     }else{
@@ -297,15 +282,8 @@ async function pasteCoords(targetLatId,targetLngId){
 }
 
 /* ---------- 폼 수집 ---------- */
-function getDateFromSelects(){
-  const y = new Date().getFullYear();
-  const m = parseInt(qs('#sel_month').value,10);
-  const d = parseInt(qs('#sel_day').value,10);
-  const h = parseInt(qs('#sel_hour').value,10);
-  return new Date(y, m-1, d, h, 0, 0);
-}
 function getForm(){
-  const dt = getDateFromSelects();
+  const dt = getDateFromInput() || new Date();
   return {
     title: qs('#c_title').value.trim(),
     datetime: dt.toISOString(),
@@ -330,6 +308,7 @@ function getForm(){
 function validate(form){
   const errs=[];
   if(!form.title) errs.push('제목을 입력하세요.');
+  if(!qs('#c_datetime').value) errs.push('일시를 선택하세요.');
   if(!form.from) errs.push('출발을 입력하세요.');
   if(!form.to) errs.push('도착을 입력하세요.');
   if(!(form.capacity>0)) errs.push('인원(2)은 1 이상이어야 합니다.');
@@ -343,12 +322,17 @@ const PUBLIST_KEY='rimo_published_cards_v1';
 
 function loadDraft(){
   const d=load(DRAFT_KEY,null);
+  // 칩 먼저
+  renderChips('styleChips', STYLE_OPTS, d?.styles||[]);
+  renderChips('paceChips',  PACE_OPTS,  d?.pace||[]);
+
+  // datetime 초기값
+  const now = new Date();
+  const dt = d?.datetime ? new Date(d.datetime) : now;
+  qs('#c_datetime').value = toLocalDatetimeValue(dt);
+
   if(!d) return;
   qs('#c_title').value=d.title||'';
-  const dt = d.datetime ? new Date(d.datetime) : new Date();
-  qs('#sel_month').value = (dt.getMonth()+1);
-  qs('#sel_day').value = dt.getDate();
-  qs('#sel_hour').value = dt.getHours();
   qs('#c_from').value=d.from||'';
   qs('#c_to').value=d.to||'';
   qs('#from_lat').value=d.from_lat??'';
@@ -360,8 +344,6 @@ function loadDraft(){
   qs('#c_capacity_min').value=d.capacity_min||'';
   qs('#c_capacity').value=d.capacity||'';
   qs('#c_theme').value=d.theme||'blue';
-  renderChips('styleChips', STYLE_OPTS, d.styles||[]);
-  renderChips('paceChips',  PACE_OPTS,  d.pace||[]);
   updateMsgCount();
 }
 function saveDraft(){
@@ -412,11 +394,13 @@ function updateMsgCount(){
 }
 
 (function init(){
-  // 칩 기본 세팅
+  // 칩
   renderChips('styleChips', STYLE_OPTS, []);
   renderChips('paceChips',  PACE_OPTS,  []);
-  // 월/일/시
-  fillMonthDayHour();
+
+  // datetime 기본값
+  qs('#c_datetime').value = toLocalDatetimeValue(new Date());
+
   // 메시지 카운트
   qs('#c_msg').addEventListener('input', updateMsgCount);
 
