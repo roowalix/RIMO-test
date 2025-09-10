@@ -139,6 +139,53 @@
 
   /* 카드 감싸는 패널(비주얼) */
   .card.panel{border:1px solid var(--border-1);border-radius:18px;padding:12px}
+
+  /* 정원/테마 4:6 배치 + 캡슐 스타일 */
+.pair-46{
+  display:grid;
+  grid-template-columns:4fr 6fr; /* 정원:테마 = 4:6 */
+  gap:10px;
+}
+@media (max-width:720px){
+  .pair-46{ grid-template-columns:1fr; } /* 모바일 1열 */
+}
+
+/* 캡슐 박스 */
+.mini{
+  display:grid;
+  grid-template-columns:auto 1fr; /* 라벨, 입력 */
+  align-items:center;
+  gap:10px;
+  background:#0f1020;
+  border:1px solid #2c2f48;
+  border-radius:10px;
+  padding:8px 10px;
+}
+
+/* 내부 소라벨 */
+.mini .mini-lbl{
+  color:#cfd1e8;
+  font-weight:700;
+  font-size:13px;
+  white-space:nowrap;
+}
+
+/* 캡슐 내부 입력/셀렉트는 테두리/배경 제거하여 일체감 */
+.mini input,
+.mini select{
+  background:transparent;
+  border:none;
+  color:#fff;
+  font-size:14px;
+  padding:8px 0;
+  width:100%;
+  outline:none;
+}
+.mini input:focus,
+.mini select:focus{
+  box-shadow:none; /* 외곽 하이라이트는 캡슐에 주기 원하시면 여기에 추가 가능 */
+}
+
 </style>
 </head>
 <body>
@@ -180,26 +227,29 @@
       </div>
     </div>
 
-    <!-- 정원/테마 1행 · 입력폭 컴팩트 -->
-    <div class="row split">
-      <div class="cell">
-        <label>정원</label>
-        <div class="field" style="max-width:220px">
-          <input id="max" type="number" inputmode="numeric" min="1" step="1" placeholder="4" />
-        </div>
+    <div class="row">
+  <label>정원 / 테마</label>
+  <div class="field">
+    <div class="pair-46">
+      <!-- 정원 -->
+      <div class="mini">
+        <span class="mini-lbl">정원</span>
+        <input id="c_capacity" type="number" min="1" value="4" placeholder="정원">
       </div>
-      <div class="cell">
-        <label>테마</label>
-        <div class="field" style="max-width:260px">
-          <select id="theme">
-            <option value="blue">blue</option>
-            <option value="red">red</option>
-            <option value="yellow">yellow</option>
-            <option value="green">green</option>
-          </select>
-        </div>
+      <!-- 테마 -->
+      <div class="mini">
+        <span class="mini-lbl">테마</span>
+        <select id="c_theme" title="테마">
+          <option value="red">red</option>
+          <option value="yellow">yellow</option>
+          <option value="blue" selected>blue</option>
+          <option value="green">green</option>
+        </select>
       </div>
     </div>
+  </div>
+</div>
+
 
     <div class="row">
       <label>배기량</label>
