@@ -40,6 +40,12 @@
     width:100%;padding:10px 12px;border-radius:10px;border:1px solid #2c2f48;background:#0f1020;color:#fff;font-size:14px
   }
 
+  /* 좌표 전용: 항상 2열 유지 */
+.coords{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
   .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .pair-46{display:grid;grid-template-columns:4fr 6fr;gap:10px}
   @media (max-width:720px){ .two, .pair-46{grid-template-columns:1fr} }
@@ -112,7 +118,7 @@
       <label for="c_from">출발</label>
       <div class="field">
         <input id="c_from" placeholder="예: GS25 한강르네상스 반포2호">
-        <div class="two" style="margin-top:8px">
+        <div class="coords" style="margin-top:8px">
           <input id="from_lat" type="number" step="any" placeholder="위도 (예: 33.509768)" inputmode="decimal" min="-90" max="90">
           <input id="from_lng" type="number" step="any" placeholder="경도 (예: 126.511954)" inputmode="decimal" min="-180" max="180">
         </div>
@@ -124,7 +130,7 @@
       <label for="c_to">도착</label>
       <div class="field">
         <input id="c_to" placeholder="예: RSG 성수">
-        <div class="two" style="margin-top:8px">
+        <div class="coords" style="margin-top:8px">
           <input id="to_lat" type="number" step="any" placeholder="위도" inputmode="decimal" min="-90" max="90">
           <input id="to_lng" type="number" step="any" placeholder="경도" inputmode="decimal" min="-180" max="180">
         </div>
