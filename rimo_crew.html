@@ -9,7 +9,6 @@
     --bg:#0b0b0f; --fg:#e8e8ef; --muted:#b9b9cc; --line:#232333;
     --tile:#141627; --tile2:#101223; --accent:#7aa7ff; --good:#2aa84a; --bad:#ff5d5d;
     --chip-bg:#14172a; --chip-bd:#2b2e54; --chip-on:#27306a; --chip-on-bd:#3a4aa2;
-    --ctl-h:40px; /* 모든 컨트롤(입력/셀렉트/텍스트에어리어) 높이 통일 */
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Arial,sans-serif}
@@ -26,40 +25,19 @@
   .panel{background:var(--tile);border:1px solid var(--line);border-radius:14px;padding:14px}
   .panel h3{margin:0 0 12px;font-size:16px}
 
-  /* 행/라벨/필드 — 라벨폭을 내용폭(max-content)으로, 실제 간격은 column-gap으로 제어 */
-  .row{
-    display:grid;
-    grid-template-columns:max-content 1fr;
-    column-gap:6px; /* 보이는 간격 */
-    align-items:center;
-    margin:10px 0
-  }
+  /* 행/라벨/필드 */
+  .row{display:grid;grid-template-columns:40px 1fr;gap:0;align-items:center;margin:10px 0}
+  @media (max-width:560px){ .row{grid-template-columns:80px 1fr} }
   .row > label{
-    /* width: var(--label-width);  ← 제거(불필요 & 간섭 원인) */
     font-weight:700;color:#cfd1e8;font-size:14px;
-    justify-self:end; text-align:right; /* 라벨을 오른쪽 끝에 붙여 시각적 간격 축소 */
-    white-space:nowrap;
+    justify-self:end; text-align:right; /* 라벨을 오른쪽 끝에 붙여 시각 간격 축소 */
   }
   .field{display:block}
-
-  /* 모든 컨트롤 공통 높이/패딩 정리 */
   input,select,textarea{
-    width:100%;
-    height:var(--ctl-h);
-    padding:10px 12px;       /* 기본 패딩 */
-    padding-left:8px;        /* 왼쪽만 살짝 줄여 더 촘촘하게 */
-    border-radius:10px;
-    border:1px solid #2c2f48;
-    background:#0f1020;
-    color:#fff;
-    font-size:14px
+    width:100%;padding-left:8px;border-radius:10px;border:1px solid #2c2f48;background:#0f1020;color:#fff;font-size:14px
   }
-  /* 메시지 textarea를 한 줄 컨트롤과 동일 높이로 */
-  textarea{
-    min-height:var(--ctl-h);
-    height:var(--ctl-h);
-    resize:none; /* 사용자가 늘리지 못하게 */
-  }
+  /* 메시지 폼을 다른 폼과 동일 높이로 고정 */
+  textarea{height:40px;min-height:40px;max-height:40px;resize:none;overflow-y:auto}
 
   .hint{color:var(--muted);font-size:12px;margin-top:6px}
 
@@ -160,8 +138,284 @@
       <div class="field"><div id="paceChips" class="chips"></div></div>
     </div>
 
-    <!-- 메시지 (한 줄 높이로 통일) -->
+    <!-- 메시지 (높이 고정) -->
     <div class="row">
       <label for="c_msg">메시지</label>
       <div class="field">
-        <textarea id="c_msg" maxlength="30" placeholder="30자 이내
+        <textarea id="c_msg" maxlength="30" placeholder="30자 이내"></textarea>
+      </div>
+    </div>
+
+    <hr style="border:none;border-top:1px solid var(--line);margin:16px 0">
+
+    <!-- 좌표 -->
+    <div class="row">
+      <label>출발 지정<br><span style="font-size:12px;color:#9ea1c9">위도, 경도</span></label>
+      <div class="field two">
+        <input id="from_lat" type="number" step="any" placeholder="위도 (예: 37.5665)" inputmode="decimal" min="-90" max="90">
+        <div class="inline">
+          <input id="from_lng" type="number" step="any" placeholder="경도 (예: 126.9780)" inputmode="decimal" min="-180" max="180">
+          <button class="btn small" id="btnPasteFrom">📋 붙여넣기</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <label>도착 지정<br><span style="font-size:12px;color:#9ea1c9">위도, 경도</span></label>
+      <div class="field two">
+        <input id="to_lat" type="number" step="any" placeholder="위도" inputmode="decimal" min="-90" max="90">
+        <div class="inline">
+          <input id="to_lng" type="number" step="any" placeholder="경도" inputmode="decimal" min="-180" max="180">
+          <button class="btn small" id="btnPasteTo">📋 붙여넣기</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 인원( ) / ( )  +  테마 드롭다운 (4:6) -->
+    <div class="row">
+      <label>인원 / 테마</label>
+      <div class="field pair-46">
+        <div class="two">
+          <input id="c_capacity_min" type="number" min="1" placeholder="인원(1)">
+          <input id="c_capacity" type="number" min="1" placeholder="인원(2)">
+        </div>
+        <select id="c_theme" title="테마">
+          <option value="blue" selected>blue</option>
+          <option value="red">red</option>
+          <option value="yellow">yellow</option>
+          <option value="green">green</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 기능 버튼들 -->
+    <div class="btnbar">
+      <button class="btn" id="btnDraft"># 드래프트 저장</button>
+      <button class="btn primary" id="btnPublish"># 메인에 발행</button>
+      <button class="btn" id="btnReset"># 새로 작성</button>
+    </div>
+  </section>
+
+  <!-- 발행된 라이딩 카드 목록 -->
+  <section class="panel">
+    <h3>발행된 라이딩 카드 목록</h3>
+    <div id="cards" class="cards"></div>
+  </section>
+</main>
+
+<nav class="btmnav" aria-label="하단 내비게이션">
+  <div class="wrap">
+    <a class="navitem active" href="rimo_crew.html" title="크루 생성">
+      <div class="ico">🛠️</div><div>크루 생성</div>
+    </a>
+    <a class="navitem" href="rimo_joins.html" title="매칭 희망">
+      <div class="ico">🤝</div><div>매칭 희망</div>
+    </a>
+    <a class="navitem" href="rimo_routes.html" title="루트 제안">
+      <div class="ico">🗺️</div><div>루트 제안</div>
+    </a>
+    <a class="navitem" href="rimo_feedback.html" title="후기 모음">
+      <div class="ico">📝</div><div>후기 모음</div>
+    </a>
+    <a class="navitem" href="rimo_data.html" title="자료 관리">
+      <div class="ico">🗄️</div><div>자료 관리</div>
+    </a>
+  </div>
+</nav>
+
+<script>
+/* ---------- 기본 설정 ---------- */
+const MAIN_URL = "https://roowalix.github.io/RIMO-test/index.html"; // 필요 시 교체
+
+/* ---------- 칩 옵션 ---------- */
+const STYLE_OPTS = ["Urban","Curve","Tour"];
+const PACE_OPTS  = ["Easy","Balanced","Dynamic"];
+
+/* ---------- 유틸 ---------- */
+const qs=(s,p=document)=>p.querySelector(s);
+const qsa=(s,p=document)=>Array.from(p.querySelectorAll(s));
+const save=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+const load=(k,def)=>{try{return JSON.parse(localStorage.getItem(k)||JSON.stringify(def))}catch(e){return def}};
+function makeChip(label,on=false){
+  const el=document.createElement('button');
+  el.type='button';
+  el.className='chip'+(on?' on':'');
+  el.dataset.val=label;
+  el.innerHTML=`<span>${label}</span><span class="x">✓</span>`;
+  el.addEventListener('click',()=>el.classList.toggle('on'));
+  return el;
+}
+function renderChips(id,opts,sel=[]){
+  const box=qs('#'+id); box.innerHTML='';
+  opts.forEach(o=>box.appendChild(makeChip(o,sel.includes(o))));
+}
+function selectedChips(id){ return qsa('#'+id+' .chip.on').map(c=>c.dataset.val); }
+function pad(n){return String(n).padStart(2,'0')}
+function formatKDate(dt){return `${dt.getMonth()+1}월 ${dt.getDate()}일 ${pad(dt.getHours())}:${pad(dt.getMinutes())}`}
+
+/* datetime-local value ↔ Date */
+function toLocalDatetimeValue(d){
+  const y=d.getFullYear(), m=pad(d.getMonth()+1), day=pad(d.getDate()), hh=pad(d.getHours()), mi=pad(d.getMinutes());
+  return `${y}-${m}-${day}T${hh}:${mi}`;
+}
+function getDateFromInput(){
+  const v = qs('#c_datetime').value;
+  if(!v) return null;
+  const [date,time] = v.split('T');
+  if(!date||!time) return null;
+  const [Y,M,D] = date.split('-').map(Number);
+  const [h,m] = time.split(':').map(Number);
+  return new Date(Y, M-1, D, h, m||0, 0);
+}
+
+/* ---------- 좌표 붙여넣기 ---------- */
+async function pasteCoords(targetLatId,targetLngId){
+  try{
+    const text = await navigator.clipboard.readText();
+    const nums = text.split(/[,\s]+/).map(v=>parseFloat(v)).filter(v=>!Number.isNaN(v));
+    if(nums.length>=2){
+      const [a,b]=nums;
+      let lat=a, lng=b;
+      qs('#'+targetLatId).value = lat;
+      qs('#'+targetLngId).value = lng;
+    }else{
+      alert('클립보드에서 좌표를 찾지 못했습니다. "위도,경도" 형태로 복사해 주세요.');
+    }
+  }catch(e){ alert('클립보드 접근이 차단되었습니다. 브라우저 권한을 확인하세요.'); }
+}
+
+/* ---------- 폼 수집 ---------- */
+function getForm(){
+  const dt = getDateFromInput() || new Date();
+  return {
+    title: qs('#c_title').value.trim(),
+    datetime: dt.toISOString(),
+    datetime_display: formatKDate(dt),
+    from: qs('#c_from').value.trim(),
+    to: qs('#c_to').value.trim(),
+    from_lat: parseFloat(qs('#from_lat').value||''),
+    from_lng: parseFloat(qs('#from_lng').value||''),
+    to_lat: parseFloat(qs('#to_lat').value||''),
+    to_lng: parseFloat(qs('#to_lng').value||''),
+    cc: qs('#c_cc').value,
+    styles: selectedChips('styleChips'),
+    pace: selectedChips('paceChips'),
+    message: qs('#c_msg').value.trim(),
+    capacity_min: parseInt(qs('#c_capacity_min').value||'0',10),
+    capacity: parseInt(qs('#c_capacity').value||'0',10),
+    theme: qs('#c_theme').value
+  };
+}
+
+/* ---------- 유효성 ---------- */
+function validate(form){
+  const errs=[];
+  if(!form.title) errs.push('제목을 입력하세요.');
+  if(!qs('#c_datetime').value) errs.push('일시를 선택하세요.');
+  if(!form.from) errs.push('출발을 입력하세요.');
+  if(!form.to) errs.push('도착을 입력하세요.');
+  if(!(form.capacity>0)) errs.push('인원(2)은 1 이상이어야 합니다.');
+  if(form.message.length>30) errs.push('메시지는 30자 이내입니다.');
+  return errs;
+}
+
+/* ---------- 저장/발행/초기화 ---------- */
+const DRAFT_KEY='rimo_create_draft_v4';
+const PUBLIST_KEY='rimo_published_cards_v1';
+
+function loadDraft(){
+  const d=load(DRAFT_KEY,null);
+  // 칩 먼저
+  renderChips('styleChips', STYLE_OPTS, d?.styles||[]);
+  renderChips('paceChips',  PACE_OPTS,  d?.pace||[]);
+
+  // datetime 초기값
+  const now = new Date();
+  const dt = d?.datetime ? new Date(d.datetime) : now;
+  qs('#c_datetime').value = toLocalDatetimeValue(dt);
+
+  if(!d) return;
+  qs('#c_title').value=d.title||'';
+  qs('#c_from').value=d.from||'';
+  qs('#c_to').value=d.to||'';
+  qs('#from_lat').value=d.from_lat??'';
+  qs('#from_lng').value=d.from_lng??'';
+  qs('#to_lat').value=d.to_lat??'';
+  qs('#to_lng').value=d.to_lng??'';
+  qs('#c_cc').value=d.cc||'';
+  qs('#c_msg').value=d.message||'';
+  qs('#c_capacity_min').value=d.capacity_min||'';
+  qs('#c_capacity').value=d.capacity||'';
+  qs('#c_theme').value=d.theme||'blue';
+}
+function saveDraft(){
+  const form=getForm();
+  save(DRAFT_KEY, form);
+  alert('드래프트 저장 완료');
+}
+function publish(){
+  const form=getForm();
+  const errs=validate(form);
+  if(errs.length){ alert(errs.join('\n')); return; }
+  form.id = `crew_${Date.now().toString(36)}`;
+  const list = load(PUBLIST_KEY,[]);
+  list.unshift(form);
+  save(PUBLIST_KEY,list);
+  save(DRAFT_KEY, form);
+  renderCards();
+  alert('메인에 임시 발행(로컬)되었습니다.');
+}
+function resetForm(){
+  localStorage.removeItem(DRAFT_KEY);
+  location.reload();
+}
+
+/* ---------- 카드 렌더 ---------- */
+function renderCards(){
+  const box=qs('#cards'); box.innerHTML='';
+  const list = load(PUBLIST_KEY,[]);
+  if(list.length===0){ box.innerHTML='<div class="hint">아직 발행된 카드가 없습니다.</div>'; return; }
+  list.forEach(it=>{
+    const el=document.createElement('div');
+    el.className='card';
+    el.innerHTML = `
+      <div class="tt">${it.title||'(제목 없음)'} <span class="sub">· ${it.datetime_display||''}</span></div>
+      <div class="sub">${it.from||'-'} → ${it.to||'-'}</div>
+      <div class="sub">좌표: (${it.from_lat??'-'}, ${it.from_lng??'-'}) → (${it.to_lat??'-'}, ${it.to_lng??'-'})</div>
+      <div class="sub">배기량: ${it.cc||'전체'} · 인원: ${it.capacity_min||'-'} / ${it.capacity||'-'} · 테마: ${it.theme||'-'}</div>
+      <div class="sub">스타일: ${(it.styles||[]).join(', ')||'-'} · 페이스: ${(it.pace||[]).join(', ')||'-'}</div>
+      <div class="sub">메시지: ${it.message||'-'}</div>
+    `;
+    box.appendChild(el);
+  });
+}
+
+/* ---------- 이벤트/초기화 ---------- */
+(function init(){
+  // 칩
+  renderChips('styleChips', STYLE_OPTS, []);
+  renderChips('paceChips',  PACE_OPTS,  []);
+
+  // datetime 기본값
+  qs('#c_datetime').value = toLocalDatetimeValue(new Date());
+
+  // 버튼
+  qs('#btnDraft').addEventListener('click', saveDraft);
+  qs('#btnPublish').addEventListener('click', publish);
+  qs('#btnReset').addEventListener('click', resetForm);
+  qs('#btnPasteFrom').addEventListener('click', ()=>pasteCoords('from_lat','from_lng'));
+  qs('#btnPasteTo').addEventListener('click', ()=>pasteCoords('to_lat','to_lng'));
+
+  // 드래프트 복원 & 카드 목록
+  loadDraft();
+  renderCards();
+
+  // 헤더 홈 이동
+  qs('#goMain')?.addEventListener('click',(e)=>{
+    if(!MAIN_URL || MAIN_URL==="#"){ e.preventDefault(); alert("MAIN_URL을 메인주소로 설정하세요."); return; }
+    window.open(MAIN_URL,'_blank');
+  });
+})();
+</script>
+</body>
+</html>
