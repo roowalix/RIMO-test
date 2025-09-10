@@ -26,6 +26,7 @@
   .panel h3{margin:0 0 12px;font-size:16px}
 
   .row{display:grid;grid-template-columns:140px 1fr;gap:10px;align-items:center;margin:8px 0}
+  .row.nolabel{grid-template-columns:1fr;} /* 라벨 없이 전체 폭 쓰는 전용 행 */
   @media (max-width:560px){ .row{grid-template-columns:110px 1fr} }
   .row label{font-weight:700;color:#cfd1e8}
   .field{display:block}
@@ -35,6 +36,12 @@
   textarea{min-height:90px;resize:vertical}
   .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   @media (max-width:720px){ .two{grid-template-columns:1fr} }
+
+  /* 정원/테마 한 줄 2열(4:6) */
+  .two-col{display:grid;grid-template-columns:4fr 6fr;gap:10px}
+  @media (max-width:720px){ .two-col{grid-template-columns:1fr} }
+  .subfield{display:flex;flex-direction:column;gap:6px}
+  .subfield label{font-weight:700;font-size:14px;color:#cfd1e8}
 
   /* 필버튼 */
   .chips{display:flex;gap:8px;flex-wrap:wrap}
@@ -89,16 +96,22 @@
       <div class="field"><input id="c_to" placeholder="예: RSG 성수"></div>
     </div>
 
-    <div class="row">
-      <label>정원 / 테마</label>
-      <div class="field two">
-        <input id="c_capacity" type="number" min="1" value="4" placeholder="정원">
-        <select id="c_theme" title="테마">
-          <option value="red">red</option>
-          <option value="yellow">yellow</option>
-          <option value="blue" selected>blue</option>
-          <option value="green">green</option>
-        </select>
+    <!-- 정원/테마 : 1행 2열(4:6), 각자 라벨 -->
+    <div class="row nolabel">
+      <div class="field two-col">
+        <div class="subfield">
+          <label for="c_capacity">정원</label>
+          <input id="c_capacity" type="number" min="1" value="4" placeholder="정원">
+        </div>
+        <div class="subfield">
+          <label for="c_theme">테마</label>
+          <select id="c_theme" title="테마">
+            <option value="red">red</option>
+            <option value="yellow">yellow</option>
+            <option value="blue" selected>blue</option>
+            <option value="green">green</option>
+          </select>
+        </div>
       </div>
     </div>
 
@@ -165,7 +178,7 @@
 
 <script>
 /* ---------- config ---------- */
-const MAIN_URL = "/"; // 메인 페이지 URL로 교체하세요.
+const MAIN_URL = "https://roowalix.github.io/RIMO-test/index.html"; // 메인 페이지 URL
 
 /* ---------- chips data ---------- */
 const STYLE_OPTS = ["Urban","Curve","Tour"];
