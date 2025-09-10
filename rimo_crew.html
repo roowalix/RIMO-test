@@ -28,10 +28,10 @@
   /* 행/라벨/필드 */
   .row{display:grid;grid-template-columns:40px 1fr;gap:0px;align-items:center;margin:10px 0}
   @media (max-width:560px){ .row{grid-template-columns:80px 1fr} }
-  .row > label{width: var(--label-width);font-weight:700;color:#cfd1e8;font-size:14px}
+  .row > label{width: var(--label-width);font-weight:700;color:#cfd1e8;font-size:14px;justify-self:end; text-align:right;}
   .field{display:block}
   input,select,textarea{
-    width:100%;padding:10px 12px;border-radius:10px;border:1px solid #2c2f48;background:#0f1020;color:#fff;font-size:14px
+    width:100%;padding-left:8px;border-radius:10px;border:1px solid #2c2f48;background:#0f1020;color:#fff;font-size:14px
   }
   textarea{min-height:90px;resize:vertical}
   .hint{color:var(--muted);font-size:12px;margin-top:6px}
