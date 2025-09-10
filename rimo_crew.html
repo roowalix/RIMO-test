@@ -47,7 +47,9 @@
 
   /* 폼 레이아웃 */
   .row{display:flex;align-items:center;gap:8px}
-  .row label{width:var(--label-w);font-size:12px;font-weight:700;white-space:nowrap}
+  /* 좌측 라벨(왼쪽 컬럼)만 적용 — rimo_profile과 동일 크기 */
+.row > label{font-weight:700;color:#cfd1e8;font-size:13px}
+
   .field{flex:1;min-width:0}
 
   .row.split{
@@ -305,7 +307,7 @@
     <span class="ico">🛠️</span><span class="txt">크루 생성</span>
   </a>
   <a href="rimo_admin_match.html" class="tab">
-    <span class="ico">🤝</span><span class="txt">매칭 관리</span>
+    <span class="ico">🤝</span><span class="txt">매칭 희망</span>
   </a>
   <a href="rimo_admin_route.html" class="tab">
     <span class="ico">🗺️</span><span class="txt">루트 제안</span>
@@ -314,7 +316,7 @@
     <span class="ico">📝</span><span class="txt">후기 관리</span>
   </a>
   <a href="rimo_admin_db.html" class="tab">
-    <span class="ico">🗄️</span><span class="txt">DB관리</span>
+    <span class="ico">🗄️</span><span class="txt">자료 수집</span>
   </a>
 </nav>
 
