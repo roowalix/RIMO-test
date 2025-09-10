@@ -28,7 +28,7 @@
   /* 행/라벨/필드 */
   .row{display:grid;grid-template-columns:40px 1fr;gap:0px;align-items:center;margin:10px 0}
   @media (max-width:560px){ .row{grid-template-columns:80px 1fr} }
-  .row > label{font-weight:700;color:#cfd1e8;font-size:13px}
+  .row > label{width: var(--label-width);font-weight:700;color:#cfd1e8;font-size:14px}
   .field{display:block}
   input,select,textarea{
     width:100%;padding:10px 12px;border-radius:10px;border:1px solid #2c2f48;background:#0f1020;color:#fff;font-size:14px
