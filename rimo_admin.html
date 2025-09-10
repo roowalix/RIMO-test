@@ -87,18 +87,13 @@
     backdrop-filter:blur(10px);
     border-top:1px solid var(--line);
   }
-.btmnav .wrap {
-    max-width: 100%;
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    padding: 8px;
-}
-
-.btmnav .navitem {
-    width: 182px;   /* 절대값으로 고정 */
-    flex-shrink: 0; /* 화면 줄어도 버튼 폭 유지 */
-  
+  .btmnav .wrap {
+    max-width:980px;
+    margin:0 auto;
+    display:grid;
+    grid-template-columns:repeat(5, minmax(0, 1fr)); /* 버튼 폭 약 5% 넓힘 */
+    gap:10px;
+    padding:8px;
   }
   .navitem {
     display:flex;
@@ -177,23 +172,23 @@
       <div class="ico">🛠️</div><div>크루 생성</div>
     </div>
     <div class="navitem" data-go="joins" title="매칭 관리">
-      <div class="ico">🤝</div><div>매칭 관리</div>
+      <div class="ico">🤝</div><div>매칭 희망</div>
     </div>
     <div class="navitem" data-go="routes" title="루트 제안">
       <div class="ico">🗺️</div><div>루트 제안</div>
     </div>
     <div class="navitem" data-go="feedback" title="후기 관리">
-      <div class="ico">📝</div><div>후기 관리</div>
+      <div class="ico">📝</div><div>후기 모음</div>
     </div>
     <div class="navitem" data-go="data" title="DB관리">
-      <div class="ico">🗄️</div><div>DB관리</div>
+      <div class="ico">🗄️</div><div>자료 관리</div>
     </div>
   </div>
 </nav>
 
 <script>
 /* ---------- config ---------- */
-const MAIN_URL = "https://roowalix.github.io/RIMO-test/index.html"; // RIMO 메인페이지 주소 입력
+const MAIN_URL = "/"; // RIMO 메인페이지 주소 입력
 
 /* 페이지 전환 */
 function showPage(pageKey){
