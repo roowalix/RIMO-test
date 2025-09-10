@@ -27,28 +27,22 @@
   /* 행/라벨/필드 */
   .row{
     display:grid;grid-template-columns:40px 1fr;gap:0;
-    align-items:start;              /* ← 라벨/필드 위쪽맞춤 */
+    align-items:start;               /* 라벨/필드 위쪽맞춤 */
     margin:10px 0;
   }
   @media (max-width:560px){ .row{grid-template-columns:80px 1fr} }
   .row > label{
     font-weight:700;color:#cfd1e8;font-size:14px;
-    align-self:start;               /* 라벨을 위쪽 정렬 보장 */
+    align-self:start;
   }
   .field{display:block}
   input,select,textarea{
     width:100%;padding:10px 12px;border-radius:10px;border:1px solid #2c2f48;background:#0f1020;color:#fff;font-size:14px
   }
 
-  /* 좌표 전용: 항상 2열 유지 */
-.coords{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-}
   .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .pair-46{display:grid;grid-template-columns:4fr 6fr;gap:10px}
-  @media (max-width:720px){ .two, .pair-46{grid-template-columns:1fr} }
+  /* 항상 2열 유지해야 하는 블록(좌표/인원)에 공통 사용 */
+  .coords{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 
   /* 토글(rimo_profile 스타일) */
   .toggles{display:flex;gap:10px;flex-wrap:wrap;margin:0}
@@ -113,7 +107,7 @@
       </div>
     </div>
 
-    <!-- 출발: 지명 + 좌표(아래 두 칸) -->
+    <!-- 출발: 지명 + 좌표(같은 행 2열) -->
     <div class="row">
       <label for="c_from">출발</label>
       <div class="field">
@@ -125,7 +119,7 @@
       </div>
     </div>
 
-    <!-- 도착: 지명 + 좌표(아래 두 칸) -->
+    <!-- 도착: 지명 + 좌표(같은 행 2열) -->
     <div class="row">
       <label for="c_to">도착</label>
       <div class="field">
@@ -133,6 +127,17 @@
         <div class="coords" style="margin-top:8px">
           <input id="to_lat" type="number" step="any" placeholder="위도" inputmode="decimal" min="-90" max="90">
           <input id="to_lng" type="number" step="any" placeholder="경도" inputmode="decimal" min="-180" max="180">
+        </div>
+      </div>
+    </div>
+
+    <!-- 인원: 같은 행 2열 (잔여 / 정원) - 도착 밑 -->
+    <div class="row">
+      <label>인원</label>
+      <div class="field">
+        <div class="coords">
+          <input id="c_remaining" type="number" min="0" placeholder="잔여">
+          <input id="c_capacity" type="number" min="1" placeholder="정원">
         </div>
       </div>
     </div>
@@ -167,25 +172,6 @@
       <label for="c_msg">메시지</label>
       <div class="field">
         <input id="c_msg" maxlength="30" placeholder="30자 이내">
-      </div>
-    </div>
-
-    <hr style="border:none;border-top:1px solid var(--line);margin:0">
-
-    <!-- 인원/테마 (4:6) -->
-    <div class="row">
-      <label>인원 / 테마</label>
-      <div class="field pair-46">
-        <div class="two">
-          <input id="c_capacity_min" type="number" min="1" placeholder="인원(1)">
-          <input id="c_capacity" type="number" min="1" placeholder="인원(2)">
-        </div>
-        <select id="c_theme" title="테마">
-          <option value="blue" selected>blue</option>
-          <option value="red">red</option>
-          <option value="yellow">yellow</option>
-          <option value="green">green</option>
-        </select>
       </div>
     </div>
 
@@ -272,15 +258,12 @@ function getDateFromInput(){
   return new Date(Y, M-1, D, h, m||0, 0);
 }
 
-/* ===== 좌표 자동 분리 ===== */
+/* ===== 좌표 자동 분리(붙여넣기/변경 시) ===== */
 function extractCoords(text){
   if(!text) return null;
   text = String(text).trim();
-  // @lat,lng
   let m = text.match(/@(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)/);
-  // q=lat,lng
   if(!m) m = text.match(/[?&]q=(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)/);
-  // 숫자 두 개
   if(!m){
     const nums = text.match(/-?\d+(?:\.\d+)?/g);
     if(nums && nums.length>=2) m=[, nums[0], nums[1]];
@@ -291,31 +274,22 @@ function extractCoords(text){
   if(Math.abs(lat)>90 || Math.abs(lng)>180) return null;
   return {lat, lng};
 }
-
-/* 특정 위/경도 입력쌍에 붙여넣기/변경 시 자동 분리 */
 function attachAutoSplit(latId,lngId){
   const latEl = qs('#'+latId);
   const lngEl = qs('#'+lngId);
-  const handlePaste = (e)=>{
+  const onPaste = (e)=>{
     const text = e.clipboardData?.getData('text');
     const c = extractCoords(text);
-    if(c){
-      e.preventDefault();
-      latEl.value = c.lat;
-      lngEl.value = c.lng;
-    }
+    if(c){ e.preventDefault(); latEl.value=c.lat; lngEl.value=c.lng; }
   };
-  const handleChange = (e)=>{
+  const onChange = (e)=>{
     const c = extractCoords(e.target.value);
-    if(c){
-      latEl.value = c.lat;
-      lngEl.value = c.lng;
-    }
+    if(c){ latEl.value=c.lat; lngEl.value=c.lng; }
   };
-  latEl.addEventListener('paste', handlePaste);
-  lngEl.addEventListener('paste', handlePaste);
-  latEl.addEventListener('change', handleChange);
-  lngEl.addEventListener('change', handleChange);
+  latEl.addEventListener('paste', onPaste);
+  lngEl.addEventListener('paste', onPaste);
+  latEl.addEventListener('change', onChange);
+  lngEl.addEventListener('change', onChange);
 }
 
 /* 폼 수집 */
@@ -335,9 +309,8 @@ function getForm(){
     styles: selectedToggles('styleToggles'),
     pace: selectedToggles('paceToggles'),
     message: qs('#c_msg').value.trim(),
-    capacity_min: parseInt(qs('#c_capacity_min').value||'0',10),
-    capacity: parseInt(qs('#c_capacity').value||'0',10),
-    theme: qs('#c_theme').value
+    remaining: parseInt(qs('#c_remaining').value||'0',10), // 잔여
+    capacity: parseInt(qs('#c_capacity').value||'0',10)    // 정원
   };
 }
 
@@ -348,7 +321,9 @@ function validate(form){
   if(!qs('#c_datetime').value) errs.push('일시를 선택하세요.');
   if(!form.from) errs.push('출발을 입력하세요.');
   if(!form.to) errs.push('도착을 입력하세요.');
-  if(!(form.capacity>0)) errs.push('인원(2)은 1 이상이어야 합니다.');
+  if(!(form.capacity>0)) errs.push('정원은 1 이상이어야 합니다.');
+  if(form.remaining<0) errs.push('잔여는 0 이상이어야 합니다.');
+  if(form.remaining>form.capacity) errs.push('잔여가 정원보다 클 수 없습니다.');
   if(form.message.length>30) errs.push('메시지는 30자 이내입니다.');
   return errs;
 }
@@ -377,9 +352,11 @@ function loadDraft(){
   qs('#to_lng').value=d.to_lng??'';
   qs('#c_cc').value=d.cc||'';
   qs('#c_msg').value=d.message||'';
-  qs('#c_capacity_min').value=d.capacity_min||'';
-  qs('#c_capacity').value=d.capacity||'';
-  qs('#c_theme').value=d.theme||'blue';
+
+  /* 호환: 기존 capacity_min → 잔여 */
+  const remaining = (d.remaining ?? d.capacity_min ?? '');
+  qs('#c_remaining').value = remaining;
+  qs('#c_capacity').value  = d.capacity ?? '';
 }
 function saveDraft(){
   const form=getForm();
@@ -409,13 +386,15 @@ function renderCards(){
   const list = load(PUBLIST_KEY,[]);
   if(list.length===0){ box.innerHTML='<div class="hint">아직 발행된 카드가 없습니다.</div>'; return; }
   list.forEach(it=>{
+    const remaining = (it.remaining ?? it.capacity_min ?? '-'); // 호환
+    const capacity  = (it.capacity ?? '-');
     const el=document.createElement('div');
     el.className='card';
     el.innerHTML = `
       <div class="tt">${it.title||'(제목 없음)'} <span class="sub">· ${it.datetime_display||''}</span></div>
       <div class="sub">${it.from||'-'} → ${it.to||'-'}</div>
       <div class="sub">좌표: (${it.from_lat??'-'}, ${it.from_lng??'-'}) → (${it.to_lat??'-'}, ${it.to_lng??'-'})</div>
-      <div class="sub">배기량: ${it.cc||'전체'} · 인원: ${it.capacity_min||'-'} / ${it.capacity||'-'} · 테마: ${it.theme||'-'}</div>
+      <div class="sub">배기량: ${it.cc||'전체'} · 인원: 잔여 ${remaining} / 정원 ${capacity}</div>
       <div class="sub">스타일: ${(it.styles||[]).join(', ')||'-'} · 페이스: ${(it.pace||[]).join(', ')||'-'}</div>
       <div class="sub">메시지: ${it.message||'-'}</div>
     `;
@@ -429,7 +408,7 @@ function renderCards(){
   renderToggles('paceToggles',  PACE_OPTS,  []);
   qs('#c_datetime').value = toLocalDatetimeValue(new Date());
 
-  /* 출발/도착 좌표 자동 분리 연결 */
+  /* 좌표 자동 분리 연결 */
   attachAutoSplit('from_lat','from_lng');
   attachAutoSplit('to_lat','to_lng');
 
