@@ -8,8 +8,7 @@
   :root{
     --bg:#0b0b0f; --fg:#e8e8ef; --muted:#b9b9cc; --line:#232333;
     --tile:#141627; --tile2:#101223; --accent:#7aa7ff; --good:#2aa84a; --bad:#ff5d5d;
-    --chip-bg:#14172a; --chip-bd:#2b2e54;
-    --accent-glow: rgba(122,167,255,.35);
+    --chip-bg:#14172a; --chip-bd:#2b2e54; --accent-glow: rgba(122,167,255,.35);
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Arial,sans-serif}
@@ -26,9 +25,16 @@
   .panel{background:var(--tile);border:1px solid var(--line);border-radius:14px;padding:0 14px 14px 14px }
 
   /* 행/라벨/필드 */
-  .row{display:grid;grid-template-columns:40px 1fr;gap:0px;align-items:center;margin:10px 0}
+  .row{
+    display:grid;grid-template-columns:40px 1fr;gap:0;
+    align-items:start;              /* ← 라벨/필드 위쪽맞춤 */
+    margin:10px 0;
+  }
   @media (max-width:560px){ .row{grid-template-columns:80px 1fr} }
-  .row > label{width: var(--label-width);font-weight:700;color:#cfd1e8;font-size:14px}
+  .row > label{
+    font-weight:700;color:#cfd1e8;font-size:14px;
+    align-self:start;               /* 라벨을 위쪽 정렬 보장 */
+  }
   .field{display:block}
   input,select,textarea{
     width:100%;padding:10px 12px;border-radius:10px;border:1px solid #2c2f48;background:#0f1020;color:#fff;font-size:14px
@@ -38,7 +44,7 @@
   .pair-46{display:grid;grid-template-columns:4fr 6fr;gap:10px}
   @media (max-width:720px){ .two, .pair-46{grid-template-columns:1fr} }
 
-  /* rimo_profile 스타일 토글 */
+  /* 토글(rimo_profile 스타일) */
   .toggles{display:flex;gap:10px;flex-wrap:wrap;margin:0}
   .toggle{
     display:inline-flex;align-items:center;gap:14px;padding:8px 12px;border-radius:999px;
@@ -101,19 +107,19 @@
       </div>
     </div>
 
-    <!-- 출발: 지명 + (아래) 좌표 -->
+    <!-- 출발: 지명 + 좌표(아래 두 칸) -->
     <div class="row">
       <label for="c_from">출발</label>
       <div class="field">
         <input id="c_from" placeholder="예: GS25 한강르네상스 반포2호">
         <div class="two" style="margin-top:8px">
-          <input id="from_lat" type="number" step="any" placeholder="위도 (예: 37.5665)" inputmode="decimal" min="-90" max="90">
-          <input id="from_lng" type="number" step="any" placeholder="경도 (예: 126.9780)" inputmode="decimal" min="-180" max="180">
+          <input id="from_lat" type="number" step="any" placeholder="위도 (예: 33.509768)" inputmode="decimal" min="-90" max="90">
+          <input id="from_lng" type="number" step="any" placeholder="경도 (예: 126.511954)" inputmode="decimal" min="-180" max="180">
         </div>
       </div>
     </div>
 
-    <!-- 도착: 지명 + (아래) 좌표 -->
+    <!-- 도착: 지명 + 좌표(아래 두 칸) -->
     <div class="row">
       <label for="c_to">도착</label>
       <div class="field">
@@ -140,7 +146,7 @@
       </div>
     </div>
 
-    <!-- 스타일/페이스 토글 -->
+    <!-- 스타일/페이스 -->
     <div class="row">
       <label>스타일</label>
       <div class="field"><div id="styleToggles" class="toggles"></div></div>
@@ -150,7 +156,7 @@
       <div class="field"><div id="paceToggles" class="toggles"></div></div>
     </div>
 
-    <!-- 메시지 (단일 줄) -->
+    <!-- 메시지 (한 줄) -->
     <div class="row">
       <label for="c_msg">메시지</label>
       <div class="field">
@@ -160,7 +166,7 @@
 
     <hr style="border:none;border-top:1px solid var(--line);margin:0">
 
-    <!-- 인원/테마 -->
+    <!-- 인원/테마 (4:6) -->
     <div class="row">
       <label>인원 / 테마</label>
       <div class="field pair-46">
@@ -177,7 +183,7 @@
       </div>
     </div>
 
-    <!-- 기능 버튼들 -->
+    <!-- 기능 버튼 -->
     <div class="btnbar">
       <button class="btn" id="btnDraft"># 드래프트 저장</button>
       <button class="btn primary" id="btnPublish"># 메인에 발행</button>
@@ -225,7 +231,7 @@ const qsa=(s,p=document)=>Array.from(p.querySelectorAll(s));
 const save=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
 const load=(k,def)=>{try{return JSON.parse(localStorage.getItem(k)||JSON.stringify(def))}catch(e){return def}};
 
-/* ===== 토글 렌더링 ===== */
+/* 토글 */
 function makeToggle(label, active=false){
   const el=document.createElement('button');
   el.type='button';
@@ -258,6 +264,52 @@ function getDateFromInput(){
   const [Y,M,D] = date.split('-').map(Number);
   const [h,m] = time.split(':').map(Number);
   return new Date(Y, M-1, D, h, m||0, 0);
+}
+
+/* ===== 좌표 자동 분리 ===== */
+function extractCoords(text){
+  if(!text) return null;
+  text = String(text).trim();
+  // @lat,lng
+  let m = text.match(/@(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)/);
+  // q=lat,lng
+  if(!m) m = text.match(/[?&]q=(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)/);
+  // 숫자 두 개
+  if(!m){
+    const nums = text.match(/-?\d+(?:\.\d+)?/g);
+    if(nums && nums.length>=2) m=[, nums[0], nums[1]];
+  }
+  if(!m) return null;
+  let lat = parseFloat(m[1]), lng = parseFloat(m[2]);
+  if(Math.abs(lat)>90 && Math.abs(lng)<=90){ const t=lat; lat=lng; lng=t; }
+  if(Math.abs(lat)>90 || Math.abs(lng)>180) return null;
+  return {lat, lng};
+}
+
+/* 특정 위/경도 입력쌍에 붙여넣기/변경 시 자동 분리 */
+function attachAutoSplit(latId,lngId){
+  const latEl = qs('#'+latId);
+  const lngEl = qs('#'+lngId);
+  const handlePaste = (e)=>{
+    const text = e.clipboardData?.getData('text');
+    const c = extractCoords(text);
+    if(c){
+      e.preventDefault();
+      latEl.value = c.lat;
+      lngEl.value = c.lng;
+    }
+  };
+  const handleChange = (e)=>{
+    const c = extractCoords(e.target.value);
+    if(c){
+      latEl.value = c.lat;
+      lngEl.value = c.lng;
+    }
+  };
+  latEl.addEventListener('paste', handlePaste);
+  lngEl.addEventListener('paste', handlePaste);
+  latEl.addEventListener('change', handleChange);
+  lngEl.addEventListener('change', handleChange);
 }
 
 /* 폼 수집 */
@@ -369,14 +421,15 @@ function renderCards(){
 (function init(){
   renderToggles('styleToggles', STYLE_OPTS, []);
   renderToggles('paceToggles',  PACE_OPTS,  []);
-
   qs('#c_datetime').value = toLocalDatetimeValue(new Date());
 
-  // 드래프트 복원 & 카드 목록
+  /* 출발/도착 좌표 자동 분리 연결 */
+  attachAutoSplit('from_lat','from_lng');
+  attachAutoSplit('to_lat','to_lng');
+
   loadDraft();
   renderCards();
 
-  // 홈 이동
   qs('#goMain')?.addEventListener('click',(e)=>{
     if(!MAIN_URL || MAIN_URL==="#"){ e.preventDefault(); alert("MAIN_URL을 메인주소로 설정하세요."); return; }
     window.open(MAIN_URL,'_blank');
