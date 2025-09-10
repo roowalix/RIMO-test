@@ -4,391 +4,75 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>RIMO — 어드민 · 크루 생성</title>
-
-<!-- 공통 테마 -->
-<link rel="stylesheet" href="rimo_theme.css?v=20250911" />
-
 <style>
   :root{
-    /* 라벨/액센트(프로필 페이지 톤과 맞춤) */
-    --label-w:56px;
-    --accent:#2a5bff;
-    --accent-glow: rgba(122,167,255,.45);
-
-    /* 폼 컨트롤 공통 – 프로필 페이지와 동일 톤 */
-    --ctrl-h: 48px;
-    --ctrl-radius: 12px;
-    --ctrl-bg: #0f1020;
-    --ctrl-bd: #2c2f48;
-    --ctrl-ink:#fff;
-    --ctrl-ph:#9aa0b6;
-
-    /* 하단 네비 */
-    --tab-bg:#131a2e; --tab-bd:#2b3150; --tab-ink:#e9ebf5;
-    --tab-pri:#2a5bff; --tab-pri-bd:#3b53a8;
+    --bg:#0b0b0f; --fg:#e8e8ef; --muted:#b9b9cc; --line:#232333;
+    --tile:#141627; --tile2:#101223; --accent:#7aa7ff; --good:#2aa84a; --bad:#ff5d5d;
   }
-
   *{box-sizing:border-box}
-  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Helvetica,Arial,sans-serif}
+  body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Arial,sans-serif}
 
-  header{
-    position:sticky; top:0; z-index:5;
-    background:rgba(11,11,15,.9);
-    -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
-    border-bottom:1px solid var(--border-1);
-  }
-  .bar{display:flex;gap:10px;align-items:center;padding:14px 16px;height:56px}
-  .logo{font-weight:900}
-  .title{font-weight:800;opacity:.9}
-  .home{margin-left:auto;text-decoration:none;font-size:22px}
+  /* 헤더 */
+  header{position:sticky;top:0;z-index:5;background:rgba(11,11,15,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .bar{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:12px 16px}
+  .title{font-weight:900;font-size:16px}
+  .home-btn{width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:28px;border-radius:0px;border:none;background:transparent;cursor:pointer;transition:background .2s}
+  .home-btn:hover{background:rgba(255,255,255,.08)}
 
-  main{display:flex;flex-direction:column;gap:12px}
-  .panel{padding:12px;display:flex;flex-direction:column;gap:12px}
+  /* 하단 네비 (다중 페이지 링크) */
+  .btmnav{position:fixed;left:0;right:0;bottom:0;z-index:10;background:rgba(11,11,15,.9);backdrop-filter:blur(10px);border-top:1px solid var(--line)}
+  .btmnav .wrap{max-width:980px;margin:0 auto;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;padding:8px}
+  .navitem{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px 4px;border-radius:10px;border:1px solid #2b2e48;background:#14172a;cursor:pointer;font-size:12px;text-align:center;user-select:none;transition:background .2s,transform .1s;text-decoration:none;color:var(--fg)}
+  .navitem.active{background:#27306a;border-color:#3a4aa2}
+  .navitem .ico{font-size:18px;line-height:1}
+  .navitem:active{transform:translateY(1px)}
 
-  /* 폼 레이아웃 */
-  .row{display:flex;align-items:center;gap:8px}
-  /* 좌측 라벨(왼쪽 컬럼)만 적용 — rimo_profile과 동일 크기 */
-.row > label{font-weight:700;color:#cfd1e8;font-size:13px}
-
-  .field{flex:1;min-width:0}
-
-  .row.split{
-    display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr);
-    column-gap:16px; align-items:center;
-  }
-  .row.split .cell{display:flex;align-items:center;gap:8px;min-width:0}
-  .row.split .cell label{width:var(--label-w);font-size:14px;font-weight:700}
-  .row.split .cell .field{flex:1;min-width:0}
-
-  /* 컨트롤 공통 */
-  .field input,
-  .field select,
-  .field textarea{
-    appearance:none; width:100%;
-    height:var(--ctrl-h);
-    padding:12px 14px;
-    border:1px solid var(--ctrl-bd);
-    border-radius:var(--ctrl-radius);
-    background:var(--ctrl-bg);
-    color:var(--ctrl-ink);
-    font-size:14px; line-height:1;
-  }
-  .field textarea{height:120px; resize:vertical}
-  .field input::placeholder, .field textarea::placeholder{color:var(--ctrl-ph)}
-  .field input:focus, .field select:focus, .field textarea:focus{
-    outline:none; border-color:var(--accent);
-    box-shadow:0 0 0 2px rgba(122,167,255,.25) inset, 0 0 12px rgba(122,167,255,.28);
-  }
-
-  /* 칩 그룹 */
-  .chips{display:flex;flex-wrap:wrap;gap:12px}
-  .chip{
-    display:inline-flex;align-items:center;justify-content:center;
-    padding:10px 18px;border-radius:999px;
-    background:#121529;border:1px solid #2b2e54;color:#fff;
-    font-weight:800;font-size:16px;cursor:pointer;user-select:none;
-    transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease, background-color .15s ease;
-  }
-  .chip.active{
-    border-color:var(--accent); background:rgba(122,167,255,.16);
-    box-shadow:0 0 10px var(--accent-glow), 0 0 0 2px rgba(122,167,255,.25) inset;
-    transform:translateY(-1px) scale(1.03);
-  }
-
-  /* 액션 버튼 */
-  .actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px}
-  .btn{padding:14px;border-radius:12px;border:none;color:#fff;font-weight:800;cursor:pointer}
-  .btn.primary{background:var(--accent)}
-  .btn.ghost{background:#2c2f48}
-
-  /* 토스트 */
-  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);padding:10px 14px;background:rgba(0,0,0,.78);color:#fff;border-radius:10px;font-size:13px;display:none;z-index:5000;border:1px solid rgba(255,255,255,.12)}
-  .toast.show{display:block;animation:fade 2s ease}
-  @keyframes fade{0%{opacity:0;transform:translateX(-50%) translateY(6px)}
-                  10%{opacity:1;transform:translateX(-50%) translateY(0)}
-                  90%{opacity:1}
-                  100%{opacity:0}}
-
-  /* ===== 하단 네비(아이콘+텍스트) ===== */
-  .adminbar{
-    position:fixed; left:0; right:0;
-    bottom: max(12px, env(safe-area-inset-bottom));
-    z-index:2500;
-    display:grid;
-    grid-template-columns: repeat(3, 1fr); /* 모바일 3개 + 2개 자동 개행 */
-    gap:12px 14px;
-    padding:0 12px;
-  }
-  @media (max-width:420px){
-    .adminbar{ grid-template-columns: repeat(2, 1fr); }
-  }
-  .adminbar .tab{
-    display:inline-flex; align-items:center; justify-content:center;
-    gap:10px; height:62px; border-radius:20px;
-    background:var(--tab-bg); border:1px solid var(--tab-bd);
-    color:var(--tab-ink); text-decoration:none;
-    font-weight:800; font-size:16px;
-    box-shadow:0 2px 10px rgba(0,0,0,.25);
-    transition:transform .15s ease, box-shadow .15s ease, background-color .15s ease, border-color .15s ease;
-  }
-  .adminbar .tab:hover{ transform:translateY(-1px); box-shadow:0 6px 18px rgba(0,0,0,.35); }
-  .adminbar .tab.primary{
-    background:var(--tab-pri); border-color:var(--tab-pri-bd); color:#fff;
-    box-shadow:0 0 0 2px rgba(91,140,255,.20) inset, 0 10px 22px rgba(0,0,0,.35);
-  }
-  .tab .ico{font-size:22px;line-height:1}
-  .tab .txt{line-height:1}
-
-  /* 카드 감싸는 패널(비주얼) */
-  .card.panel{border:1px solid var(--border-1);border-radius:18px;padding:12px}
-
-  /* 정원/테마 4:6 배치 + 캡슐 스타일 */
-.pair-46{
-  display:grid;
-  grid-template-columns:4fr 6fr; /* 정원:테마 = 4:6 */
-  gap:10px;
-}
-@media (max-width:720px){
-  .pair-46{ grid-template-columns:1fr; } /* 모바일 1열 */
-}
-
-/* 캡슐 박스 */
-.mini{
-  display:grid;
-  grid-template-columns:auto 1fr; /* 라벨, 입력 */
-  align-items:center;
-  gap:10px;
-  background:#0f1020;
-  border:1px solid #2c2f48;
-  border-radius:10px;
-  padding:8px 10px;
-}
-
-/* 내부 소라벨 */
-.mini .mini-lbl{
-  color:#cfd1e8;
-  font-weight:700;
-  font-size:13px;
-  white-space:nowrap;
-}
-
-/* 캡슐 내부 입력/셀렉트는 테두리/배경 제거하여 일체감 */
-.mini input,
-.mini select{
-  background:transparent;
-  border:none;
-  color:#fff;
-  font-size:14px;
-  padding:8px 0;
-  width:100%;
-  outline:none;
-}
-.mini input:focus,
-.mini select:focus{
-  box-shadow:none; /* 외곽 하이라이트는 캡슐에 주기 원하시면 여기에 추가 가능 */
-}
-
+  /* 빈 화면이 네비와 겹치지 않도록 여백 */
+  .spacer{height:120px}
 </style>
 </head>
 <body>
 <header>
   <div class="bar">
-    <div class="logo">🏍️ RIMO</div>
-    <div class="title">어드민 · 크루 생성</div>
-    <a href="index.html" class="home" aria-label="홈">🏠</a>
+    <div class="title">🏍️ RIMO — 어드민 · 크루 생성</div>
+    <button class="home-btn" id="goMain" title="메인 이동">🏠</button>
   </div>
 </header>
 
-<main>
-  <section class="panel card panel">
-    <div class="row">
-      <label>제목</label>
-      <div class="field">
-        <input id="title" type="text" placeholder="예: &lt;가을맞이 카페 라이딩&gt;" />
-      </div>
-    </div>
+<!-- 내부 본문 제거됨 -->
+<div class="spacer" aria-hidden="true"></div>
 
-    <div class="row">
-      <label>일시</label>
-      <div class="field">
-        <input id="when" type="text" placeholder="예: 9월 20일 23:00" />
-      </div>
-    </div>
-
-    <div class="row">
-      <label>출발지</label>
-      <div class="field">
-        <input id="from" type="text" placeholder="예: GS25 한강르네상스 반포2호점" />
-      </div>
-    </div>
-
-    <div class="row">
-      <label>도착지</label>
-      <div class="field">
-        <input id="to" type="text" placeholder="예: RSG 성수" />
-      </div>
-    </div>
-
-    <div class="row">
-  <label>정원 / 테마</label>
-  <div class="field">
-    <div class="pair-46">
-      <!-- 정원 -->
-      <div class="mini">
-        <span class="mini-lbl">정원</span>
-        <input id="c_capacity" type="number" min="1" value="4" placeholder="정원">
-      </div>
-      <!-- 테마 -->
-      <div class="mini">
-        <span class="mini-lbl">테마</span>
-        <select id="c_theme" title="테마">
-          <option value="red">red</option>
-          <option value="yellow">yellow</option>
-          <option value="blue" selected>blue</option>
-          <option value="green">green</option>
-        </select>
-      </div>
-    </div>
+<!-- 하단 네비게이션: 파일 링크 구조 -->
+<nav class="btmnav" aria-label="하단 내비게이션">
+  <div class="wrap">
+    <a class="navitem active" href="rimo_crew.html" title="크루 생성">
+      <div class="ico">🛠️</div><div>크루 생성</div>
+    </a>
+    <a class="navitem" href="rimo_joins.html" title="매칭 관리">
+      <div class="ico">🤝</div><div>매칭 관리</div>
+    </a>
+    <a class="navitem" href="rimo_routes.html" title="루트 제안">
+      <div class="ico">🗺️</div><div>루트 제안</div>
+    </a>
+    <a class="navitem" href="rimo_feedback.html" title="후기 관리">
+      <div class="ico">📝</div><div>후기 관리</div>
+    </a>
+    <a class="navitem" href="rimo_data.html" title="DB관리">
+      <div class="ico">🗄️</div><div>DB관리</div>
+    </a>
   </div>
-</div>
-
-
-    <div class="row">
-      <label>배기량</label>
-      <div class="field">
-        <select id="cc">
-          <option value="전체">전체</option>
-          <option value="125cc">125cc</option>
-          <option value="250cc">250cc</option>
-          <option value="400cc+">400cc+</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="row">
-      <label>스타일</label>
-      <div class="field">
-        <div class="chips" id="styleChips">
-          <span class="chip" data-v="Urban">Urban</span>
-          <span class="chip" data-v="Curve">Curve</span>
-          <span class="chip" data-v="Tour">Tour</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="row">
-      <label>페이스</label>
-      <div class="field">
-        <div class="chips" id="paceChips">
-          <span class="chip" data-v="Easy">Easy</span>
-          <span class="chip" data-v="Balanced">Balanced</span>
-          <span class="chip" data-v="Dynamic">Dynamic</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="row">
-      <label>메시지</label>
-      <div class="field">
-        <textarea id="msg" placeholder="간단한 안내/조건 등을 적어주세요."></textarea>
-      </div>
-    </div>
-
-    <div class="actions">
-      <button class="btn primary" id="publishBtn">발행하기</button>
-      <button class="btn ghost" id="resetBtn">리셋</button>
-    </div>
-  </section>
-</main>
-
-<!-- 하단 네비 -->
-<nav class="adminbar" aria-label="어드민 메뉴">
-  <a href="rimo_admin_create.html" class="tab primary">
-    <span class="ico">🛠️</span><span class="txt">크루 생성</span>
-  </a>
-  <a href="rimo_admin_match.html" class="tab">
-    <span class="ico">🤝</span><span class="txt">매칭 희망</span>
-  </a>
-  <a href="rimo_admin_route.html" class="tab">
-    <span class="ico">🗺️</span><span class="txt">루트 제안</span>
-  </a>
-  <a href="rimo_admin_review.html" class="tab">
-    <span class="ico">📝</span><span class="txt">후기 관리</span>
-  </a>
-  <a href="rimo_admin_db.html" class="tab">
-    <span class="ico">🗄️</span><span class="txt">자료 수집</span>
-  </a>
 </nav>
 
-<div class="toast" id="toast"></div>
-
 <script>
-/* 저장 대상 키 (메인 페이지가 읽음) */
-const LS_CREWS = 'rimo_crews_v1';
-
-/* 칩 토글 */
-function bindChips(containerId){
-  const wrap = document.getElementById(containerId);
-  wrap.addEventListener('click', e=>{
-    const c = e.target.closest('.chip'); if(!c) return;
-    c.classList.toggle('active');
-  });
-}
-bindChips('styleChips'); bindChips('paceChips');
-
-/* 토스트 */
-function toast(msg, ms=2000){
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.style.animationDuration = (ms/1000)+'s';
-  t.classList.add('show');
-  clearTimeout(window._toastTimer);
-  window._toastTimer = setTimeout(()=> t.classList.remove('show'), ms);
-}
-
-/* 발행하기 → 로컬스토리지에 카드 추가 */
-document.getElementById('publishBtn').addEventListener('click', ()=>{
-  const title = document.getElementById('title').value.trim();
-  const when  = document.getElementById('when').value.trim();
-  const from  = document.getElementById('from').value.trim();
-  const to    = document.getElementById('to').value.trim();
-  const max   = parseInt(document.getElementById('max').value||'0',10) || 4;
-  const theme = document.getElementById('theme').value;
-  const cc    = document.getElementById('cc').value;
-  const msg   = document.getElementById('msg').value.trim();
-
-  const styles = [...document.querySelectorAll('#styleChips .chip.active')].map(el=>el.dataset.v);
-  const paces  = [...document.querySelectorAll('#paceChips .chip.active')].map(el=>el.dataset.v);
-
-  if(!title || !when || !from || !to){
-    toast('제목/일시/출발지/도착지를 입력해 주세요.'); return;
+  // 메인 이동만 유지
+  const MAIN_URL = "https://roowalix.github.io/RIMO-test/index.html"; // 필요 시 변경
+  const go = document.getElementById('goMain');
+  if(go){
+    go.addEventListener('click', (e)=>{
+      if(!MAIN_URL || MAIN_URL==="#"){ e.preventDefault(); alert("MAIN_URL을 메인주소로 설정하세요."); return; }
+      window.open(MAIN_URL,'_blank');
+    });
   }
-
-  let crews = [];
-  try{ crews = JSON.parse(localStorage.getItem(LS_CREWS)||'[]'); }catch(_){ crews = []; }
-
-  const obj = {
-    id: 'crew_'+Math.random().toString(36).slice(2,8),
-    theme, title,
-    time: when, from, to,
-    lat: 37.5665, lng: 126.9780,     // 데모 좌표 (필요시 폼 추가)
-    toLat: 37.55, toLng: 127.0,
-    peopleNow: 0, peopleMax: max,
-    styles, cc, msg,
-    pace: paces
-  };
-  crews.unshift(obj);
-  localStorage.setItem(LS_CREWS, JSON.stringify(crews));
-  toast('✅ 카드가 발행되었습니다! 메인에서 확인하세요.');
-});
-
-document.getElementById('resetBtn').addEventListener('click', ()=>{
-  document.querySelectorAll('input, textarea').forEach(el=> el.value='');
-  document.getElementById('theme').value='blue';
-  document.getElementById('cc').value='전체';
-  document.querySelectorAll('.chip.active').forEach(el=> el.classList.remove('active'));
-  toast('초기화 완료');
-});
 </script>
 </body>
 </html>
