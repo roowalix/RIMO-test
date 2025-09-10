@@ -17,6 +17,15 @@
     /* 내 프로필 찾기 모달 전용 변수 */
     --claim-results-min: 140px;
     --claim-card-h: 132px;
+
+    /* 폼 컨트롤 공통(7개 전부 동일) */
+    --control-h: 48px;
+    --control-radius: 12px;
+    --control-bg: #0f1020;
+    --control-bd: #2c2f48;
+    --control-ink: #fff;
+    --control-ph: #9aa0b6;
+    --control-font: 14px;
   }
 
   *{box-sizing:border-box}
@@ -39,8 +48,6 @@
   .form-row.top{align-items:flex-start}
   .form-row label{width:var(--label-width);font-size:14px;font-weight:700;white-space:nowrap}
   .field{flex:1.5;min-width:0}
-  /* PIN 입력칸 룩 */
-  #pin{letter-spacing:2px;text-align:center}
 
   /* 지역/탠덤 1행 2열 */
   .form-row.split{
@@ -54,7 +61,28 @@
   .form-row.split .col:nth-child(2) .field{ flex:1 1 auto; min-width:0 }
   .form-row.split select{ width:100% }
 
-  textarea{resize:none;height:40px}
+  /* 공통 컨트롤 룩(7개 동일) */
+  .panel .field input,
+  .panel .field select,
+  #pin,
+  #intro{
+    appearance:none;width:100%;
+    height:var(--control-h); padding:12px 14px;
+    border:1px solid var(--control-bd); border-radius:var(--control-radius);
+    background:var(--control-bg); color:var(--control-ink); font-size:var(--control-font);
+    font-family:inherit; line-height:1; box-sizing:border-box;
+  }
+  .panel .field input::placeholder, #intro::placeholder{ color:var(--control-ph) }
+  .panel .field input:focus,
+  .panel .field select:focus, #pin:focus, #intro:focus{
+    outline:none; border-color:var(--accent);
+    box-shadow:0 0 0 2px rgba(122,167,255,.25) inset, 0 0 12px rgba(122,167,255,.28);
+  }
+
+  /* PIN */
+  #pin{letter-spacing:2px;text-align:center;caret-color:#fff}
+
+  textarea{resize:none}
 
   .toggles{display:flex;gap:10px;flex-wrap:wrap;margin:0}
   .toggle{
@@ -86,7 +114,7 @@
     padding:12px 18px;border-radius:22px;font-weight:800;text-decoration:none;font-size:14px}
   .tabbar .tab.primary{background:var(--tab-pri);border-color:var(--tab-pri-bd)}
 
-  /* 미리보기 모달 */
+  /* 모달(공통) */
   .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.5);z-index:3000;padding:16px}
   .modal.show{display:flex}
   .modal-content.panel{max-width:520px;box-shadow:0 8px 24px rgba(0,0,0,.4)}
@@ -156,81 +184,20 @@
     color:#e6e9ff; box-shadow:0 0 10px var(--accent-glow), 0 0 0 2px rgba(122,167,255,.25) inset;
     transform:translateY(-1px) scale(1.03);
   }
-  /* PIN 인풋을 다른 필드와 동일한 룩으로 */
-#pin{
-  appearance:none;
-  width:100%;
-  padding:12px;
-  border:1px solid #2c2f48;
-  border-radius:10px;
-  background:#0f1020;
-  color:#fff;
-  font-size:14px;
-  letter-spacing:2px;
-  text-align:center;
-}
-#pin::placeholder{ color:#9aa0b6; }
-#pin:focus{
-  outline:none;
-  border-color:var(--accent);
-  box-shadow:0 0 0 2px rgba(122,167,255,.25) inset;
-}
-  /* ===== 폼 컨트롤 공통 (7개 전부 동일) ===== */
-:root{
-  --control-h: 38px;          /* 높이 통일: 48~56px 선호 */
-  --control-radius: 12px;
-  --control-bg: #0f1020;
-  --control-bd: #2c2f48;
-  --control-ink: #fff;
-  --control-ph: #9aa0b6;
-  --control-font: 14px;       /* 폰트 크기 통일 */
-}
 
-/* input/select/textarea 공통 룩 */
-.panel .field input,
-.panel .field select,
-#pin,
-#intro{
-  appearance: none;
-  width: 100%;
-  height: var(--control-h);
-  padding: 12px 14px;
-  border: 1px solid var(--control-bd);
-  border-radius: var(--control-radius);
-  background: var(--control-bg);
-  color: var(--control-ink);
-  font-size: var(--control-font);
-  font-family: inherit;        /* 본문 폰트와 동일 */
-  line-height: 1;
-  box-sizing: border-box;
-}
-
-/* placeholder 톤 */
-.panel .field input::placeholder,
-#intro::placeholder{ color: var(--control-ph); }
-
-/* 포커스(활성화) 효과 — 7개 전부 동일 */
-.panel .field input:focus,
-.panel .field select:focus,
-#pin:focus,
-#intro:focus{
-  outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px rgba(122,167,255,.25) inset,
-              0 0 12px rgba(122,167,255,.28);
-}
-
-/* PIN 전용(입력 정렬/간격만 추가) */
-#pin{
-  text-align: center;          /* 가운데 입력 유지 (원하면 삭제) */
-  letter-spacing: 2px;
-  caret-color: var(--control-ink);
-}
-
-/* 자기소개 textarea 동작(한 줄 높이 유지) */
-#intro{
-  resize: none;                /* 크기조절 비활성; 필요하면 vertical 로 */
-}
+  /* === 미리보기 모달 칩(엠버서더/인덱스와 동일 팔레트) === */
+  #previewModal .chip{
+    display:inline-flex; align-items:center; justify-content:center;
+    padding:8px 12px; border-radius:999px; font-size:12px; font-weight:700;
+    color:#e6e9ef; border:1px solid rgba(255,255,255,.12);
+    background:rgba(255,255,255,.06); white-space:nowrap;
+  }
+  #previewModal .chip.pill-urban    {background:#1e2d55; border-color:#2c4484}
+  #previewModal .chip.pill-curve    {background:#2a1f56; border-color:#40307a}
+  #previewModal .chip.pill-tour     {background:#1e3b3a; border-color:#2f5f5d}
+  #previewModal .chip.pill-easy     {background:#1f3a1f; border-color:#2f5a2f}
+  #previewModal .chip.pill-balanced {background:#3a341e; border-color:#5a4f2f}
+  #previewModal .chip.pill-dynamic  {background:#3a1f1f; border-color:#5a2f2f}
 </style>
 </head>
 <body>
@@ -294,14 +261,13 @@
       </div>
     </div>
 
-            <!-- ✅ PIN(4자리) — 저장 시 함께 전송 (해시 저장) -->
     <div class="form-row">
       <label>PIN</label>
       <div class="field">
         <input id="pin" type="password" inputmode="numeric" pattern="\d*" maxlength="4" placeholder="4자리 숫자 (새로 설정/변경)">
       </div>
     </div>
-    
+
     <div class="form-row">
       <label>스타일</label>
       <div class="toggles" data-group="style">
@@ -468,7 +434,7 @@ let _localPinSha = '';
   }catch(_){}
 })();
 
-/* 유틸: UID 보장 */
+/* UID 보장 */
 function ensureUID(){
   let u = localStorage.getItem(LS_UID);
   if(!u){
@@ -478,12 +444,25 @@ function ensureUID(){
   return u;
 }
 
-/* 유틸: SHA-256(hex) */
+/* SHA-256(hex) */
 async function sha256Hex(text){
   const buf = new TextEncoder().encode(text);
   const hash = await crypto.subtle.digest('SHA-256', buf);
   const bytes = Array.from(new Uint8Array(hash));
   return bytes.map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+/* 칩 클래스 매핑(모달 칩 색상) */
+function chipClass(label){
+  switch(String(label||'').toLowerCase()){
+    case 'urban':    return 'pill-urban';
+    case 'curve':    return 'pill-curve';
+    case 'tour':     return 'pill-tour';
+    case 'easy':     return 'pill-easy';
+    case 'balanced': return 'pill-balanced';
+    case 'dynamic':  return 'pill-dynamic';
+    default:         return '';
+  }
 }
 
 /* 수집 (PIN 해시 포함) */
@@ -492,7 +471,6 @@ async function collectProfile(){
   const pace   = [...document.querySelectorAll('.toggles[data-group="speed"] .toggle.active')].map(el=>el.dataset.value);
   const introVal = (document.getElementById('intro').value||'').slice(0,25);
 
-  // PIN 입력이 있으면 새 해시, 없으면 기존 해시 유지
   const pinRaw = (document.getElementById('pin').value || '').trim();
   let pinSha = _localPinSha || '';
   if(pinRaw){
@@ -530,21 +508,23 @@ async function saveProfileRemote(p){
   return out;
 }
 
-/* 미리보기 */
+/* 미리보기 (칩 팔레트 적용) */
 function showPreview(p){
   document.getElementById('avatarPreview').textContent = p.icon || '🏍️';
   document.getElementById('namePreview').textContent   = p.name || '라이더 이름';
   document.getElementById('bikePreview').textContent   = `${p.region? p.region+' · ' : ''}${p.bike||'바이크 미입력'}`;
   document.getElementById('timePreview').textContent   = p.time || '-';
   document.getElementById('tandemPreview').textContent = `탠덤 ${p.tandem||'-'}`;
-  document.getElementById('styleGrid').innerHTML = p.styles.map(s=>`<div class="tag">${s}</div>`).join('');
-  document.getElementById('paceGrid').innerHTML  = p.pace.map(s=>`<div class="tag">${s}</div>`).join('');
+  document.getElementById('styleGrid').innerHTML =
+    (p.styles||[]).map(s=>`<span class="chip ${chipClass(s)}">${s}</span>`).join('');
+  document.getElementById('paceGrid').innerHTML  =
+    (p.pace||[]).map(s=>`<span class="chip ${chipClass(s)}">${s}</span>`).join('');
   document.getElementById('previewModal').classList.add('show');
 }
 
 document.getElementById("saveBtn").addEventListener("click", async ()=>{
   try{
-    const p = await collectProfile();          // ← PIN 해시를 위해 async
+    const p = await collectProfile();
     if(!p.name){ showToast("이름을 입력해 주세요."); return; }
     const btn = document.getElementById("saveBtn");
     btn.disabled = true;
@@ -553,7 +533,6 @@ document.getElementById("saveBtn").addEventListener("click", async ()=>{
       const out = await saveProfileRemote(p);
       if(out.ok){
         showToast("✅ 프로필 저장 완료");
-        // 저장 후 PIN 입력칸은 비워두기
         const pinEl = document.getElementById('pin'); if(pinEl) pinEl.value='';
         showPreview(p);
       }else{
@@ -632,9 +611,6 @@ document.getElementById("editBtn").addEventListener("click",()=> {
       btn.addEventListener('click', async ()=>{
         const pin = (pinEl.value||'').trim();
         if(pin.length !== 4){ showToast('PIN 4자리를 입력해주세요'); pinEl.focus(); return; }
-
-        // (선택) 서버에서 검증하려면 별도 API로 pin_sha256 전달해 확인하세요.
-        // const ok = await verifyOnServer(r.uid, await sha256Hex(pin));
 
         btn.classList.add('active');
         setTimeout(()=>btn.classList.remove('active'), 600);
