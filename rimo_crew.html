@@ -16,6 +16,9 @@
     --t-yellow:#ffd85d;   --t-yellow-bg:rgba(255,216,93,.16);  --t-yellow-br:rgba(255,216,93,.38);
     --t-green:#56d364;    --t-green-bg:rgba(86,211,100,.16);   --t-green-br:rgba(86,211,100,.42);
     --t-purple:#a78bfa;   --t-purple-bg:rgba(167,139,250,.16); --t-purple-br:rgba(167,139,250,.42);
+
+    /* 라벨 열 너비(프로필과 공용으로 쓰기 쉬움) */
+    --label-w: 36px;
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Arial,sans-serif}
@@ -33,20 +36,33 @@
 
   /* 행/라벨/필드 */
   .row{
-    display:grid;grid-template-columns:40px 1fr;gap:0;
-    align-items:center;              /* ← 가운데 정렬 */
+    display:grid;
+    grid-template-columns: var(--label-w) 1fr; /* 라벨 열 가변 */
+    gap: 2px;            /* 시각 간격 최소화 */
+    align-items:center;  /* 가운데 정렬 */
     margin:10px 0;
   }
   .row.no-label{grid-template-columns:1fr}  /* 라벨 없는 행(테마 등) */
   @media (max-width:560px){ .row{grid-template-columns:80px 1fr} }
   .row > label{
     font-weight:700;color:#cfd1e8;font-size:14px;
-    align-self:center;               /* 라벨도 가운데 정렬 */
+    justify-self:end; text-align:right; padding-right:2px; /* 간격 축소 핵심 */
+    align-self:center;
   }
   .field{display:block}
+
+  /* 입력 공통 + 포커스 글로우 */
   input,select,textarea{
-    width:100%;padding:10px 12px;border-radius:10px;border:1px solid #2c2f48;background:#0f1020;color:#fff;font-size:14px
+    width:100%;padding:10px 12px;border-radius:10px;border:1px solid #2c2f48;background:#0f1020;color:#fff;font-size:14px;
+    transition: border-color .15s ease, box-shadow .15s ease;
   }
+  input:focus, select:focus, textarea:focus{
+    outline:none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-glow), 0 0 0 1px var(--accent) inset;
+  }
+  /* 포커스된 행 라벨 미세 강조(옵션) */
+  .row:has(input:focus), .row:has(select:focus), .row:has(textarea:focus) > label{ color:#eef3ff; }
 
   .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .coords{display:grid;grid-template-columns:1fr 1fr;gap:10px} /* 좌표/인원: 항상 2열 */
@@ -67,42 +83,16 @@
 
   /* 테마 필버튼: 네비 스타일(둥근 네모 + 아이콘/내용 2열) */
   .themes{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-  /* 컨테이너는 그대로 flex-wrap */
-.themes{
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-}
-
-/* 버튼을 콘텐츠 폭만 쓰도록(1열 방지) + 컴팩트 사이즈 */
-.theme-btn{
-  display:grid;
-  grid-template-columns:auto 1fr;
-  align-items:center;
-  gap:4px;
-  padding:4px 8px;         /* ↓ 폭 축소 */
-  border-radius:16px;
-  border:1px solid #2b2e48;
-  background:#14172a;
-  color:#e8e8ef;
-  font-size:12px;           /* ↓ 폭 축소 */
-  font-weight:500;
-  letter-spacing:0px;
-
-  /* 핵심: flex 아이템이 가로 전체를 먹지 않게 */
-  flex:0 0 auto;
-  width:auto;
-  white-space:nowrap;       /* 라벨 줄바꿈 방지 */
-}
-
-.theme-btn .badge{
-  width:14px; height:14px;  /* ↓ 배지 작게 */
-  border-radius:6px;
-  display:flex; align-items:center; justify-content:center;
-  font-size:12px;           /* ↓ 아이콘도 약간 축소 */
-  border:0px solid transparent;
-  background:#0f1020;
-}
+  .theme-btn{
+    display:grid;grid-template-columns:auto 1fr;align-items:center;
+    gap:4px;padding:4px 8px;border-radius:16px;border:1px solid #2b2e48;background:#14172a;color:#e8e8ef;
+    font-size:12px;font-weight:500;letter-spacing:0;cursor:pointer;user-select:none;
+    flex:0 0 auto; width:auto; white-space:nowrap; /* 1열 방지/컴팩트 */
+    transition:transform .12s ease, box-shadow .12s ease, background .12s ease, border-color .12s ease, color .12s ease;
+  }
+  .theme-btn .badge{
+    width:14px;height:14px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;background:#0f1020;border:0;
+  }
   .theme-btn.active{
     transform:translateY(-1px) scale(1.02);
     box-shadow:0 0 0 1px currentColor inset, 0 0 12px currentColor;
@@ -111,16 +101,12 @@
   /* 각 테마 색상(버튼 전체/배지) */
   .theme-btn[data-theme="red"]    { color:var(--t-red);    background:var(--t-red-bg);    border-color:var(--t-red-br) }
   .theme-btn[data-theme="red"] .badge    { background:rgba(255,93,93,.12);  border-color:var(--t-red-br) }
-
   .theme-btn[data-theme="blue"]   { color:var(--t-blue);   background:var(--t-blue-bg);   border-color:var(--t-blue-br) }
   .theme-btn[data-theme="blue"] .badge   { background:rgba(122,167,255,.12);border-color:var(--t-blue-br) }
-
   .theme-btn[data-theme="yellow"] { color:var(--t-yellow); background:var(--t-yellow-bg); border-color:var(--t-yellow-br) }
   .theme-btn[data-theme="yellow"] .badge { background:rgba(255,216,93,.12); border-color:var(--t-yellow-br) }
-
   .theme-btn[data-theme="green"]  { color:var(--t-green);  background:var(--t-green-bg);  border-color:var(--t-green-br) }
   .theme-btn[data-theme="green"] .badge  { background:rgba(86,211,100,.12); border-color:var(--t-green-br) }
-
   .theme-btn[data-theme="purple"] { color:var(--t-purple); background:var(--t-purple-bg); border-color:var(--t-purple-br) }
   .theme-btn[data-theme="purple"] .badge { background:rgba(167,139,250,.12);border-color:var(--t-purple-br) }
 
@@ -235,7 +221,7 @@
       <label for="c_cc">배기량</label>
       <div class="field">
         <select id="c_cc">
-          <option value="">전체</option>
+          <option value="">관계없음</option>
           <option>125cc 이하</option>
           <option>125~250</option>
           <option>250~400</option>
@@ -278,7 +264,7 @@
     </div>
   </section>
 
-  <section class="panel">
+  <section class="panel" id="cardsPanel">
     <h3>발행된 라이딩 카드 목록</h3>
     <div id="cards" class="cards"></div>
   </section>
@@ -289,7 +275,7 @@
     <a class="navitem active" href="rimo_crew.html" title="크루 생성">
       <div class="ico">🛠️</div><div>크루 생성</div>
     </a>
-    <a class="navitem" href="rimo_joins.html" title="매칭 희망">
+    <a class="navitem href" href="rimo_joins.html" title="매칭 희망">
       <div class="ico">🤝</div><div>매칭 희망</div>
     </a>
     <a class="navitem" href="rimo_routes.html" title="루트 제안">
@@ -500,6 +486,8 @@ function publish(){
   save(PUBLIST_KEY,list);
   save(DRAFT_KEY, form);
   renderCards();
+  // 발행 후 목록으로 스크롤
+  qs('#cardsPanel')?.scrollIntoView({ behavior:'smooth', block:'start' });
   alert('메인에 임시 발행(로컬)되었습니다.');
 }
 function resetForm(){
@@ -533,7 +521,7 @@ function renderCards(){
         <span class="pin"></span><span class="place">${it.to||'-'}</span>
       </div>
       <div class="sub">좌표: (${it.from_lat??'-'}, ${it.from_lng??'-'}) → (${it.to_lat??'-'}, ${it.to_lng??'-'})</div>
-      <div class="sub">배기량: ${it.cc||'전체'} · 인원: 잔여 ${remaining} / 정원 ${capacity}</div>
+      <div class="sub">배기량: ${(it.cc && it.cc.trim()) ? it.cc : '관계없음'} · 인원: 잔여 ${remaining} / 정원 ${capacity}</div>
       <div class="sub">스타일: ${(it.styles||[]).join(', ')||'-'} · 페이스: ${(it.pace||[]).join(', ')||'-'}</div>
       <div class="sub">메시지: ${it.message||'-'}</div>
     `;
