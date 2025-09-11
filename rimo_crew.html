@@ -35,15 +35,31 @@
   .panel{background:var(--tile);border:1px solid var(--line);border-radius:14px;padding:0 14px 14px 14px }
 
   /* 행/라벨/필드 */
-  .row{
-    display:grid;
-    grid-template-columns: var(--label-w) 1fr; /* 라벨 열 가변 */
-    gap: 2px;            /* 시각 간격 최소화 */
-    align-items:center;  /* 가운데 정렬 */
-    margin:10px 0;
-  }
-  .row.no-label{grid-template-columns:1fr}  /* 라벨 없는 행(테마 등) */
-  @media (max-width:560px){ .row{grid-template-columns:80px 1fr} }
+  
+/* 행: 라벨 열을 '내용만큼'만 쓰도록 + 간격 살짝만 */
+.row{
+  display:grid;
+  grid-template-columns: max-content 1fr; /* ← var(--label-w) 대신 */
+  gap: 6px;                                /* 라벨-폼 사이 간격 */
+  align-items:center;
+  margin:10px 0;
+}
+
+/* 라벨을 왼쪽으로 붙이기 */
+.row > label{
+  justify-self:start;    /* ← end 에서 start 로 */
+  text-align:left;       /* ← 좌측정렬 */
+  padding-right:0;       /* 불필요한 여백 제거 */
+}
+
+/* 라벨 없는 행은 그대로 전체폭 */
+.row.no-label{ grid-template-columns:1fr }
+
+/* 모바일에서는 필요 시 고정폭 유지하고 싶다면(선택) */
+@media (max-width:560px){
+  .row{ grid-template-columns: 80px 1fr; } /* 기존 모바일 레이아웃 유지 */
+}
+
   .row > label{
     font-weight:700;color:#cfd1e8;font-size:14px;
     justify-self:end; text-align:right; padding-right:2px; /* 간격 축소 핵심 */
