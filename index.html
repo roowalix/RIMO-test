@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>RIMO — 오늘의 라이딩 크루</title>
 
+<!-- (선택) 공통 테마 파일 -->
 <link rel="stylesheet" href="rimo_theme.css?v=20250911">
+<!-- Leaflet -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin />
 
 <style>
@@ -16,10 +18,12 @@
 
     --tab-bg:#182039; --tab-bd:#2d3559; --tab-ink:#e6e8ef;
     --tab-pri:#26346d; --tab-pri-bd:#3b53a8;
+
+    --border-1:#2b2e48; --muted:#b9b9cc;
   }
 
   *{box-sizing:border-box}
-  body{ margin:0; font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Helvetica,Arial,sans-serif; }
+  body{ margin:0; font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Helvetica,Arial,sans-serif; background:#0b0b0f; color:#e8e8ef; }
 
   /* 헤더 */
   header{
@@ -35,15 +39,16 @@
 
   /* 본문 */
   main{padding:16px;max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:14px;padding-bottom:120px}
-  #map{height:360px;border-radius:14px;outline:1px solid var(--border-1)}
-  .leaflet-container{z-index:1}
+  #map{height:360px;border-radius:14px;outline:1px solid var(--border-1); background:#0f1220}
+  .leaflet-container{z-index:1;border-radius:14px}
 
   /* 카드 캐러셀 */
   .carousel{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:8px 4px 0}
   .carousel::-webkit-scrollbar{display:none}
   .card{
     scroll-snap-align:start;width:304px;flex:0 0 auto;border-radius:14px;padding:14px;
-    display:flex;flex-direction:column;gap:8px;border:1px solid transparent;position:relative
+    display:flex;flex-direction:column;gap:8px;border:1px solid transparent;position:relative;
+    background:rgba(255,255,255,.04);
   }
   .card h3{margin:0 0 2px;font-size:18px}
   .meta{font-size:14px;color:var(--muted)}
@@ -114,6 +119,7 @@
   .tabbar .tab.primary{background:var(--tab-pri);border-color:var(--tab-pri-bd)}
   body.modal-open .tabbar{pointer-events:none;opacity:.28;filter:saturate(.2) blur(1px);transform:translateY(2px)}
 
+  /* 혹시 남아 있던 상단 필터 버튼 숨김(안전망) */
   .filter-btn{display:none !important}
 </style>
 </head>
@@ -129,7 +135,6 @@
 <main>
   <div id="map" class="panel"></div>
   <section id="list" class="carousel"></section>
-  <div id="empty" style="display:none; padding:8px 2px; color:#cfd2ff;">표시할 라이딩이 없습니다.</div>
 </main>
 
 <nav class="tabbar" aria-label="하단 네비게이션">
@@ -154,14 +159,18 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin></script>
 <script>
-/* ===================== 상수/공통 ===================== */
+/* =================== 상수/공유 설정 =================== */
 const ADMIN_DM = "http://pf.kakao.com/_ceUDn/chat";
 const LS_KEY   = 'rimo_profile_v1';
-const LS_CACHE = 'rimo_published_cards_server_cache'; // 어드민과 같은 키 사용
-
-// ★ 새 웹앱 주소(말씀하신 주소로 교체)
+const PUBLIST_KEY = 'rimo_published_cards_server_cache'; // 어드민과 동일
+const EXP_MIN_AFTER_START = 5; // 출발 후 5분까지 표시
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxWLEa5-oxPQYuxQTYXInrePIBU3jbJZZf2lNFkasERyv3pftmC1niT78GZ5tVJ7i_cMQ/exec";
 
+/* 날짜 뱃지 */
+document.getElementById('today').textContent =
+  new Date().toLocaleDateString('ko-KR',{month:'long',day:'numeric',weekday:'short'});
+
+/* 테마 색 (카드 보더/핀 색상) */
 const THEMES = {
   red:    { base:'#ff4d4d', cardBg:'rgba(255,77,77,.14)',  border:'rgba(255,77,77,.55)'},
   yellow: { base:'#ffd24d', cardBg:'rgba(255,210,77,.16)', border:'rgba(255,210,77,.55)'},
@@ -170,99 +179,65 @@ const THEMES = {
   purple: { base:'#a78bfa', cardBg:'rgba(167,139,250,.16)', border:'rgba(167,139,250,.55)'},
 };
 
-/* 날짜 뱃지 */
-document.getElementById('today').textContent =
-  new Date().toLocaleDateString('ko-KR',{month:'long',day:'numeric',weekday:'short'});
-
-/* ===================== 서버 통신 ===================== */
-function fetchJSONP(url, timeoutMs=9000){
-  return new Promise((resolve,reject)=>{
-    const cb = '__rimo_cb_'+Date.now();
-    const s = document.createElement('script');
-    const t = setTimeout(()=>{ cleanup(); reject(new Error('JSONP timeout')); }, timeoutMs);
-    function cleanup(){ delete window[cb]; s.remove(); clearTimeout(t); }
-    window[cb] = data => { cleanup(); resolve(data); };
-    s.src = url + (url.includes('?')?'&':'?') + 'callback=' + cb + '&_=' + Date.now();
-    s.onerror = ()=>{ cleanup(); reject(new Error('JSONP error')); };
-    document.body.appendChild(s);
-  });
-}
-
-async function loadFromServer(){
-  // 1) 표준 fetch (CORS 허용 시)
-  try{
-    const res = await fetch(WEB_APP_URL+'?op=list&_='+Date.now(), {cache:'no-store'});
-    if(res.ok){
-      const data = await res.json();
-      if(Array.isArray(data)) return data;
-      if(Array.isArray(data?.rows)) return data.rows; // 혹시 rows로 감싼 형태
-    }
-  }catch(e){
-    console.warn('fetch list failed, fallback to JSONP', e);
-  }
-  // 2) JSONP 폴백 (Apps Script가 callback 지원하도록 구현되어 있어야 합니다)
-  try{
-    const data = await fetchJSONP(WEB_APP_URL+'?op=list');
-    if(Array.isArray(data)) return data;
-    if(Array.isArray(data?.rows)) return data.rows;
-  }catch(e){
-    console.warn('jsonp list failed', e);
-  }
-  // 3) 최후 폴백: 로컬 캐시
-  try{ return JSON.parse(localStorage.getItem(LS_CACHE)||'[]'); }catch(_){ return []; }
-}
-
-/* ===================== 데이터 정리/필터 ===================== */
-function parseISOOrDisplay(dtISO, display){
-  // dtISO가 유효하면 우선 사용
-  if(dtISO){
-    const d = new Date(dtISO);
-    if(!isNaN(d)) return d;
-  }
-  // fallback: "10월 10일 19:00" 같은 표시형
-  if(display){
-    // 월/일/시:분만 있을 수 있으니, 올해 기준으로 파싱 시도
-    const m = display.match(/(\d{1,2})월\s*(\d{1,2})일\s*(\d{1,2}):(\d{2})/);
+/* 유틸 */
+const $ = (s,p=document)=>p.querySelector(s);
+const $$ = (s,p=document)=>Array.from(p.querySelectorAll(s));
+function pad(n){return String(n).padStart(2,'0')}
+function formatKDate(dt){return `${dt.getMonth()+1}월 ${dt.getDate()}일 ${pad(dt.getHours())}:${pad(dt.getMinutes())}`}
+function parseStartISO(rec){
+  // 우선 ISO(datetime), 없으면 datetime_display를 추정
+  if(rec.datetime){ const d=new Date(rec.datetime); if(!isNaN(d)) return d; }
+  if(rec.datetime_display){
+    // "10월 10일 19:00" 같은 형식 추정 → 올해 기준
+    const m = rec.datetime_display.match(/(\d+)월\s+(\d+)일\s+(\d+):(\d+)/);
     if(m){
-      const now = new Date();
-      return new Date(now.getFullYear(), Number(m[1])-1, Number(m[2]), Number(m[3]), Number(m[4]), 0);
+      const now=new Date(); return new Date(now.getFullYear(), Number(m[1])-1, Number(m[2]), Number(m[3]), Number(m[4]), 0);
     }
   }
   return null;
 }
 
-function isActive(crew){
-  // 출발시간 + 5분까지 보이도록
-  const when = parseISOOrDisplay(crew.datetime, crew.datetime_display);
-  if(!when) return true; // 시간이 없으면 숨기지 않음
-  const cutoff = new Date(when.getTime() + 5*60*1000);
-  return Date.now() <= cutoff.getTime();
+/* 서버에서 목록 로드 (fetch → JSONP 폴백) */
+function fetchJSONP(url, timeoutMs=9000){
+  return new Promise((resolve,reject)=>{
+    const cb='__rimo_cb_'+Date.now();
+    const s=document.createElement('script');
+    const t=setTimeout(()=>{cleanup();reject(new Error('JSONP timeout'));},timeoutMs);
+    function cleanup(){ delete window[cb]; s.remove(); clearTimeout(t); }
+    window[cb]=data=>{ cleanup(); resolve(data); };
+    s.src=url+(url.includes('?')?'&':'?')+'callback='+cb+'&_='+Date.now();
+    s.onerror=()=>{ cleanup(); reject(new Error('JSONP error')); };
+    document.body.appendChild(s);
+  });
+}
+async function loadFromServer(){
+  // 1) 캐시 먼저
+  let cached=[]; try{ cached=JSON.parse(localStorage.getItem(PUBLIST_KEY)||'[]'); }catch(_){}
+  if (cached.length) renderAll(cached);
+
+  // 2) fetch
+  try{
+    const res = await fetch(WEB_APP_URL+'?op=list&_='+Date.now(), {cache:'no-store'});
+    if(res.ok){
+      const data = await res.json();
+      const rows = Array.isArray(data) ? data : (Array.isArray(data?.rows) ? data.rows : []);
+      if(rows.length){ localStorage.setItem(PUBLIST_KEY, JSON.stringify(rows)); return rows; }
+    }
+  }catch(e){ console.warn('fetch list failed; jsonp fallback', e); }
+
+  // 3) JSONP
+  try{
+    const data = await fetchJSONP(WEB_APP_URL+'?op=list');
+    const rows = Array.isArray(data) ? data : (Array.isArray(data?.rows) ? data.rows : []);
+    if(rows.length){ localStorage.setItem(PUBLIST_KEY, JSON.stringify(rows)); return rows; }
+  }catch(e){ console.warn('jsonp list failed', e); }
+
+  // 4) 폴백: 캐시
+  return cached;
 }
 
-function normalizeRow(r){
-  // 서버/시트 헤더가 조금 달라도 최대한 흡수
-  return {
-    id: r.id || r.ID || r.Id || `crew_${Math.random().toString(36).slice(2,8)}`,
-    theme: (r.theme || r.Theme || 'blue').toLowerCase(),
-    title: r.title || r.Title || '(제목 없음)',
-    time:  r.datetime_display || r.time || r.Time || '',
-    datetime: r.datetime || r.DateTime || r.dateTime || '',
-    from: r.from || r.From || '',
-    to:   r.to   || r.To   || '',
-    lat:  Number(r.from_lat ?? r.lat ?? r.Lat ?? 0),
-    lng:  Number(r.from_lng ?? r.lng ?? r.Lng ?? r.Long ?? 0),
-    toLat:Number(r.to_lat ?? r.toLat ?? r.ToLat ?? 0),
-    toLng:Number(r.to_lng ?? r.toLng ?? r.ToLng ?? 0),
-    peopleNow: Number(r.remaining ?? r.peopleNow ?? 0),
-    peopleMax: Number(r.capacity  ?? r.peopleMax ?? 0),
-    styles: (typeof r.styles==='string'? r.styles.split(',').map(s=>s.trim()).filter(Boolean) : (r.styles||[])),
-    cc: r.cc || '',
-    msg: r.message || r.msg || ''
-  };
-}
-
-/* ===================== 지도 ===================== */
-const map=L.map('map',{scrollWheelZoom:true});
+/* ===== 지도 ===== */
+const map = L.map('map',{scrollWheelZoom:true});
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
 const group=L.featureGroup().addTo(map);
 const arcs=L.layerGroup().addTo(map);
@@ -284,19 +259,19 @@ function renderMap(crews){
   const bounds=L.latLngBounds([]);
   crews.forEach(c=>{
     const t=THEMES[c.theme]||THEMES.blue;
-    const ms=L.marker([c.lat,c.lng],{icon:makePin(t.base,'S')}).addTo(group);
-    const md=L.marker([c.toLat,c.toLng],{icon:makePin(t.base,'D')}).addTo(group);
-    const a=L.polyline(arcCoords(c.lat,c.lng,c.toLat,c.toLng),{color:t.base,weight:2.5,dashArray:"6 8",opacity:.9}).addTo(arcs);
+    // 좌표 없으면 스킵
+    if(!(isFinite(c.from_lat)&&isFinite(c.from_lng)&&isFinite(c.to_lat)&&isFinite(c.to_lng))) return;
+    const ms=L.marker([c.from_lat,c.from_lng],{icon:makePin(t.base,'S')}).addTo(group);
+    const md=L.marker([c.to_lat,c.to_lng],{icon:makePin(t.base,'D')}).addTo(group);
+    const a=L.polyline(arcCoords(c.from_lat,c.from_lng,c.to_lat,c.to_lng),{color:t.base,weight:2.5,dashArray:"6 8",opacity:.9}).addTo(arcs);
     [ms,md].forEach(m=>bounds.extend(m.getLatLng()));
     a.getLatLngs().forEach(p=>bounds.extend(p));
   });
   if(bounds.isValid()) map.fitBounds(bounds.pad(0.25));
 }
 
-/* ===================== 카드 렌더 ===================== */
+/* ===== 카드 ===== */
 const listEl=document.getElementById('list');
-const emptyEl=document.getElementById('empty');
-
 function chipClass(label){
   switch(String(label).toLowerCase()){
     case 'urban':    return 'pill-urban';
@@ -310,46 +285,46 @@ function chipClass(label){
 }
 function chip(label){ return `<span class="chip ${chipClass(label)}">${label}</span>`; }
 
+function normalizeArr(v){
+  if(Array.isArray(v)) return v;
+  if(v==null) return [];
+  return String(v).split(/[|,]/).map(s=>s.trim()).filter(Boolean);
+}
+
 function renderCards(crews){
   listEl.innerHTML="";
-  if(!crews.length){
-    emptyEl.style.display='block';
-    return;
-  }
-  emptyEl.style.display='none';
-
   crews.forEach(c=>{
     const t=THEMES[c.theme]||THEMES.blue;
+    const styles = normalizeArr(c.styles);
+    const paces  = normalizeArr(c.pace);
     const el=document.createElement('article');
     el.className="card"; el.dataset.id=c.id;
-    el.style.background=t.cardBg; el.style.border=`1px solid ${t.border}`;
+    el.style.border=`1px solid ${t.border}`;
+    el.style.background=t.cardBg;
 
-    // 출발 임박(출발 15분 이내) 표시 예시
-    let immin=false;
-    const d=parseISOOrDisplay(c.datetime, c.time || c.datetime_display);
-    if(d){
-      const mins=(d.getTime()-Date.now())/60000;
-      immin = mins<=15 && mins>=-5;
-    }
+    // 출발 임박(출발 전 20분 이내 예시)
+    const start=parseStartISO(c);
+    const immin = start ? (start - Date.now() <= 20*60*1000 && start - Date.now() > -5*60*1000) : false;
 
     el.innerHTML=`
-      <h3>${c.title}</h3>
-      <div class="meta">⏰ ${c.time || ''}</div>
-      <div class="meta">📍 ${c.from} → ${c.to}</div>
-      <div class="msg">💬 ${c.msg||''}</div>
+      <h3>${c.title || '(제목 없음)'}</h3>
+      <div class="meta">⏰ ${c.datetime_display || (start?formatKDate(start):'-')}</div>
+      <div class="meta">📍 ${c.from || '-'} → ${c.to || '-'}</div>
+      <div class="msg">💬 ${c.message || '-'}</div>
       ${immin ? `<div class="imminent">🚦 출발 임박</div>` : ``}
       <div class="pillrow">
-        ${(c.styles||[]).map(chip).join("")}
+        ${styles.map(chip).join("")}
+        ${paces.map(chip).join("")}
         ${c.cc ? chip(c.cc) : ""}
       </div>
-      <button class="join">👥 ${c.peopleNow}/${c.peopleMax} · ✅ 합류 신청</button>
+      <button class="join">👥 ${(c.remaining ?? 0)}/${(c.capacity ?? '-')} · ✅ 합류 신청</button>
     `;
     el.querySelector('.join').addEventListener('click',()=>openJoinModal(c));
     listEl.appendChild(el);
   });
 }
 
-/* ===================== 모달/복사 ===================== */
+/* ===== 합류 모달 ===== */
 const modal=document.getElementById('joinModal');
 const sheet=document.getElementById('joinSheet');
 const preview=document.getElementById('preview');
@@ -362,12 +337,12 @@ document.getElementById('editProfile').onclick=()=> location.href='rimo_profile.
 
 function loadProfile(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)||'{}'); }catch(_){ return {}; } }
 function composeText(crew, profile){
-  const styles=(profile.styles||[]).join(' · ') || '-';
-  const paces =(profile.pace  ||[]).join(' · ') || '-';
+  const styles=(normalizeArr(profile.styles)).join(' · ') || '-';
+  const paces =(normalizeArr(profile.pace  )).join(' · ') || '-';
   return (
 `[✅ 합류 신청] ${crew.title}
 📍 출발 → 도착
-${crew.from} → ${crew.to}
+${crew.from || '-'} → ${crew.to || '-'}
 
 👤 라이더 : ${profile.name || '이름 미입력'} ${profile.icon || ''}
 🏍️ 바이크 : ${profile.bike || '미입력'}
@@ -394,42 +369,67 @@ function openJoinModal(crew){
   document.getElementById('copyProfileBtn').onclick=()=> copyText(text);
 }
 
-/* ===================== 부트스트랩 ===================== */
-document.getElementById('today').textContent =
-  new Date().toLocaleDateString('ko-KR',{month:'long',day:'numeric',weekday:'short'});
-
-(async function init(){
-  // 서버에서 최신 목록 불러오기
-  let rows = await loadFromServer();
-  // 정규화
-  let crews = rows.map(normalizeRow);
-  // 출발시간 +5분 지난 카드는 숨김
-  crews = crews.filter(isActive);
-  // 시간 오름차순 정렬
-  crews.sort((a,b)=>{
-    const da = parseISOOrDisplay(a.datetime, a.time) || new Date(8640000000000000);
-    const db = parseISOOrDisplay(b.datetime, b.time) || new Date(8640000000000000);
-    return da - db;
-  });
-  // 캐시에도 저장(어드민과 공유)
-  try{ localStorage.setItem(LS_CACHE, JSON.stringify(crews)); }catch(_){}
-
-  renderCards(crews);
-  renderMap(crews);
-
-  // 1분마다 자동 재로딩(출발/만료 반영)
-  setInterval(async ()=>{
-    let fresh = await loadFromServer();
-    let cs = fresh.map(normalizeRow).filter(isActive);
-    cs.sort((a,b)=>{
-      const da = parseISOOrDisplay(a.datetime, a.time) || new Date(8640000000000000);
-      const db = parseISOOrDisplay(b.datetime, b.time) || new Date(8640000000000000);
+/* ===== 렌더 파이프라인 ===== */
+function filterActiveRows(rows){
+  const now = Date.now();
+  return rows
+    .map(r=>{
+      // 서버 컬럼명/로컬 키 보정
+      return {
+        id: r.id || r.ID || `crew_${Math.random().toString(36).slice(2,8)}`,
+        title: r.title || r.제목 || '',
+        datetime: r.datetime || r.Datetime || '',
+        datetime_display: r.datetime_display || r.Time || r.일시표시 || '',
+        from: r.from || r.출발 || '',
+        to: r.to || r.도착 || '',
+        from_lat: Number(r.from_lat ?? r.From_Lat ?? r.위도 ?? NaN),
+        from_lng: Number(r.from_lng ?? r.From_Lng ?? r.경도 ?? NaN),
+        to_lat:   Number(r.to_lat   ?? r.To_Lat   ?? r.도착위도 ?? NaN),
+        to_lng:   Number(r.to_lng   ?? r.To_Lng   ?? r.도착경도 ?? NaN),
+        capacity: Number(r.capacity ?? r.정원 ?? NaN),
+        remaining:Number(r.remaining?? r.잔여 ?? NaN),
+        cc: r.cc || r.배기량 || '',
+        styles: r.styles ?? r.스타일 ?? '',
+        pace: r.pace ?? r.페이스 ?? '',
+        message: r.message || r.메시지 || '',
+        theme: r.theme || r.테마 || 'blue',
+      };
+    })
+    .filter(rec=>{
+      const start = parseStartISO(rec);
+      if(!start) return true; // 시작시간 없으면 표시
+      const hideAfter = start.getTime() + EXP_MIN_AFTER_START*60*1000;
+      return now <= hideAfter; // 출발 + 5분까지만 보이기
+    })
+    .sort((a,b)=>{
+      const da=parseStartISO(a)?.getTime() ?? 0;
+      const db=parseStartISO(b)?.getTime() ?? 0;
       return da - db;
     });
-    renderCards(cs);
-    renderMap(cs);
-    try{ localStorage.setItem(LS_CACHE, JSON.stringify(cs)); }catch(_){}
-  }, 60000);
+}
+
+function renderAll(rows){
+  const active = filterActiveRows(rows);
+  renderCards(active);
+  renderMap(active);
+}
+
+/* ===== init ===== */
+(async function init(){
+  const rows = await loadFromServer();
+  renderAll(rows.length ? rows : [{
+    id:"demo1", theme:"blue", title:"<예시 카드 — 관리자에서 발행하세요>",
+    datetime_display:"10월 10일 19:00",
+    from:"출발지", to:"도착지",
+    from_lat:37.5665, from_lng:126.9780, to_lat:37.55, to_lng:127.0,
+    remaining:0, capacity:4, styles:["Urban","Easy"], cc:"", message:"관리자 페이지에서 발행하면 이 예시는 사라집니다."
+  }]);
+
+  // 주기적 정리(1분 간격으로 만료카드 제거/갱신)
+  setInterval(async()=>{
+    const latest = await loadFromServer();
+    renderAll(latest);
+  }, 60*1000);
 })();
 </script>
 </body>
