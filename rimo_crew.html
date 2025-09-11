@@ -227,6 +227,7 @@ const STYLE_OPTS = ["Urban","Curve","Tour"];
 const PACE_OPTS  = ["Easy","Balanced","Dynamic"];
 /* 레드 제거 */
 const THEME_OPTS = [
+  {key:'red',   label:'레드',   emoji:'🔴'},
   {key:'blue',   label:'블루',   emoji:'🔵'},
   {key:'yellow', label:'옐로',   emoji:'🟡'},
   {key:'green',  label:'그린',   emoji:'🟢'},
@@ -491,11 +492,10 @@ function renderCards(list){
     const capacity  = (it.capacity ?? '-');
     const el=document.createElement('div');
     el.className='card'; el.dataset.theme = theme; el.dataset.id = it.id;
-    const themeLabel = ({blue:'블루 크루',yellow:'옐로 크루',green:'그린 크루',purple:'퍼플 크루'})[theme] || '블루 크루';
+    const themeLabel = ({red:'레드 크루',blue:'블루 크루',yellow:'옐로 크루',green:'그린 크루',purple:'퍼플 크루'})[theme] || '블루 크루';
     el.innerHTML = `
       <div class="tt">
-        <span class="theme-tag">${themeLabel}</span>
-        ${it.title||'(제목 없음)'} <span class="sub">· ${it.datetime_display||''}</span>
+             ${it.title||'(제목 없음)'} <span class="sub">· ${it.datetime_display||''}</span>
       </div>
       <div class="route">
         <span class="pin"></span><span class="place">${it.from||'-'}</span>
