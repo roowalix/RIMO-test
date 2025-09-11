@@ -17,8 +17,12 @@
     --t-green:#56d364;    --t-green-bg:rgba(86,211,100,.16);   --t-green-br:rgba(86,211,100,.42);
     --t-purple:#a78bfa;   --t-purple-bg:rgba(167,139,250,.16); --t-purple-br:rgba(167,139,250,.42);
 
-    /* 라벨 열 너비(프로필과 공용으로 쓰기 쉬움) */
-    --label-w: 36px;
+    /* 라벨/간격(절대값) */
+    --label-w: 56px;      /* 데스크톱 라벨 폭: 한글 2~3글자 기준 */
+    --label-gap: 8px;     /* 라벨-폼 간격 */
+
+    --label-w-sm: 44px;   /* 모바일 라벨 폭 */
+    --label-gap-sm: 6px;  /* 모바일 라벨-폼 간격 */
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Arial,sans-serif}
@@ -31,43 +35,33 @@
   .home-btn:hover{background:rgba(255,255,255,.08)}
 
   /* 본문 레이아웃 */
-  main{padding:16px;display:grid;gap:16px;max-width:980px;margin:0 auto;padding-bottom:120px}
-  .panel{background:var(--tile);border:1px solid var(--line);border-radius:14px;padding:0 14px 14px 14px }
+  main{padding:12px 16px;display:grid;gap:16px;max-width:980px;margin:0 auto;padding-bottom:120px}
+  .panel{background:var(--tile);border:1px solid var(--line);border-radius:14px;padding:14px}
 
-  /* 행/라벨/필드 */
-  
-/* 행: 라벨 열을 '내용만큼'만 쓰도록 + 간격 살짝만 */
-.row{
-  display:grid;
-  grid-template-columns: max-content 1fr; /* ← var(--label-w) 대신 */
-  gap: 6px;                                /* 라벨-폼 사이 간격 */
-  align-items:center;
-  margin:10px 0;
-}
-
-/* 라벨을 왼쪽으로 붙이기 */
-.row > label{
-  justify-self:start;    /* ← end 에서 start 로 */
-  text-align:left;       /* ← 좌측정렬 */
-  padding-right:0;       /* 불필요한 여백 제거 */
-}
-
-/* 라벨 없는 행은 그대로 전체폭 */
-.row.no-label{ grid-template-columns:1fr }
-
-/* 모바일에서는 필요 시 고정폭 유지하고 싶다면(선택) */
-@media (max-width:560px){
-  .row{ grid-template-columns: 80px 1fr; } /* 기존 모바일 레이아웃 유지 */
-}
-
-  .row > label{
-    font-weight:700;color:#cfd1e8;font-size:14px;
-    justify-self:start; text-align:right; padding-right:2px; /* 간격 축소 핵심 */
-    align-self:center;
+  /* ===== 폼 그리드: 라벨 고정폭, 내용 가변 ===== */
+  .row{
+    display:grid;
+    grid-template-columns: var(--label-w) 1fr; /* 좌: 고정폭 / 우: 남는 전부 */
+    gap: var(--label-gap);
+    align-items:center;
+    margin:10px 0;
   }
-  .field{display:block}
+  .row.no-label{ grid-template-columns:1fr; }  /* 라벨 없는 행(테마 등) */
+  .row > label{
+    font-weight:700; color:#cfd1e8; font-size:14px;
+    justify-self:start; text-align:left; white-space:nowrap;
+  }
+  .field{ min-width:0; }            /* 내용 영역이 줄어들 수 있도록 */
+  .field > *{ width:100%; }         /* 내부 input/select/textarea 꽉 차게 */
 
-  /* 입력 공통 + 포커스 글로우 */
+  @media (max-width:560px){
+    .row{
+      grid-template-columns: var(--label-w-sm) 1fr;
+      gap: var(--label-gap-sm);
+    }
+  }
+
+  /* 입력 공통 + 포커스 글로우(파랑계열) */
   input,select,textarea{
     width:100%;padding:10px 12px;border-radius:10px;border:1px solid #2c2f48;background:#0f1020;color:#fff;font-size:14px;
     transition: border-color .15s ease, box-shadow .15s ease;
@@ -77,13 +71,13 @@
     border-color: var(--accent);
     box-shadow: 0 0 0 2px var(--accent-glow), 0 0 0 1px var(--accent) inset;
   }
-  /* 포커스된 행 라벨 미세 강조(옵션) */
+  /* 지원 브라우저에서: 포커스된 행의 라벨 색 살짝 강화 */
   .row:has(input:focus), .row:has(select:focus), .row:has(textarea:focus) > label{ color:#eef3ff; }
 
   .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .coords{display:grid;grid-template-columns:1fr 1fr;gap:10px} /* 좌표/인원: 항상 2열 */
+  .coords{display:grid;grid-template-columns:1fr 1fr;gap:10px} /* 좌표/인원: 2열 고정 */
 
-  /* 토글(rimo_profile 스타일) */
+  /* === 토글(rimo_profile 스타일) ========================= */
   .toggles{display:flex;gap:10px;flex-wrap:wrap;margin:0}
   .toggle{
     display:inline-flex;align-items:center;gap:14px;padding:8px 12px;border-radius:999px;
@@ -97,13 +91,13 @@
     font-weight:500;
   }
 
-  /* 테마 필버튼: 네비 스타일(둥근 네모 + 아이콘/내용 2열) */
+  /* === 테마 필버튼: 네비 스타일 ========================== */
   .themes{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
   .theme-btn{
     display:grid;grid-template-columns:auto 1fr;align-items:center;
     gap:0px;padding:4px 8px;border-radius:16px;border:1px solid #2b2e48;background:#14172a;color:#e8e8ef;
     font-size:12px;font-weight:500;letter-spacing:0;cursor:pointer;user-select:none;
-    flex:0 0 auto; width:auto; white-space:nowrap; /* 1열 방지/컴팩트 */
+    flex:0 0 auto; white-space:nowrap;
     transition:transform .12s ease, box-shadow .12s ease, background .12s ease, border-color .12s ease, color .12s ease;
   }
   .theme-btn .badge{
@@ -126,19 +120,17 @@
   .theme-btn[data-theme="purple"] { color:var(--t-purple); background:var(--t-purple-bg); border-color:var(--t-purple-br) }
   .theme-btn[data-theme="purple"] .badge { background:rgba(167,139,250,.12);border-color:var(--t-purple-br) }
 
-  /* 기능버튼 */
+  /* === 기능버튼 ========================================== */
   .btn{padding:10px 14px;border-radius:10px;border:1px solid #2b2e48;background:#1b1d2e;color:#fff;cursor:pointer}
   .btn.small{padding:8px 10px;font-size:12px}
   .btn.primary{background:#2a5bff;border-color:#3d6aff}
   .btnbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;justify-content:center;}
 
-  /* 카드 */
+  /* === 카드 ============================================== */
   .cards{display:grid;gap:10px;margin-top:10px}
   .card{background:#141628;border:1px solid var(--line);border-radius:12px;padding:12px}
   .card .tt{font-weight:800}
   .card .sub{color:#c8cae0;font-size:12px;margin-top:4px}
-
-  /* 카드: 테마별 악센트 & 라우트 */
   .card .theme-tag{
     display:inline-flex;align-items:center;gap:6px;
     padding:4px 8px;border-radius:999px;font-size:11px;font-weight:800;
@@ -154,7 +146,6 @@
   .card[data-theme="yellow"] { border-color:var(--t-yellow-br) }
   .card[data-theme="green"]  { border-color:var(--t-green-br) }
   .card[data-theme="purple"] { border-color:var(--t-purple-br) }
-
   .card[data-theme="red"]    .theme-tag,.card[data-theme="red"]    .route{ color:var(--t-red) }
   .card[data-theme="blue"]   .theme-tag,.card[data-theme="blue"]   .route{ color:var(--t-blue) }
   .card[data-theme="yellow"] .theme-tag,.card[data-theme="yellow"] .route{ color:var(--t-yellow) }
@@ -281,7 +272,7 @@
   </section>
 
   <section class="panel" id="cardsPanel">
-    <h3>발행된 라이딩 카드 목록</h3>
+    <h3 style="margin:0 0 8px 0;font-size:16px;">발행된 라이딩 카드 목록</h3>
     <div id="cards" class="cards"></div>
   </section>
 </main>
@@ -291,7 +282,7 @@
     <a class="navitem active" href="rimo_crew.html" title="크루 생성">
       <div class="ico">🛠️</div><div>크루 생성</div>
     </a>
-    <a class="navitem href" href="rimo_joins.html" title="매칭 희망">
+    <a class="navitem" href="rimo_joins.html" title="매칭 희망">
       <div class="ico">🤝</div><div>매칭 희망</div>
     </a>
     <a class="navitem" href="rimo_routes.html" title="루트 제안">
