@@ -13,33 +13,29 @@
     --btn:#2A2F4F; --btnHover:#3C4380;
     --imminent-bg: rgba(255,199,94,.16);
     --imminent-bd: rgba(255,199,94,.45);
-
-    /* tabbar 덮어쓰기(필요시) */
     --tab-bg:#182039; --tab-bd:#2d3559; --tab-ink:#e6e8ef;
     --tab-pri:#26346d; --tab-pri-bd:#3b53a8;
+    --border-1:#2b2f4a;
+    --muted:#b9b9cc;
   }
-
   *{box-sizing:border-box}
-  body{ margin:0; font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Helvetica,Arial,sans-serif; }
+  body{ margin:0; font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Helvetica,Arial,sans-serif; background:#0b0b0f; color:#e6e8ef }
 
-  /* 헤더 */
   header{
     position:sticky; top:0; z-index:5;
     background:rgba(11,11,15,.9);
     -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
-    border-bottom:1px solid var(--border-1);
+    border-bottom:1px solid var(--border-1)
   }
   .bar{display:flex;gap:10px;align-items:center;padding:14px 16px;height:56px}
   .logo{font-weight:900}
   .title{font-weight:800;opacity:.9}
   .pill{margin-left:auto;padding:6px 10px;border-radius:999px;background:#151525;color:#b9b9cc;font-size:12px}
 
-  /* 본문 */
   main{padding:16px;max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:14px;padding-bottom:120px}
-  #map{height:360px;border-radius:14px;outline:1px solid var(--border-1)}
+  #map{height:360px;border-radius:14px;outline:1px solid var(--border-1); background:#0f1020}
   .leaflet-container{z-index:1}
 
-  /* 카드 캐러셀 */
   .carousel{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:8px 4px 0}
   .carousel::-webkit-scrollbar{display:none}
   .card{
@@ -50,14 +46,12 @@
   .meta{font-size:14px;color:var(--muted)}
   .msg{font-size:14px}
 
-  /* 칩(=필) */
   .pillrow{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
   .chip{
     padding:6px 9px; border-radius:999px; font-size:12px; font-weight:500;
     display:inline-flex; align-items:center; justify-content:center;
     background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); color:#e6e8ef;
   }
-  /* 엠버서더와 동일 팔레트 */
   .chip.pill-urban   {background:#1e2d55; border-color:#2c4484}
   .chip.pill-curve   {background:#2a1f56; border-color:#40307a}
   .chip.pill-tour    {background:#1e3b3a; border-color:#2f5f5d}
@@ -65,7 +59,6 @@
   .chip.pill-balanced{background:#3a341e; border-color:#5a4f2f}
   .chip.pill-dynamic {background:#3a1f1f; border-color:#5a2f2f}
 
-  /* 출발 임박 배지 */
   .imminent{
     position:absolute; top:10px; right:10px;
     display:inline-flex; align-items:center; gap:6px;
@@ -79,16 +72,13 @@
     100%{box-shadow:0 0 0 0 rgba(255,199,94,0)}
   }
 
-  /* 합류 버튼 */
   .join{margin-top:2px;width:100%;padding:14px;border-radius:12px;border:none;color:#fff;font-weight:800;
         background:rgba(255,255,255,.16);cursor:pointer}
   .card.selected{box-shadow:0 0 0 2px rgba(255,255,255,.12) inset}
 
-  /* 지도 핀 */
   .pin{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;
        font-weight:900;font-size:12px;color:#0b0b0f;border:2px solid rgba(255,255,255,.9);box-shadow:0 1px 6px rgba(0,0,0,.35)}
 
-  /* 모달 */
   .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:4000;
          background:rgba(0,0,0,.45);padding:22px 12px}
   .modal.show{display:flex}
@@ -109,14 +99,11 @@
                         background:var(--btn);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
   .modal-actions button:hover{background:var(--btnHover)}
 
-  /* 하단 네비 */
   .tabbar{position:fixed;left:0;right:0;bottom:16px;z-index:1500;display:flex;gap:12px;justify-content:center}
   .tabbar .tab{background:var(--tab-bg);border:1px solid var(--tab-bd);color:var(--tab-ink);
                padding:12px 18px;border-radius:22px;font-weight:800;text-decoration:none;font-size:14px}
   .tabbar .tab.primary{background:var(--tab-pri);border-color:var(--tab-pri-bd)}
   body.modal-open .tabbar{pointer-events:none;opacity:.28;filter:saturate(.2) blur(1px);transform:translateY(2px)}
-
-  /* 혹시 남아 있던 상단 필터 버튼 숨김(안전망) */
   .filter-btn{display:none !important}
 </style>
 </head>
@@ -131,7 +118,7 @@
 
 <main>
   <div id="map" class="panel"></div>
-  <section id="list" class="carousel"></section>
+  <section id="list" class="carousel" aria-live="polite"></section>
 </main>
 
 <nav class="tabbar" aria-label="하단 네비게이션">
@@ -156,37 +143,28 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin></script>
 <script>
-/* 상수 */
+/* ===== 서버 API ===== */
+const API = "https://script.google.com/macros/s/AKfycbzj6AP7LLecbXrAMFwKuz8ne-h2VBpYnM0fIku2lWoQSvvdpxkGPM7KNot8yMBRCvfeig/exec";
+
+/* ===== 상수/키 ===== */
 const ADMIN_DM = "http://pf.kakao.com/_ceUDn/chat";
 const LS_KEY   = 'rimo_profile_v1';
-const LS_CREWS = 'rimo_crews_v1';
-const LS_APPS  = 'rimo_applications_v1';
+const LS_CREWS = 'rimo_crews_v1';   // 오프라인 폴백
 
-/* 테마 */
+/* ===== 테마 팔레트 (red는 표시만 유지, 발행 쪽에서는 제외) ===== */
 const THEMES = {
   red:    { base:'#ff4d4d', cardBg:'rgba(255,77,77,.14)',  border:'rgba(255,77,77,.55)'},
   yellow: { base:'#ffd24d', cardBg:'rgba(255,210,77,.16)', border:'rgba(255,210,77,.55)'},
   blue:   { base:'#5b8cff', cardBg:'rgba(91,140,255,.16)', border:'rgba(91,140,255,.55)'},
-  green:  { base:'#46d37d', cardBg:'rgba(70,211,125,.16)', border:'rgba(70,211,125,.55)'}
+  green:  { base:'#46d37d', cardBg:'rgba(70,211,125,.16)', border:'rgba(70,211,125,.55)'},
+  purple: { base:'#a78bfa', cardBg:'rgba(167,139,250,.16)',border:'rgba(167,139,250,.55)'}
 };
 
 /* 날짜 뱃지 */
 document.getElementById('today').textContent =
   new Date().toLocaleDateString('ko-KR',{month:'long',day:'numeric',weekday:'short'});
 
-/* 발행된 카드 */
-let crews=[];
-try{ crews = JSON.parse(localStorage.getItem(LS_CREWS)||'[]'); }catch(_){ crews=[]; }
-if(!crews.length){
-  crews=[{
-    id:"demo1", theme:"blue", title:"<예시 카드 — 관리자에서 발행하세요>",
-    time:"10월 10일 19:00", from:"출발지", to:"도착지",
-    lat:37.5665, lng:126.9780, toLat:37.55, toLng:127.0,
-    peopleNow:0, peopleMax:4, styles:["Urban","Easy"], cc:"", msg:"관리자 페이지에서 발행하면 이 예시는 사라집니다."
-  }];
-}
-
-/* 지도 */
+/* ===== 지도 ===== */
 const map=L.map('map',{scrollWheelZoom:true});
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
 const group=L.featureGroup().addTo(map);
@@ -204,22 +182,22 @@ function arcCoords(aLat,aLng,bLat,bLng,k=0.18){
   const nx=-vy/len,ny=vx/len; let off=len*k; if(off<0.01) off=0.01;
   const cx=mx+nx*off,cy=my+ny*off; return [[y1,x1],[cy,cx],[y2,x2]];
 }
-function renderMap(){
+function renderMap(crews){
   group.clearLayers(); arcs.clearLayers();
   const bounds=L.latLngBounds([]);
   crews.forEach(c=>{
+    if(!(Number.isFinite(c.from_lat)&&Number.isFinite(c.from_lng)&&Number.isFinite(c.to_lat)&&Number.isFinite(c.to_lng))) return;
     const t=THEMES[c.theme]||THEMES.blue;
-    const ms=L.marker([c.lat,c.lng],{icon:makePin(t.base,'S')}).addTo(group);
-    const md=L.marker([c.toLat,c.toLng],{icon:makePin(t.base,'D')}).addTo(group);
-    const a=L.polyline(arcCoords(c.lat,c.lng,c.toLat,c.toLng),{color:t.base,weight:2.5,dashArray:"6 8",opacity:.9}).addTo(arcs);
+    const ms=L.marker([c.from_lat,c.from_lng],{icon:makePin(t.base,'S')}).addTo(group);
+    const md=L.marker([c.to_lat,c.to_lng],{icon:makePin(t.base,'D')}).addTo(group);
+    const a=L.polyline(arcCoords(c.from_lat,c.from_lng,c.to_lat,c.to_lng),{color:t.base,weight:2.5,dashArray:"6 8",opacity:.9}).addTo(arcs);
     [ms,md].forEach(m=>bounds.extend(m.getLatLng()));
     a.getLatLngs().forEach(p=>bounds.extend(p));
   });
   if(bounds.isValid()) map.fitBounds(bounds.pad(0.25));
 }
-renderMap();
 
-/* 칩 클래스 매핑 (엠버서더와 동일 색) */
+/* ===== 칩 색상 클래스 ===== */
 function chipClass(label){
   switch(String(label).toLowerCase()){
     case 'urban':    return 'pill-urban';
@@ -231,12 +209,11 @@ function chipClass(label){
     default:         return '';
   }
 }
-
-/* 카드 렌더링 */
-const listEl=document.getElementById('list');
 function chip(label){ return `<span class="chip ${chipClass(label)}">${label}</span>`; }
 
-function renderCards(){
+/* ===== 카드 렌더 ===== */
+const listEl=document.getElementById('list');
+function renderCards(crews){
   listEl.innerHTML="";
   crews.forEach(c=>{
     const t=THEMES[c.theme]||THEMES.blue;
@@ -244,44 +221,48 @@ function renderCards(){
     el.className="card"; el.dataset.id=c.id;
     el.style.background=t.cardBg; el.style.border=`1px solid ${t.border}`;
 
-    // 출발 임박 플래그(예시)
-    const immin=false;
+    const timeDisplay = c.datetime_display || toKDate(new Date(c.datetime || c.timeISO || Date.now()));
+    const peopleNow = Math.max(0, (c.capacity ?? 0) - (c.remaining ?? 0)); // 정원-잔여 ≈ 현재
+    const msg = c.message || c.msg || '';
 
     el.innerHTML=`
-      <h3>${c.title}</h3>
-      <div class="meta">⏰ ${c.time}</div>
+      <h3>${c.title || '(제목 없음)'}</h3>
+      <div class="meta">⏰ ${timeDisplay}</div>
       <div class="meta">📍 ${c.from} → ${c.to}</div>
-      <div class="msg">💬 ${c.msg}</div>
-      ${immin ? `<div class="imminent">🚦 출발 임박</div>` : ``}
+      <div class="msg">${msg ? '💬 ' + msg : ''}</div>
       <div class="pillrow">
         ${(c.styles||[]).map(chip).join("")}
+        ${(c.pace||[]).map(chip).join("")}
         ${c.cc ? chip(c.cc) : ""}
       </div>
-      <button class="join">👥 ${c.peopleNow}/${c.peopleMax} · ✅ 합류 신청</button>
+      <button class="join">👥 ${peopleNow}/${c.capacity ?? '-'} · ✅ 합류 신청</button>
     `;
     el.querySelector('.join').addEventListener('click',()=>openJoinModal(c));
     listEl.appendChild(el);
   });
 }
-renderCards();
 
-/* 모달 */
+/* ===== 날짜 포맷 ===== */
+function pad(n){return String(n).padStart(2,'0')}
+function toKDate(d){ return `${d.getMonth()+1}월 ${d.getDate()}일 ${pad(d.getHours())}:${pad(d.getMinutes())}` }
+
+/* ===== 프로필/모달 ===== */
 const modal=document.getElementById('joinModal');
 const sheet=document.getElementById('joinSheet');
 const preview=document.getElementById('preview');
-
 function closeJoinModal(){ modal.classList.remove('show'); document.body.classList.remove('modal-open'); }
 modal.addEventListener('click', closeJoinModal);
 sheet.addEventListener('click', e=>e.stopPropagation());
-
 document.getElementById('editProfile').onclick=()=> location.href='rimo_profile.html';
 
 function loadProfile(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)||'{}'); }catch(_){ return {}; } }
 function composeText(crew, profile){
   const styles=(profile.styles||[]).join(' · ') || '-';
   const paces =(profile.pace  ||[]).join(' · ') || '-';
+  const timeDisplay = crew.datetime_display || toKDate(new Date(crew.datetime || crew.timeISO || Date.now()));
   return (
 `[✅ 합류 신청] ${crew.title}
+⏰ ${timeDisplay}
 📍 출발 → 도착
 ${crew.from} → ${crew.to}
 
@@ -299,12 +280,9 @@ async function copyText(txt){
   catch(_){ const ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta);
             ta.select(); document.execCommand('copy'); ta.remove(); return true; }
 }
-function saveApplication(crew, text){
-  let apps=[]; try{ apps=JSON.parse(localStorage.getItem(LS_APPS)||'[]'); }catch(_){ apps=[]; }
-  apps.unshift({ id:'app'+Math.random().toString(36).slice(2,7), ts:Date.now(),
-                 crewId:crew.id, title:crew.title, from:crew.from, to:crew.to, text });
-  localStorage.setItem(LS_APPS, JSON.stringify(apps));
-}
+document.getElementById('copyProfileBtn').onclick=()=> copyText(preview.textContent);
+document.getElementById('goAdmin').onclick=()=> window.location.href=ADMIN_DM;
+
 function openJoinModal(crew){
   const profile=loadProfile();
   const text=composeText(crew, profile);
@@ -312,9 +290,58 @@ function openJoinModal(crew){
   copyText(text);
   document.body.classList.add('modal-open');
   modal.classList.add('show');
-  document.getElementById('goAdmin').onclick=()=>{ saveApplication(crew, text); location.href=ADMIN_DM; };
-  document.getElementById('copyProfileBtn').onclick=()=> copyText(text);
 }
+
+/* ===== 서버에서 목록 불러오기(+오프라인 폴백) ===== */
+async function fetchCrews(){
+  try{
+    const res = await fetch(`${API}?action=list`, { cache:'no-store' });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const data = await res.json();
+    if(!data || !Array.isArray(data.items)) throw new Error('Bad payload');
+    // 표준화
+    const items = data.items.map(it=>({
+      id: it.id,
+      title: it.title,
+      from: it.from,
+      to: it.to,
+      cc: it.cc || '',
+      styles: it.styles || [],
+      pace: it.pace || [],
+      datetime: it.datetime || it.timeISO || null,
+      datetime_display: it.datetime_display || (it.datetime ? toKDate(new Date(it.datetime)) : ''),
+      capacity: Number(it.capacity ?? 0),
+      remaining: Number(it.remaining ?? 0),
+      theme: it.theme || 'blue',
+      message: it.message || '',
+      from_lat: Number(it.from_lat),
+      from_lng: Number(it.from_lng),
+      to_lat: Number(it.to_lat),
+      to_lng: Number(it.to_lng)
+    }));
+    localStorage.setItem(LS_CREWS, JSON.stringify(items)); // 오프라인 폴백 저장
+    return items;
+  }catch(e){
+    // 폴백: 저장된 로컬 데이터 또는 데모 1장
+    try{
+      const cached = JSON.parse(localStorage.getItem(LS_CREWS)||'[]');
+      if(cached.length) return cached;
+    }catch(_){}
+    return [{
+      id:"demo1", theme:"blue", title:"<예시 카드 — 관리자에서 발행하세요>",
+      datetime_display:"10월 10일 19:00", from:"출발지", to:"도착지",
+      from_lat:37.5665, from_lng:126.9780, to_lat:37.55, to_lng:127.0,
+      capacity:4, remaining:4, styles:["Urban","Easy"], cc:"", message:"관리자 페이지에서 발행하면 이 예시는 사라집니다."
+    }];
+  }
+}
+
+/* ===== 부트 ===== */
+document.addEventListener('DOMContentLoaded', async ()=>{
+  const crews = await fetchCrews();
+  renderMap(crews);
+  renderCards(crews);
+});
 </script>
 </body>
 </html>
