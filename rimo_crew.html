@@ -11,6 +11,8 @@
     --chip-bg:#14172a; --chip-bd:#2b2e54; --accent-glow: rgba(122,167,255,.35);
 
     /* Theme Colors */
+
+    --t-red:#ff5d5d;      --t-red-bg:  rgba(255,93,93,.14);    --t-red-br:  rgba(255,93,93,.35);
     --t-blue:#7aa7ff;     --t-blue-bg:rgba(122,167,255,.14);   --t-blue-br:rgba(122,167,255,.35);
     --t-yellow:#ffd85d;   --t-yellow-bg:rgba(255,216,93,.16);  --t-yellow-br:rgba(255,216,93,.38);
     --t-green:#56d364;    --t-green-bg:rgba(86,211,100,.16);   --t-green-br:rgba(86,211,100,.42);
@@ -55,6 +57,7 @@
   .theme-btn{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:0;padding:4px 8px;border-radius:16px;border:1px solid #2b2e48;background:#14172a;color:#e8e8ef;font-size:12px;font-weight:500;cursor:pointer;user-select:none;flex:0 0 auto;white-space:nowrap;transition:transform .12s, box-shadow .12s}
   .theme-btn .badge{width:14px;height:14px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;background:#0f1020;border:0}
   .theme-btn.active{transform:translateY(-1px) scale(1.02);box-shadow:0 0 0 1px currentColor inset, 0 0 12px currentColor;background:transparent}
+  .theme-btn[data-theme="red"]{color:var(--t-red);background:var(--t-red-bg);border-color:var(--t-red-br)}
   .theme-btn[data-theme="blue"]{color:var(--t-blue);background:var(--t-blue-bg);border-color:var(--t-blue-br)}
   .theme-btn[data-theme="yellow"]{color:var(--t-yellow);background:var(--t-yellow-bg);border-color:var(--t-yellow-br)}
   .theme-btn[data-theme="green"]{color:var(--t-green);background:var(--t-green-bg);border-color:var(--t-green-br)}
@@ -72,6 +75,7 @@
   .route{display:flex;align-items:center;gap:8px;margin-top:6px;color:inherit}
   .pin{width:8px;height:8px;border-radius:999px;background:currentColor}
   .dash{flex:1;border-top:1px dashed currentColor;opacity:.7}
+  .card[data-theme="red"]{border-color:var(--t-red-br)} .card[data-theme="red"] .theme-tag,.card[data-theme="red"] .route{color:var(--t-red)}
   .card[data-theme="blue"]{border-color:var(--t-blue-br)} .card[data-theme="blue"] .theme-tag,.card[data-theme="blue"] .route{color:var(--t-blue)}
   .card[data-theme="yellow"]{border-color:var(--t-yellow-br)} .card[data-theme="yellow"] .theme-tag,.card[data-theme="yellow"] .route{color:var(--t-yellow)}
   .card[data-theme="green"]{border-color:var(--t-green-br)} .card[data-theme="green"] .theme-tag,.card[data-theme="green"] .route{color:var(--t-green)}
@@ -225,7 +229,6 @@ const SHARED_TOKEN = ""; // (옵션) Apps Script에서 검사 시 맞춰주세�
 /* ---------- 옵션 ---------- */
 const STYLE_OPTS = ["Urban","Curve","Tour"];
 const PACE_OPTS  = ["Easy","Balanced","Dynamic"];
-/* 레드 제거 */
 const THEME_OPTS = [
   {key:'red',   label:'레드',   emoji:'🔴'},
   {key:'blue',   label:'블루',   emoji:'🔵'},
