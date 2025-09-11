@@ -5,44 +5,29 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>RIMO — 오늘의 라이딩 크루</title>
 
-<!-- (선택) 공통 테마 파일 -->
-<link rel="stylesheet" href="rimo_theme.css?v=20250911">
-<!-- Leaflet -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin />
-
 <style>
   :root{
     --btn:#2A2F4F; --btnHover:#3C4380;
     --imminent-bg: rgba(255,199,94,.16);
     --imminent-bd: rgba(255,199,94,.45);
-
     --tab-bg:#182039; --tab-bd:#2d3559; --tab-ink:#e6e8ef;
     --tab-pri:#26346d; --tab-pri-bd:#3b53a8;
-
     --border-1:#2b2e48; --muted:#b9b9cc;
   }
-
   *{box-sizing:border-box}
-  body{ margin:0; font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Helvetica,Arial,sans-serif; background:#0b0b0f; color:#e8e8ef; }
+  body{margin:0;background:#0b0b0f;color:#e8e8ef;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Arial,sans-serif}
 
-  /* 헤더 */
-  header{
-    position:sticky; top:0; z-index:5;
-    background:rgba(11,11,15,.9);
-    -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
-    border-bottom:1px solid var(--border-1);
-  }
+  header{position:sticky;top:0;z-index:5;background:rgba(11,11,15,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--border-1)}
   .bar{display:flex;gap:10px;align-items:center;padding:14px 16px;height:56px}
   .logo{font-weight:900}
   .title{font-weight:800;opacity:.9}
   .pill{margin-left:auto;padding:6px 10px;border-radius:999px;background:#151525;color:#b9b9cc;font-size:12px}
 
-  /* 본문 */
   main{padding:16px;max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:14px;padding-bottom:120px}
-  #map{height:360px;border-radius:14px;outline:1px solid var(--border-1); background:#0f1220}
+  #map{height:360px;border-radius:14px;outline:1px solid var(--border-1);background:#0f1220}
   .leaflet-container{z-index:1;border-radius:14px}
 
-  /* 카드 캐러셀 */
   .carousel{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:8px 4px 0}
   .carousel::-webkit-scrollbar{display:none}
   .card{
@@ -54,73 +39,42 @@
   .meta{font-size:14px;color:var(--muted)}
   .msg{font-size:14px}
 
-  /* 칩(=필) */
   .pillrow{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
-  .chip{
-    padding:6px 9px; border-radius:999px; font-size:12px; font-weight:500;
-    display:inline-flex; align-items:center; justify-content:center;
-    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); color:#e6e8ef;
-  }
-  .chip.pill-urban   {background:#1e2d55; border-color:#2c4484}
-  .chip.pill-curve   {background:#2a1f56; border-color:#40307a}
-  .chip.pill-tour    {background:#1e3b3a; border-color:#2f5f5d}
-  .chip.pill-easy    {background:#1f3a1f; border-color:#2f5a2f}
-  .chip.pill-balanced{background:#3a341e; border-color:#5a4f2f}
-  .chip.pill-dynamic {background:#3a1f1f; border-color:#5a2f2f}
+  .chip{padding:6px 9px;border-radius:999px;font-size:12px;font-weight:500;display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#e6e8ef}
+  .chip.pill-urban{background:#1e2d55;border-color:#2c4484}
+  .chip.pill-curve{background:#2a1f56;border-color:#40307a}
+  .chip.pill-tour{background:#1e3b3a;border-color:#2f5f5d}
+  .chip.pill-easy{background:#1f3a1f;border-color:#2f5a2f}
+  .chip.pill-balanced{background:#3a341e;border-color:#5a4f2f}
+  .chip.pill-dynamic{background:#3a1f1f;border-color:#5a2f2f}
 
-  /* 출발 임박 배지 */
   .imminent{
-    position:absolute; top:10px; right:10px;
-    display:inline-flex; align-items:center; gap:6px;
-    padding:8px 10px; border-radius:10px; font-size:12px; font-weight:700;
-    background:var(--imminent-bg); border:1px solid var(--imminent-bd); color:#ffe7a6;
+    position:absolute;top:10px;right:10px;display:inline-flex;align-items:center;gap:6px;
+    padding:8px 10px;border-radius:10px;font-size:12px;font-weight:700;
+    background:var(--imminent-bg);border:1px solid var(--imminent-bd);color:#ffe7a6;
     animation:pulse 2.2s ease-in-out infinite;
   }
-  @keyframes pulse{
-    0%{box-shadow:0 0 0 0 rgba(255,199,94,.35)}
-    70%{box-shadow:0 0 0 8px rgba(255,199,94,0)}
-    100%{box-shadow:0 0 0 0 rgba(255,199,94,0)}
-  }
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,199,94,.35)}70%{box-shadow:0 0 0 8px rgba(255,199,94,0)}100%{box-shadow:0 0 0 0 rgba(255,199,94,0)}}
 
-  /* 합류 버튼 */
-  .join{margin-top:2px;width:100%;padding:14px;border-radius:12px;border:none;color:#fff;font-weight:800;
-        background:rgba(255,255,255,.16);cursor:pointer}
+  .join{margin-top:2px;width:100%;padding:14px;border-radius:12px;border:none;color:#fff;font-weight:800;background:rgba(255,255,255,.16);cursor:pointer}
   .card.selected{box-shadow:0 0 0 2px rgba(255,255,255,.12) inset}
 
-  /* 지도 핀 */
-  .pin{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-       font-weight:900;font-size:12px;color:#0b0b0f;border:2px solid rgba(255,255,255,.9);box-shadow:0 1px 6px rgba(0,0,0,.35)}
+  .pin{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;color:#0b0b0f;border:2px solid rgba(255,255,255,.9);box-shadow:0 1px 6px rgba(0,0,0,.35)}
 
-  /* 모달 */
-  .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:4000;
-         background:rgba(0,0,0,.45);padding:22px 12px}
+  .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:4000;background:rgba(0,0,0,.45);padding:22px 12px}
   .modal.show{display:flex}
-  #joinSheet.panel{
-    width:calc(100% - 24px); max-width:680px;
-    background:#0e1222; border:1px solid #2b304f; border-radius:18px; box-shadow:0 14px 40px rgba(0,0,0,.55);
-    padding:16px 16px 20px;
-  }
+  #joinSheet.panel{width:calc(100% - 24px);max-width:680px;background:#0e1222;border:1px solid #2b304f;border-radius:18px;box-shadow:0 14px 40px rgba(0,0,0,.55);padding:16px 16px 20px}
   #joinSheet h4{margin:4px 0 10px;font-size:18px}
   .hint{color:#cfd2ff;line-height:1.5;margin-bottom:10px}
-  #preview.pre{
-    background:#0b1020; border:1px solid #293059; border-radius:12px;
-    padding:12px; white-space:pre-wrap; line-height:1.4;
-    min-height:96px; max-height:42vh; overflow:auto; color:#e6e9ff;
-  }
+  #preview.pre{background:#0b1020;border:1px solid #293059;border-radius:12px;padding:12px;white-space:pre-wrap;line-height:1.4;min-height:96px;max-height:42vh;overflow:auto;color:#e6e9ff}
   .modal-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px;padding-bottom:6px}
-  .modal-actions button{flex:1;min-width:110px;max-width:160px;padding:12px 18px;border-radius:12px;border:none;
-                        background:var(--btn);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+  .modal-actions button{flex:1;min-width:110px;max-width:160px;padding:12px 18px;border-radius:12px;border:none;background:var(--btn);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
   .modal-actions button:hover{background:var(--btnHover)}
 
-  /* 하단 네비 */
   .tabbar{position:fixed;left:0;right:0;bottom:16px;z-index:1500;display:flex;gap:12px;justify-content:center}
-  .tabbar .tab{background:var(--tab-bg);border:1px solid var(--tab-bd);color:var(--tab-ink);
-               padding:12px 18px;border-radius:22px;font-weight:800;text-decoration:none;font-size:14px}
+  .tabbar .tab{background:var(--tab-bg);border:1px solid var(--tab-bd);color:var(--tab-ink);padding:12px 18px;border-radius:22px;font-weight:800;text-decoration:none;font-size:14px}
   .tabbar .tab.primary{background:var(--tab-pri);border-color:var(--tab-pri-bd)}
   body.modal-open .tabbar{pointer-events:none;opacity:.28;filter:saturate(.2) blur(1px);transform:translateY(2px)}
-
-  /* 혹시 남아 있던 상단 필터 버튼 숨김(안전망) */
-  .filter-btn{display:none !important}
 </style>
 </head>
 <body>
@@ -159,18 +113,18 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin></script>
 <script>
-/* =================== 상수/공유 설정 =================== */
+/* ===== 공통 상수 ===== */
 const ADMIN_DM = "http://pf.kakao.com/_ceUDn/chat";
 const LS_KEY   = 'rimo_profile_v1';
-const PUBLIST_KEY = 'rimo_published_cards_server_cache'; // 어드민과 동일
-const EXP_MIN_AFTER_START = 5; // 출발 후 5분까지 표시
+const PUBLIST_KEY = 'rimo_published_cards_server_cache';
+const EXP_MIN_AFTER_START = 5; // 출발 +5분까지 보이기
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxWLEa5-oxPQYuxQTYXInrePIBU3jbJZZf2lNFkasERyv3pftmC1niT78GZ5tVJ7i_cMQ/exec";
 
-/* 날짜 뱃지 */
+/* UI 보조 */
 document.getElementById('today').textContent =
   new Date().toLocaleDateString('ko-KR',{month:'long',day:'numeric',weekday:'short'});
 
-/* 테마 색 (카드 보더/핀 색상) */
+/* 테마 색상 (지도/카드) */
 const THEMES = {
   red:    { base:'#ff4d4d', cardBg:'rgba(255,77,77,.14)',  border:'rgba(255,77,77,.55)'},
   yellow: { base:'#ffd24d', cardBg:'rgba(255,210,77,.16)', border:'rgba(255,210,77,.55)'},
@@ -181,23 +135,19 @@ const THEMES = {
 
 /* 유틸 */
 const $ = (s,p=document)=>p.querySelector(s);
-const $$ = (s,p=document)=>Array.from(p.querySelectorAll(s));
 function pad(n){return String(n).padStart(2,'0')}
-function formatKDate(dt){return `${dt.getMonth()+1}월 ${dt.getDate()}일 ${pad(dt.getHours())}:${pad(dt.getMinutes())}`}
+function formatKDate(d){return `${d.getMonth()+1}월 ${d.getDate()}일 ${pad(d.getHours())}:${pad(d.getMinutes())}`}
+function normalizeArr(v){ if(Array.isArray(v)) return v; if(v==null) return []; return String(v).split(/[|,]/).map(s=>s.trim()).filter(Boolean); }
 function parseStartISO(rec){
-  // 우선 ISO(datetime), 없으면 datetime_display를 추정
   if(rec.datetime){ const d=new Date(rec.datetime); if(!isNaN(d)) return d; }
   if(rec.datetime_display){
-    // "10월 10일 19:00" 같은 형식 추정 → 올해 기준
-    const m = rec.datetime_display.match(/(\d+)월\s+(\d+)일\s+(\d+):(\d+)/);
-    if(m){
-      const now=new Date(); return new Date(now.getFullYear(), Number(m[1])-1, Number(m[2]), Number(m[3]), Number(m[4]), 0);
-    }
+    const m = String(rec.datetime_display).match(/(\d+)월\s+(\d+)일\s+(\d+):(\d+)/);
+    if(m){ const now=new Date(); return new Date(now.getFullYear(), m[1]-1, m[2], m[3], m[4], 0); }
   }
   return null;
 }
 
-/* 서버에서 목록 로드 (fetch → JSONP 폴백) */
+/* 데이터 로드 (fetch → JSONP 폴백) */
 function fetchJSONP(url, timeoutMs=9000){
   return new Promise((resolve,reject)=>{
     const cb='__rimo_cb_'+Date.now();
@@ -215,7 +165,7 @@ async function loadFromServer(){
   let cached=[]; try{ cached=JSON.parse(localStorage.getItem(PUBLIST_KEY)||'[]'); }catch(_){}
   if (cached.length) renderAll(cached);
 
-  // 2) fetch
+  // 2) 표준 fetch
   try{
     const res = await fetch(WEB_APP_URL+'?op=list&_='+Date.now(), {cache:'no-store'});
     if(res.ok){
@@ -225,18 +175,17 @@ async function loadFromServer(){
     }
   }catch(e){ console.warn('fetch list failed; jsonp fallback', e); }
 
-  // 3) JSONP
+  // 3) JSONP 폴백
   try{
     const data = await fetchJSONP(WEB_APP_URL+'?op=list');
     const rows = Array.isArray(data) ? data : (Array.isArray(data?.rows) ? data.rows : []);
     if(rows.length){ localStorage.setItem(PUBLIST_KEY, JSON.stringify(rows)); return rows; }
   }catch(e){ console.warn('jsonp list failed', e); }
 
-  // 4) 폴백: 캐시
   return cached;
 }
 
-/* ===== 지도 ===== */
+/* 지도 */
 const map = L.map('map',{scrollWheelZoom:true});
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
 const group=L.featureGroup().addTo(map);
@@ -259,7 +208,6 @@ function renderMap(crews){
   const bounds=L.latLngBounds([]);
   crews.forEach(c=>{
     const t=THEMES[c.theme]||THEMES.blue;
-    // 좌표 없으면 스킵
     if(!(isFinite(c.from_lat)&&isFinite(c.from_lng)&&isFinite(c.to_lat)&&isFinite(c.to_lng))) return;
     const ms=L.marker([c.from_lat,c.from_lng],{icon:makePin(t.base,'S')}).addTo(group);
     const md=L.marker([c.to_lat,c.to_lng],{icon:makePin(t.base,'D')}).addTo(group);
@@ -270,26 +218,20 @@ function renderMap(crews){
   if(bounds.isValid()) map.fitBounds(bounds.pad(0.25));
 }
 
-/* ===== 카드 ===== */
+/* 카드 */
 const listEl=document.getElementById('list');
 function chipClass(label){
   switch(String(label).toLowerCase()){
-    case 'urban':    return 'pill-urban';
-    case 'curve':    return 'pill-curve';
-    case 'tour':     return 'pill-tour';
-    case 'easy':     return 'pill-easy';
+    case 'urban': return 'pill-urban';
+    case 'curve': return 'pill-curve';
+    case 'tour': return 'pill-tour';
+    case 'easy': return 'pill-easy';
     case 'balanced': return 'pill-balanced';
-    case 'dynamic':  return 'pill-dynamic';
-    default:         return '';
+    case 'dynamic': return 'pill-dynamic';
+    default: return '';
   }
 }
 function chip(label){ return `<span class="chip ${chipClass(label)}">${label}</span>`; }
-
-function normalizeArr(v){
-  if(Array.isArray(v)) return v;
-  if(v==null) return [];
-  return String(v).split(/[|,]/).map(s=>s.trim()).filter(Boolean);
-}
 
 function renderCards(crews){
   listEl.innerHTML="";
@@ -297,15 +239,12 @@ function renderCards(crews){
     const t=THEMES[c.theme]||THEMES.blue;
     const styles = normalizeArr(c.styles);
     const paces  = normalizeArr(c.pace);
+    const start  = parseStartISO(c);
+    const immin  = start ? (start - Date.now() <= 20*60*1000 && start - Date.now() > -5*60*1000) : false;
+
     const el=document.createElement('article');
     el.className="card"; el.dataset.id=c.id;
-    el.style.border=`1px solid ${t.border}`;
-    el.style.background=t.cardBg;
-
-    // 출발 임박(출발 전 20분 이내 예시)
-    const start=parseStartISO(c);
-    const immin = start ? (start - Date.now() <= 20*60*1000 && start - Date.now() > -5*60*1000) : false;
-
+    el.style.border=`1px solid ${t.border}`; el.style.background=t.cardBg;
     el.innerHTML=`
       <h3>${c.title || '(제목 없음)'}</h3>
       <div class="meta">⏰ ${c.datetime_display || (start?formatKDate(start):'-')}</div>
@@ -324,15 +263,13 @@ function renderCards(crews){
   });
 }
 
-/* ===== 합류 모달 ===== */
+/* 합류 모달 */
 const modal=document.getElementById('joinModal');
 const sheet=document.getElementById('joinSheet');
 const preview=document.getElementById('preview');
-
 function closeJoinModal(){ modal.classList.remove('show'); document.body.classList.remove('modal-open'); }
 modal.addEventListener('click', closeJoinModal);
 sheet.addEventListener('click', e=>e.stopPropagation());
-
 document.getElementById('editProfile').onclick=()=> location.href='rimo_profile.html';
 
 function loadProfile(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)||'{}'); }catch(_){ return {}; } }
@@ -369,37 +306,34 @@ function openJoinModal(crew){
   document.getElementById('copyProfileBtn').onclick=()=> copyText(text);
 }
 
-/* ===== 렌더 파이프라인 ===== */
+/* 렌더 파이프라인 */
 function filterActiveRows(rows){
   const now = Date.now();
   return rows
-    .map(r=>{
-      // 서버 컬럼명/로컬 키 보정
-      return {
-        id: r.id || r.ID || `crew_${Math.random().toString(36).slice(2,8)}`,
-        title: r.title || r.제목 || '',
-        datetime: r.datetime || r.Datetime || '',
-        datetime_display: r.datetime_display || r.Time || r.일시표시 || '',
-        from: r.from || r.출발 || '',
-        to: r.to || r.도착 || '',
-        from_lat: Number(r.from_lat ?? r.From_Lat ?? r.위도 ?? NaN),
-        from_lng: Number(r.from_lng ?? r.From_Lng ?? r.경도 ?? NaN),
-        to_lat:   Number(r.to_lat   ?? r.To_Lat   ?? r.도착위도 ?? NaN),
-        to_lng:   Number(r.to_lng   ?? r.To_Lng   ?? r.도착경도 ?? NaN),
-        capacity: Number(r.capacity ?? r.정원 ?? NaN),
-        remaining:Number(r.remaining?? r.잔여 ?? NaN),
-        cc: r.cc || r.배기량 || '',
-        styles: r.styles ?? r.스타일 ?? '',
-        pace: r.pace ?? r.페이스 ?? '',
-        message: r.message || r.메시지 || '',
-        theme: r.theme || r.테마 || 'blue',
-      };
-    })
+    .map(r=>({
+      id: r.id || r.ID || `crew_${Math.random().toString(36).slice(2,8)}`,
+      title: r.title || r.제목 || '',
+      datetime: r.datetime || r.Datetime || '',
+      datetime_display: r.datetime_display || r.Time || r.일시표시 || '',
+      from: r.from || r.출발 || '',
+      to: r.to || r.도착 || '',
+      from_lat: Number(r.from_lat ?? r.From_Lat ?? r.위도 ?? NaN),
+      from_lng: Number(r.from_lng ?? r.From_Lng ?? r.경도 ?? NaN),
+      to_lat:   Number(r.to_lat   ?? r.To_Lat   ?? r.도착위도 ?? NaN),
+      to_lng:   Number(r.to_lng   ?? r.To_Lng   ?? r.도착경도 ?? NaN),
+      capacity: Number(r.capacity ?? r.정원 ?? NaN),
+      remaining:Number(r.remaining?? r.잔여 ?? NaN),
+      cc: r.cc || r.배기량 || '',
+      styles: r.styles ?? r.스타일 ?? '',
+      pace: r.pace ?? r.페이스 ?? '',
+      message: r.message || r.메시지 || '',
+      theme: r.theme || r.테마 || 'blue',
+    }))
     .filter(rec=>{
       const start = parseStartISO(rec);
-      if(!start) return true; // 시작시간 없으면 표시
+      if(!start) return true;
       const hideAfter = start.getTime() + EXP_MIN_AFTER_START*60*1000;
-      return now <= hideAfter; // 출발 + 5분까지만 보이기
+      return Date.now() <= hideAfter;
     })
     .sort((a,b)=>{
       const da=parseStartISO(a)?.getTime() ?? 0;
@@ -407,14 +341,13 @@ function filterActiveRows(rows){
       return da - db;
     });
 }
-
 function renderAll(rows){
   const active = filterActiveRows(rows);
   renderCards(active);
   renderMap(active);
 }
 
-/* ===== init ===== */
+/* init */
 (async function init(){
   const rows = await loadFromServer();
   renderAll(rows.length ? rows : [{
@@ -425,7 +358,7 @@ function renderAll(rows){
     remaining:0, capacity:4, styles:["Urban","Easy"], cc:"", message:"관리자 페이지에서 발행하면 이 예시는 사라집니다."
   }]);
 
-  // 주기적 정리(1분 간격으로 만료카드 제거/갱신)
+  // 1분마다 자동 갱신 (만료/신규 반영)
   setInterval(async()=>{
     const latest = await loadFromServer();
     renderAll(latest);
