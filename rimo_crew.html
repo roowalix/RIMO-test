@@ -301,6 +301,10 @@
 /* ---------- 기본 설정 ---------- */
 const MAIN_URL = "https://roowalix.github.io/RIMO-test/index.html";
 
+/* ---------- 스프레드시트 웹앱 ---------- */
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyPQj9gyhrjWUj0gvsv2Xs5Syr06H-ST8dyJyghPJ_5DPx3WQz_i-Jbdsoz1H3KUtqc2g/exec";
+const SHARED_TOKEN = ""; // Apps Script에서 토큰 검사를 안 하면 빈 문자열로 두세요.
+
 /* ---------- 옵션 ---------- */
 const STYLE_OPTS = ["Urban","Curve","Tour"];
 const PACE_OPTS  = ["Easy","Balanced","Dynamic"];
@@ -415,6 +419,7 @@ function attachAutoSplit(latId,lngId){
 function getForm(){
   const dt = getDateFromInput() || new Date();
   return {
+    id: '', // publish 시에 채움
     title: qs('#c_title').value.trim(),
     datetime: dt.toISOString(),
     datetime_display: formatKDate(dt),
@@ -483,20 +488,69 @@ function saveDraft(){
   save(DRAFT_KEY, form);
   alert('드래프트 저장 완료');
 }
+
+/* === 웹앱 POST (스프레드시트 저장) === */
+async function sendToSheet(form){
+  try{
+    const payload = new URLSearchParams();
+    payload.set('op','publish');           // 서버에서 구분용(원하는 이름으로 변경 가능)
+    payload.set('token', SHARED_TOKEN);    // 토큰 검사 시 사용
+    // 개별 필드
+    payload.set('id', form.id);
+    payload.set('title', form.title);
+    payload.set('datetime', form.datetime);
+    payload.set('datetime_display', form.datetime_display);
+    payload.set('from', form.from);
+    payload.set('to', form.to);
+    payload.set('from_lat', String(form.from_lat ?? ''));
+    payload.set('from_lng', String(form.from_lng ?? ''));
+    payload.set('to_lat', String(form.to_lat ?? ''));
+    payload.set('to_lng', String(form.to_lng ?? ''));
+    payload.set('cc', form.cc);
+    payload.set('styles', (form.styles||[]).join(','));
+    payload.set('pace', (form.pace||[]).join(','));
+    payload.set('message', form.message);
+    payload.set('remaining', String(form.remaining ?? ''));
+    payload.set('capacity', String(form.capacity ?? ''));
+    payload.set('theme', form.theme);
+    // 전체 JSON(서버에서 이걸로만 처리해도 됨)
+    payload.set('record', JSON.stringify(form));
+
+    // CORS 회피를 위해 no-cors (응답 본문은 읽지 않음)
+    await fetch(WEB_APP_URL, {
+      method:'POST',
+      mode:'no-cors',
+      headers:{ 'Content-Type':'application/x-www-form-urlencoded' },
+      body: payload.toString()
+    });
+  }catch(err){
+    console.error('sendToSheet error', err);
+  }
+}
+
 function publish(){
   const form=getForm();
   const errs=validate(form);
   if(errs.length){ alert(errs.join('\n')); return; }
+
+  // ID 생성 후 저장
   form.id = `crew_${Date.now().toString(36)}`;
+
+  // 시트에 전송(비동기)
+  sendToSheet(form);
+
+  // 로컬 목록 반영
   const list = load(PUBLIST_KEY,[]);
   list.unshift(form);
   save(PUBLIST_KEY,list);
   save(DRAFT_KEY, form);
   renderCards();
-  // 발행 후 목록으로 스크롤
+
+  // 발행 후 목록으로 스크롤 + 안내
   qs('#cardsPanel')?.scrollIntoView({ behavior:'smooth', block:'start' });
-  alert('메인에 임시 발행(로컬)되었습니다.');
+  alert('발행 요청을 보냈습니다. (로컬 목록에도 반영되었습니다)');
 }
+
 function resetForm(){
   localStorage.removeItem(DRAFT_KEY);
   location.reload();
@@ -549,6 +603,10 @@ function renderCards(){
   renderThemes('blue');  // 기본 테마
   loadDraft();
   renderCards();
+
+  qs('#btnDraft').addEventListener('click', saveDraft);
+  qs('#btnPublish').addEventListener('click', publish);
+  qs('#btnReset').addEventListener('click', resetForm);
 
   qs('#goMain')?.addEventListener('click',(e)=>{
     if(!MAIN_URL || MAIN_URL==="#"){ e.preventDefault(); alert("MAIN_URL을 메인주소로 설정하세요."); return; }
