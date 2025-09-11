@@ -11,7 +11,6 @@
     --chip-bg:#14172a; --chip-bd:#2b2e54; --accent-glow: rgba(122,167,255,.35);
 
     /* Theme Colors */
-
     --t-red:#ff5d5d;      --t-red-bg:  rgba(255,93,93,.14);    --t-red-br:  rgba(255,93,93,.35);
     --t-blue:#7aa7ff;     --t-blue-bg:rgba(122,167,255,.14);   --t-blue-br:rgba(122,167,255,.35);
     --t-yellow:#ffd85d;   --t-yellow-bg:rgba(255,216,93,.16);  --t-yellow-br:rgba(255,216,93,.38);
@@ -71,17 +70,17 @@
   .card{background:#141628;border:1px solid var(--line);border-radius:12px;padding:12px;cursor:pointer}
   .card .tt{font-weight:800}
   .card .sub{color:#c8cae0;font-size:12px;margin-top:4px}
-  .card .theme-tag{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:800;border:1px solid currentColor;background:transparent;margin-right:6px}
   .route{display:flex;align-items:center;gap:8px;margin-top:6px;color:inherit}
   .pin{width:8px;height:8px;border-radius:999px;background:currentColor}
   .dash{flex:1;border-top:1px dashed currentColor;opacity:.7}
-  .card[data-theme="red"]{border-color:var(--t-red-br)} .card[data-theme="red"] .theme-tag,.card[data-theme="red"] .route{color:var(--t-red)}
-  .card[data-theme="blue"]{border-color:var(--t-blue-br)} .card[data-theme="blue"] .theme-tag,.card[data-theme="blue"] .route{color:var(--t-blue)}
-  .card[data-theme="yellow"]{border-color:var(--t-yellow-br)} .card[data-theme="yellow"] .theme-tag,.card[data-theme="yellow"] .route{color:var(--t-yellow)}
-  .card[data-theme="green"]{border-color:var(--t-green-br)} .card[data-theme="green"] .theme-tag,.card[data-theme="green"] .route{color:var(--t-green)}
-  .card[data-theme="purple"]{border-color:var(--t-purple-br)} .card[data-theme="purple"] .theme-tag,.card[data-theme="purple"] .route{color:var(--t-purple)}
+  .card[data-theme="red"]{border-color:var(--t-red-br)}
+  .card[data-theme="blue"]{border-color:var(--t-blue-br)}
+  .card[data-theme="yellow"]{border-color:var(--t-yellow-br)}
+  .card[data-theme="green"]{border-color:var(--t-green-br)}
+  .card[data-theme="purple"]{border-color:var(--t-purple-br)}
 
   .edit-banner{margin:8px 0 0;color:#cfe0ff;font-size:12px}
+
   .btmnav{position:fixed;left:0;right:0;bottom:0;z-index:10;background:rgba(11,11,15,.9);backdrop-filter:blur(10px);border-top:1px solid var(--line)}
   .btmnav .wrap{max-width:980px;margin:0 auto;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;padding:8px}
   .navitem{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px 4px;border-radius:10px;border:1px solid #2b2e48;background:#14172a;cursor:pointer;font-size:12px;text-align:center;user-select:none;text-decoration:none;color:var(--fg)}
@@ -222,15 +221,14 @@
 /* ---------- 기본 설정 ---------- */
 const MAIN_URL = "https://roowalix.github.io/RIMO-test/index.html";
 
-/* ---------- 스프레드시트 웹앱 ---------- */
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzj6AP7LLecbXrAMFwKuz8ne-h2VBpYnM0fIku2lWoQSvvdpxkGPM7KNot8yMBRCvfeig/exec";
-const SHARED_TOKEN = ""; // (옵션) Apps Script에서 검사 시 맞춰주세요.
+/* ---------- Apps Script 웹앱 (새 주소) ---------- */
+const API = "https://script.google.com/macros/s/AKfycbxWLEa5-oxPQYuxQTYXInrePIBU3jbJZZf2lNFkasERyv3pftmC1niT78GZ5tVJ7i_cMQ/exec";
 
 /* ---------- 옵션 ---------- */
 const STYLE_OPTS = ["Urban","Curve","Tour"];
 const PACE_OPTS  = ["Easy","Balanced","Dynamic"];
 const THEME_OPTS = [
-  {key:'red',   label:'레드',   emoji:'🔴'},
+  {key:'red',    label:'레드',   emoji:'🔴'},
   {key:'blue',   label:'블루',   emoji:'🔵'},
   {key:'yellow', label:'옐로',   emoji:'🟡'},
   {key:'green',  label:'그린',   emoji:'🟢'},
@@ -245,7 +243,7 @@ const load=(k,def)=>{try{return JSON.parse(localStorage.getItem(k)||JSON.stringi
 
 /* 상태 */
 const DRAFT_KEY='rimo_create_draft_v5';
-const PUBLIST_KEY='rimo_published_cards_server_cache';
+const CACHE_KEY='rimo_published_cards_server_cache';
 let editingId = null;
 
 /* 토글 */
@@ -389,23 +387,53 @@ function validate(form){
   return errs;
 }
 
-/* 서버 연동 */
-async function sendToSheet(form, op){
-  const payload = new URLSearchParams();
-  payload.set('op', op);
-  payload.set('token', SHARED_TOKEN);
-  Object.entries({
-    id:form.id,title:form.title,datetime:form.datetime,datetime_display:form.datetime_display,
-    from:form.from,to:form.to,from_lat:form.from_lat,from_lng:form.from_lng,
-    to_lat:form.to_lat,to_lng:form.to_lng,cc:form.cc,styles:(form.styles||[]).join(','),
-    pace:(form.pace||[]).join(','),message:form.message,remaining:form.remaining,capacity:form.capacity,theme:form.theme
-  }).forEach(([k,v])=>payload.set(k,String(v ?? '')));
-  payload.set('record', JSON.stringify(form));
+/* ---------- 서버 연동 (액션 방식 + 폴백) ---------- */
+async function apiCreateCrew(crew){
+  // 1) JSON body (action=create)
   try{
-    // CORS 문제 있을 수 있어 write는 no-cors(응답 안 읽음)
-    await fetch(WEB_APP_URL, { method:'POST', mode:'no-cors',
-      headers:{ 'Content-Type':'application/x-www-form-urlencoded' }, body: payload.toString() });
-  }catch(e){ console.warn('sendToSheet failed', e); }
+    const res = await fetch(API, {
+      method:'POST',
+      headers:{ 'Content-Type':'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action:'create', crew })
+    });
+    const j = await res.json();
+    if(j && j.ok) return j.id || crew.id;
+  }catch(_){}
+  // 2) form-encoded (op=publish/create) + no-cors fallback
+  const form = new URLSearchParams();
+  form.set('op','publish'); form.set('record', JSON.stringify(crew));
+  try{
+    const r = await fetch(API, { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:form.toString() });
+    if(r.ok){ return crew.id; }
+  }catch(_){}
+  try{
+    await fetch(API, { method:'POST', mode:'no-cors', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:form.toString() });
+    return crew.id;
+  }catch(err){ throw err; }
+}
+
+async function apiUpdateCrew(crew){
+  // 1) JSON body (action=update)
+  try{
+    const res = await fetch(API, {
+      method:'POST',
+      headers:{ 'Content-Type':'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action:'update', crew })
+    });
+    const j = await res.json();
+    if(j && j.ok) return j.id || crew.id;
+  }catch(_){}
+  // 2) form-encoded (op=update) + no-cors fallback
+  const form = new URLSearchParams();
+  form.set('op','update'); form.set('record', JSON.stringify(crew));
+  try{
+    const r = await fetch(API, { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:form.toString() });
+    if(r.ok){ return crew.id; }
+  }catch(_){}
+  try{
+    await fetch(API, { method:'POST', mode:'no-cors', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:form.toString() });
+    return crew.id;
+  }catch(err){ throw err; }
 }
 
 function fetchJSONP(url, timeoutMs=9000){
@@ -422,21 +450,32 @@ function fetchJSONP(url, timeoutMs=9000){
 }
 
 async function loadFromServer(){
-  // 1) 시도: 표준 fetch (CORS 허용인 경우)
+  // 1) 표준: action=list
   try{
-    const res = await fetch(WEB_APP_URL+'?op=list', {cache:'no-store'});
+    const res = await fetch(`${API}?action=list`, { cache:'no-store' });
     if(res.ok){
-      const data = await res.json();
-      if(Array.isArray(data)){ save(PUBLIST_KEY,data); return data; }
+      const j = await res.json();
+      if(j && j.ok && Array.isArray(j.items)){ save(CACHE_KEY, j.items); return j.items; }
+      if(Array.isArray(j)) { save(CACHE_KEY, j); return j; } // 혹시 배열만 내려주는 경우
     }
-  }catch(e){}
-  // 2) 실패 시 JSONP 폴백
+  }catch(_){}
+  // 2) 폴백: op=list
   try{
-    const data = await fetchJSONP(WEB_APP_URL+'?op=list');
-    if(Array.isArray(data)){ save(PUBLIST_KEY,data); return data; }
-  }catch(e){}
-  // 3) 최종 폴백: 캐시
-  return load(PUBLIST_KEY,[]);
+    const res2 = await fetch(`${API}?op=list`, { cache:'no-store' });
+    if(res2.ok){
+      const x = await res2.json();
+      const arr = Array.isArray(x?.items) ? x.items : (Array.isArray(x) ? x : []);
+      if(arr.length){ save(CACHE_KEY, arr); return arr; }
+    }
+  }catch(_){}
+  // 3) JSONP 최종 폴백
+  try{
+    const jp = await fetchJSONP(`${API}?op=list`);
+    const arr = Array.isArray(jp?.items) ? jp.items : (Array.isArray(jp) ? jp : []);
+    if(arr.length){ save(CACHE_KEY, arr); return arr; }
+  }catch(_){}
+  // 4) 캐시
+  return load(CACHE_KEY,[]);
 }
 
 /* 저장/발행/수정/초기화 */
@@ -446,27 +485,29 @@ async function saveOrPublish(){
   const form=getForm();
   const errs=validate(form); if(errs.length){ alert(errs.join('\n')); return; }
 
-  if(!editingId){ // 신규 발행
-    form.id = `crew_${Date.now().toString(36)}`;
-    await sendToSheet(form, 'publish');
-    // 로컬 즉시 반영
-    const list = load(PUBLIST_KEY,[]); list.unshift(form); save(PUBLIST_KEY,list);
-    renderCards(list);
-    qs('#cardsPanel')?.scrollIntoView({behavior:'smooth', block:'start'});
-    alert('발행 요청을 보냈습니다.');
-  }else{ // 수정 저장
-    form.id = editingId;
-    await sendToSheet(form, 'update');
-    // 로컬 즉시 반영
-    const list = load(PUBLIST_KEY,[]);
-    const idx = list.findIndex(x=>x.id===editingId);
-    if(idx>=0) list[idx]=form; else list.unshift(form);
-    save(PUBLIST_KEY,list);
-    renderCards(list);
-    exitEditMode();
-    alert('수정 요청을 보냈습니다.');
+  try{
+    if(!editingId){ // 신규 발행
+      form.id = `crew_${Date.now().toString(36)}`;
+      const id = await apiCreateCrew(form);
+      editingId = id || form.id;
+      // 로컬 즉시 반영
+      const list = await loadFromServer();
+      renderCards(list);
+      qs('#cardsPanel')?.scrollIntoView({behavior:'smooth', block:'start'});
+      alert('발행 완료되었습니다.');
+    }else{ // 수정 저장
+      form.id = editingId;
+      await apiUpdateCrew(form);
+      const list = await loadFromServer();
+      renderCards(list);
+      exitEditMode();
+      alert('수정 완료되었습니다.');
+    }
+    save(DRAFT_KEY, form);
+  }catch(err){
+    console.error(err);
+    alert('서버 오류: '+ (err?.message || err));
   }
-  save(DRAFT_KEY, form);
 }
 
 function startEdit(it){
@@ -481,11 +522,10 @@ function exitEditMode(){
   qs('#editBanner').style.display='none';
   qs('#editId').textContent = '';
   qs('#btnSave').textContent = '메인에 발행';
-  // 폼은 남겨둠(원하면 resetForm 호출)
 }
 function resetForm(){ localStorage.removeItem(DRAFT_KEY); location.reload(); }
 
-/* 카드 렌더 (좌표 줄은 숨김) */
+/* 카드 렌더 (좌표 줄 삭제됨) */
 function renderCards(list){
   const box=qs('#cards'); box.innerHTML='';
   if(!list || list.length===0){ box.innerHTML='<div class="hint">아직 발행된 카드가 없습니다.</div>'; return; }
@@ -495,10 +535,9 @@ function renderCards(list){
     const capacity  = (it.capacity ?? '-');
     const el=document.createElement('div');
     el.className='card'; el.dataset.theme = theme; el.dataset.id = it.id;
-    const themeLabel = ({red:'레드 크루',blue:'블루 크루',yellow:'옐로 크루',green:'그린 크루',purple:'퍼플 크루'})[theme] || '블루 크루';
     el.innerHTML = `
       <div class="tt">
-             ${it.title||'(제목 없음)'} <span class="sub">· ${it.datetime_display||''}</span>
+        ${it.title||'(제목 없음)'} <span class="sub">· ${it.datetime_display || formatKDate(new Date(it.datetime||Date.now()))}</span>
       </div>
       <div class="route">
         <span class="pin"></span><span class="place">${it.from||'-'}</span>
@@ -506,7 +545,7 @@ function renderCards(list){
         <span class="pin"></span><span class="place">${it.to||'-'}</span>
       </div>
       <div class="sub">배기량: ${(it.cc && String(it.cc).trim()) ? it.cc : '관계없음'} · 인원: 잔여 ${remaining} / 정원 ${capacity}</div>
-      <div class="sub">스타일: ${(it.styles||[]).join(', ')||'-'} · 페이스: ${(it.pace||[]).join(', ')||'-'}</div>
+      <div class="sub">스타일: ${(Array.isArray(it.styles)?it.styles:String(it.styles||'').split(/[|,]/).filter(Boolean)).join(', ')||'-'} · 페이스: ${(Array.isArray(it.pace)?it.pace:String(it.pace||'').split(/[|,]/).filter(Boolean)).join(', ')||'-'}</div>
       <div class="sub">메시지: ${it.message||'-'}</div>
     `;
     el.addEventListener('click', ()=> startEdit(it));
@@ -525,11 +564,11 @@ function renderCards(list){
 
   renderThemes('blue');
 
-  // 서버에서 목록을 불러오므로, PC/모바일 어디서든 동일하게 보임
+  // 서버 목록 불러오기(PC/모바일 동일)
   const list = await loadFromServer();
   renderCards(list);
 
-  // 드래프트 복원(원하면)
+  // 드래프트 복원(있으면)
   const d = load(DRAFT_KEY,null); if(d){ setForm(d); }
 
   qs('#btnDraft').addEventListener('click', saveDraft);
