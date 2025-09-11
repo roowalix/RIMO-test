@@ -16,6 +16,13 @@
     --t-yellow:#ffd85d;   --t-yellow-bg:rgba(255,216,93,.16);  --t-yellow-br:rgba(255,216,93,.38);
     --t-green:#56d364;    --t-green-bg:rgba(86,211,100,.16);   --t-green-br:rgba(86,211,100,.42);
     --t-purple:#a78bfa;   --t-purple-bg:rgba(167,139,250,.16); --t-purple-br:rgba(167,139,250,.42);
+
+    /* 라벨/간격(절대값) */
+    --label-w: 56px;      /* 데스크톱 라벨 폭: 한글 2~3글자 기준 */
+    --label-gap: 8px;     /* 라벨-폼 간격 */
+
+    --label-w-sm: 44px;   /* 모바일 라벨 폭 */
+    --label-gap-sm: 6px;  /* 모바일 라벨-폼 간격 */
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Arial,sans-serif}
@@ -31,47 +38,30 @@
   main{padding:16px;display:grid;gap:16px;max-width:980px;margin:0 auto;padding-bottom:120px}
   .panel{background:var(--tile);border:1px solid var(--line);border-radius:14px;padding:14px}
 
-  /* 절대값 변수 (원하는 값으로 조정 가능) */
-:root{
-  --label-w: 56px;      /* 데스크톱 라벨 폭: 한글 2~3글자 기준 */
-  --label-gap: 8px;     /* 라벨과 폼 사이 고정 간격 */
-
-  --label-w-sm: 44px;   /* 모바일 라벨 폭 */
-  --label-gap-sm: 6px;  /* 모바일 라벨-폼 간격 */
-}
-
-/* 라벨 열 = 고정폭(px), 내용 열 = 남는 영역 전부 */
-.row{
-  display:grid;
-  grid-template-columns: var(--label-w) 1fr;
-  gap: var(--label-gap);
-  align-items:center;
-  margin:10px 0;
-}
-
-/* 라벨을 좌측 정렬, 딱 붙게 */
-.row > label{
-  font-weight:700;
-  color:#cfd1e8;
-  font-size:14px;
-  justify-self:start;
-  text-align:left;
-  white-space:nowrap;           /* 혹시 모를 줄바꿈 방지 */
-}
-
-/* 내용 영역이 제대로 ‘줄어들 수’ 있게 */
-.field{ min-width:0; }          /* grid에서는 이게 중요합니다 */
-.field > *{ width:100%; }       /* input/select/textarea가 꽉 차도록 */
-
-/* 모바일에서 라벨/간격만 더 타이트하게 */
-@media (max-width:560px){
+  /* ===== 폼 그리드: 라벨 고정폭, 내용 가변 ===== */
   .row{
-    grid-template-columns: var(--label-w-sm) 1fr;
-    gap: var(--label-gap-sm);
-}
+    display:grid;
+    grid-template-columns: var(--label-w) 1fr; /* 좌: 고정폭 / 우: 남는 전부 */
+    gap: var(--label-gap);
+    align-items:center;
+    margin:10px 0;
+  }
+  .row.no-label{ grid-template-columns:1fr; }  /* 라벨 없는 행(테마 등) */
+  .row > label{
+    font-weight:700; color:#cfd1e8; font-size:14px;
+    justify-self:start; text-align:left; white-space:nowrap;
+  }
+  .field{ min-width:0; }            /* 내용 영역이 줄어들 수 있도록 */
+  .field > *{ width:100%; }         /* 내부 input/select/textarea 꽉 차게 */
 
+  @media (max-width:560px){
+    .row{
+      grid-template-columns: var(--label-w-sm) 1fr;
+      gap: var(--label-gap-sm);
+    }
+  }
 
-  /* 입력 공통 + 포커스 글로우 */
+  /* 입력 공통 + 포커스 글로우(파랑계열) */
   input,select,textarea{
     width:100%;padding:10px 12px;border-radius:10px;border:1px solid #2c2f48;background:#0f1020;color:#fff;font-size:14px;
     transition: border-color .15s ease, box-shadow .15s ease;
@@ -81,7 +71,7 @@
     border-color: var(--accent);
     box-shadow: 0 0 0 2px var(--accent-glow), 0 0 0 1px var(--accent) inset;
   }
-  /* 포커스된 행 라벨 미세 강조(지원 브라우저에서만) */
+  /* 지원 브라우저에서: 포커스된 행의 라벨 색 살짝 강화 */
   .row:has(input:focus), .row:has(select:focus), .row:has(textarea:focus) > label{ color:#eef3ff; }
 
   .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -130,19 +120,17 @@
   .theme-btn[data-theme="purple"] { color:var(--t-purple); background:var(--t-purple-bg); border-color:var(--t-purple-br) }
   .theme-btn[data-theme="purple"] .badge { background:rgba(167,139,250,.12);border-color:var(--t-purple-br) }
 
-  /* 기능버튼 */
+  /* === 기능버튼 ========================================== */
   .btn{padding:10px 14px;border-radius:10px;border:1px solid #2b2e48;background:#1b1d2e;color:#fff;cursor:pointer}
   .btn.small{padding:8px 10px;font-size:12px}
   .btn.primary{background:#2a5bff;border-color:#3d6aff}
   .btnbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;justify-content:center;}
 
-  /* 카드 */
+  /* === 카드 ============================================== */
   .cards{display:grid;gap:10px;margin-top:10px}
   .card{background:#141628;border:1px solid var(--line);border-radius:12px;padding:12px}
   .card .tt{font-weight:800}
   .card .sub{color:#c8cae0;font-size:12px;margin-top:4px}
-
-  /* 카드: 테마별 악센트 & 라우트 */
   .card .theme-tag{
     display:inline-flex;align-items:center;gap:6px;
     padding:4px 8px;border-radius:999px;font-size:11px;font-weight:800;
@@ -158,7 +146,6 @@
   .card[data-theme="yellow"] { border-color:var(--t-yellow-br) }
   .card[data-theme="green"]  { border-color:var(--t-green-br) }
   .card[data-theme="purple"] { border-color:var(--t-purple-br) }
-
   .card[data-theme="red"]    .theme-tag,.card[data-theme="red"]    .route{ color:var(--t-red) }
   .card[data-theme="blue"]   .theme-tag,.card[data-theme="blue"]   .route{ color:var(--t-blue) }
   .card[data-theme="yellow"] .theme-tag,.card[data-theme="yellow"] .route{ color:var(--t-yellow) }
@@ -285,7 +272,7 @@
   </section>
 
   <section class="panel" id="cardsPanel">
-    <h3>발행된 라이딩 카드 목록</h3>
+    <h3 style="margin:0 0 8px 0;font-size:16px;">발행된 라이딩 카드 목록</h3>
     <div id="cards" class="cards"></div>
   </section>
 </main>
@@ -394,10 +381,10 @@ function getDateFromInput(){
 function extractCoords(text){
   if(!text) return null;
   text = String(text).trim();
-  let m = text.match(/@(-?\\d+(?:\\.\\d+)?),\\s*(-?\\d+(?:\\.\\d+)?)/);
-  if(!m) m = text.match(/[?&]q=(-?\\d+(?:\\.\\d+)?),\\s*(-?\\d+(?:\\.\\d+)?)/);
+  let m = text.match(/@(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)/);
+  if(!m) m = text.match(/[?&]q=(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)/);
   if(!m){
-    const nums = text.match(/-?\\d+(?:\\.\\d+)?/g);
+    const nums = text.match(/-?\d+(?:\.\d+)?/g);
     if(nums && nums.length>=2) m=[, nums[0], nums[1]];
   }
   if(!m) return null;
@@ -499,7 +486,7 @@ function saveDraft(){
 function publish(){
   const form=getForm();
   const errs=validate(form);
-  if(errs.length){ alert(errs.join('\\n')); return; }
+  if(errs.length){ alert(errs.join('\n')); return; }
   form.id = `crew_${Date.now().toString(36)}`;
   const list = load(PUBLIST_KEY,[]);
   list.unshift(form);
@@ -507,7 +494,7 @@ function publish(){
   save(DRAFT_KEY, form);
   renderCards();
   // 발행 후 목록으로 스크롤
-  document.querySelector('#cardsPanel')?.scrollIntoView({ behavior:'smooth', block:'start' });
+  qs('#cardsPanel')?.scrollIntoView({ behavior:'smooth', block:'start' });
   alert('메인에 임시 발행(로컬)되었습니다.');
 }
 function resetForm(){
@@ -528,7 +515,7 @@ function renderCards(){
     const el=document.createElement('div');
     el.className='card';
     el.dataset.theme = theme;
-    const themeLabel = ({red:'레드 크루',blue:'블루 크루',yellow:'옐로 크루',green:'그린 크루',purple:'퍼플 크루'})[theme] || '블루 크루';
+    const themeLabel = ({"red":"레드 크루","blue":"블루 크루","yellow":"옐로 크루","green":"그린 크루","purple":"퍼플 크루"})[theme] || '블루 크루';
 
     el.innerHTML = `
       <div class="tt">
@@ -553,7 +540,7 @@ function renderCards(){
 (function init(){
   renderToggles('styleToggles', STYLE_OPTS, []);
   renderToggles('paceToggles',  PACE_OPTS,  []);
-  document.querySelector('#c_datetime').value = toLocalDatetimeValue(new Date());
+  qs('#c_datetime').value = toLocalDatetimeValue(new Date());
 
   /* 좌표 자동 분리 연결 */
   attachAutoSplit('from_lat','from_lng');
@@ -563,7 +550,7 @@ function renderCards(){
   loadDraft();
   renderCards();
 
-  document.querySelector('#goMain')?.addEventListener('click',(e)=>{
+  qs('#goMain')?.addEventListener('click',(e)=>{
     if(!MAIN_URL || MAIN_URL==="#"){ e.preventDefault(); alert("MAIN_URL을 메인주소로 설정하세요."); return; }
     window.open(MAIN_URL,'_blank');
   });
