@@ -11,154 +11,78 @@
     --chip-bg:#14172a; --chip-bd:#2b2e54; --accent-glow: rgba(122,167,255,.35);
 
     /* Theme Colors */
-    --t-red:#ff5d5d;      --t-red-bg:rgba(255,93,93,.14);      --t-red-br:rgba(255,93,93,.35);
     --t-blue:#7aa7ff;     --t-blue-bg:rgba(122,167,255,.14);   --t-blue-br:rgba(122,167,255,.35);
     --t-yellow:#ffd85d;   --t-yellow-bg:rgba(255,216,93,.16);  --t-yellow-br:rgba(255,216,93,.38);
     --t-green:#56d364;    --t-green-bg:rgba(86,211,100,.16);   --t-green-br:rgba(86,211,100,.42);
     --t-purple:#a78bfa;   --t-purple-bg:rgba(167,139,250,.16); --t-purple-br:rgba(167,139,250,.42);
 
     /* 라벨/간격(절대값) */
-    --label-w: 56px;      /* 데스크톱 라벨 폭: 한글 2~3글자 기준 */
-    --label-gap: 2px;     /* 라벨-폼 간격 */
-
-    --label-w-sm: 44px;   /* 모바일 라벨 폭 */
-    --label-gap-sm: 2px;  /* 모바일 라벨-폼 간격 */
+    --label-w: 56px;
+    --label-gap: 2px;
+    --label-w-sm: 44px;
+    --label-gap-sm: 2px;
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Arial,sans-serif}
 
-  /* 헤더 */
   header{position:sticky;top:0;z-index:5;background:rgba(11,11,15,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
   .bar{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:12px 16px}
   .title{font-weight:900;font-size:16px}
   .home-btn{width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:30px;border-radius:8px;border:none;background:transparent;cursor:pointer;transition:background .2s}
   .home-btn:hover{background:rgba(255,255,255,.08)}
 
-  /* 본문 레이아웃 */
   main{padding:16px;display:grid;gap:16px;max-width:980px;margin:0 auto;padding-bottom:120px}
   .panel{background:var(--tile);border:1px solid var(--line);border-radius:14px;padding:4px 14px 16px 16px}
 
-  /* ===== 폼 그리드: 라벨 고정폭, 내용 가변 ===== */
-  .row{
-    display:grid;
-    grid-template-columns: var(--label-w) 1fr; /* 좌: 고정폭 / 우: 남는 전부 */
-    gap: var(--label-gap);
-    align-items:center;
-    margin:10px 0;
-  }
-  .row.no-label{ grid-template-columns:1fr; }  /* 라벨 없는 행(테마 등) */
-  .row > label{
-    font-weight:700; color:#cfd1e8; font-size:14px;
-    justify-self:start; text-align:left; white-space:nowrap;
-  }
-  .field{ min-width:0; }            /* 내용 영역이 줄어들 수 있도록 */
-  .field > *{ width:100%; }         /* 내부 input/select/textarea 꽉 차게 */
+  /* 폼 그리드 */
+  .row{display:grid;grid-template-columns: var(--label-w) 1fr;gap: var(--label-gap);align-items:center;margin:10px 0}
+  .row.no-label{grid-template-columns:1fr}
+  .row>label{font-weight:700;color:#cfd1e8;font-size:14px;justify-self:start;text-align:left;white-space:nowrap}
+  .field{min-width:0}.field>*{width:100%}
+  @media (max-width:560px){ .row{grid-template-columns: var(--label-w-sm) 1fr;gap: var(--label-gap-sm)} }
 
-  @media (max-width:560px){
-    .row{
-      grid-template-columns: var(--label-w-sm) 1fr;
-      gap: var(--label-gap-sm);
-    }
-  }
+  input,select,textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #2c2f48;background:#0f1020;color:#fff;font-size:14px;transition:border-color .15s, box-shadow .15s}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-glow),0 0 0 1px var(--accent) inset}
+  .row:has(input:focus),.row:has(select:focus),.row:has(textarea:focus)>label{color:#eef3ff}
 
-  /* 입력 공통 + 포커스 글로우(파랑계열) */
-  input,select,textarea{
-    width:100%;padding:10px 12px;border-radius:10px;border:1px solid #2c2f48;background:#0f1020;color:#fff;font-size:14px;
-    transition: border-color .15s ease, box-shadow .15s ease;
-  }
-  input:focus, select:focus, textarea:focus{
-    outline:none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 2px var(--accent-glow), 0 0 0 1px var(--accent) inset;
-  }
-  /* 지원 브라우저에서: 포커스된 행의 라벨 색 살짝 강화 */
-  .row:has(input:focus), .row:has(select:focus), .row:has(textarea:focus) > label{ color:#eef3ff; }
+  .coords{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 
-  .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .coords{display:grid;grid-template-columns:1fr 1fr;gap:10px} /* 좌표/인원: 2열 고정 */
-
-  /* === 토글(rimo_profile 스타일) ========================= */
   .toggles{display:flex;gap:10px;flex-wrap:wrap;margin:0}
-  .toggle{
-    display:inline-flex;align-items:center;gap:14px;padding:8px 12px;border-radius:999px;
-    color:#e6e9ff;font-size:13px;cursor:pointer;user-select:none;white-space:nowrap;
-    transition:transform .15s ease, box-shadow .15s ease;
-    background:var(--chip-bg); border:1px solid var(--chip-bd);
-  }
-  .toggle.active{
-    border-color:var(--accent); background:rgba(122,167,255,.16);
-    box-shadow:0 0 10px var(--accent-glow); transform:translateY(-1px) scale(1.01);
-    font-weight:500;
-  }
+  .toggle{display:inline-flex;align-items:center;gap:14px;padding:8px 12px;border-radius:999px;color:#e6e9ff;font-size:13px;cursor:pointer;user-select:none;white-space:nowrap;transition:transform .15s, box-shadow .15s;background:var(--chip-bg); border:1px solid var(--chip-bd)}
+  .toggle.active{border-color:var(--accent); background:rgba(122,167,255,.16); box-shadow:0 0 10px var(--accent-glow); transform:translateY(-1px) scale(1.01); font-weight:500}
 
-  /* === 테마 필버튼: 네비 스타일 ========================== */
   .themes{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-  .theme-btn{
-    display:grid;grid-template-columns:auto 1fr;align-items:center;
-    gap:0px;padding:4px 8px;border-radius:16px;border:1px solid #2b2e48;background:#14172a;color:#e8e8ef;
-    font-size:12px;font-weight:500;letter-spacing:0;cursor:pointer;user-select:none;
-    flex:0 0 auto; white-space:nowrap;
-    transition:transform .12s ease, box-shadow .12s ease, background .12s ease, border-color .12s ease, color .12s ease;
-  }
-  .theme-btn .badge{
-    width:14px;height:14px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;background:#0f1020;border:0;
-  }
-  .theme-btn.active{
-    transform:translateY(-1px) scale(1.02);
-    box-shadow:0 0 0 1px currentColor inset, 0 0 12px currentColor;
-    background:transparent;
-  }
-  /* 각 테마 색상(버튼 전체/배지) */
-  .theme-btn[data-theme="red"]    { color:var(--t-red);    background:var(--t-red-bg);    border-color:var(--t-red-br) }
-  .theme-btn[data-theme="red"] .badge    { background:rgba(255,93,93,.12);  border-color:var(--t-red-br) }
-  .theme-btn[data-theme="blue"]   { color:var(--t-blue);   background:var(--t-blue-bg);   border-color:var(--t-blue-br) }
-  .theme-btn[data-theme="blue"] .badge   { background:rgba(122,167,255,.12);border-color:var(--t-blue-br) }
-  .theme-btn[data-theme="yellow"] { color:var(--t-yellow); background:var(--t-yellow-bg); border-color:var(--t-yellow-br) }
-  .theme-btn[data-theme="yellow"] .badge { background:rgba(255,216,93,.12); border-color:var(--t-yellow-br) }
-  .theme-btn[data-theme="green"]  { color:var(--t-green);  background:var(--t-green-bg);  border-color:var(--t-green-br) }
-  .theme-btn[data-theme="green"] .badge  { background:rgba(86,211,100,.12); border-color:var(--t-green-br) }
-  .theme-btn[data-theme="purple"] { color:var(--t-purple); background:var(--t-purple-bg); border-color:var(--t-purple-br) }
-  .theme-btn[data-theme="purple"] .badge { background:rgba(167,139,250,.12);border-color:var(--t-purple-br) }
+  .theme-btn{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:0;padding:4px 8px;border-radius:16px;border:1px solid #2b2e48;background:#14172a;color:#e8e8ef;font-size:12px;font-weight:500;cursor:pointer;user-select:none;flex:0 0 auto;white-space:nowrap;transition:transform .12s, box-shadow .12s}
+  .theme-btn .badge{width:14px;height:14px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;background:#0f1020;border:0}
+  .theme-btn.active{transform:translateY(-1px) scale(1.02);box-shadow:0 0 0 1px currentColor inset, 0 0 12px currentColor;background:transparent}
+  .theme-btn[data-theme="blue"]{color:var(--t-blue);background:var(--t-blue-bg);border-color:var(--t-blue-br)}
+  .theme-btn[data-theme="yellow"]{color:var(--t-yellow);background:var(--t-yellow-bg);border-color:var(--t-yellow-br)}
+  .theme-btn[data-theme="green"]{color:var(--t-green);background:var(--t-green-bg);border-color:var(--t-green-br)}
+  .theme-btn[data-theme="purple"]{color:var(--t-purple);background:var(--t-purple-bg);border-color:var(--t-purple-br)}
 
-  /* === 기능버튼 ========================================== */
   .btn{padding:10px 14px;border-radius:10px;border:1px solid #2b2e48;background:#1b1d2e;color:#fff;cursor:pointer;margin-top:6px;font-weight:700}
-  .btn.small{padding:8px 10px;font-size:12px}
   .btn.primary{background:#2a5bff;border-color:#3d6aff}
   .btnbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;justify-content:center;}
 
-  /* === 카드 ============================================== */
   .cards{display:grid;gap:10px}
-  .card{background:#141628;border:1px solid var(--line);border-radius:12px;padding:12px}
+  .card{background:#141628;border:1px solid var(--line);border-radius:12px;padding:12px;cursor:pointer}
   .card .tt{font-weight:800}
   .card .sub{color:#c8cae0;font-size:12px;margin-top:4px}
-  .card .theme-tag{
-    display:inline-flex;align-items:center;gap:6px;
-    padding:4px 8px;border-radius:999px;font-size:11px;font-weight:800;
-    border:1px solid currentColor;background:transparent;margin-right:6px;
-  }
+  .card .theme-tag{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:800;border:1px solid currentColor;background:transparent;margin-right:6px}
   .route{display:flex;align-items:center;gap:8px;margin-top:6px;color:inherit}
   .pin{width:8px;height:8px;border-radius:999px;background:currentColor}
   .dash{flex:1;border-top:1px dashed currentColor;opacity:.7}
+  .card[data-theme="blue"]{border-color:var(--t-blue-br)} .card[data-theme="blue"] .theme-tag,.card[data-theme="blue"] .route{color:var(--t-blue)}
+  .card[data-theme="yellow"]{border-color:var(--t-yellow-br)} .card[data-theme="yellow"] .theme-tag,.card[data-theme="yellow"] .route{color:var(--t-yellow)}
+  .card[data-theme="green"]{border-color:var(--t-green-br)} .card[data-theme="green"] .theme-tag,.card[data-theme="green"] .route{color:var(--t-green)}
+  .card[data-theme="purple"]{border-color:var(--t-purple-br)} .card[data-theme="purple"] .theme-tag,.card[data-theme="purple"] .route{color:var(--t-purple)}
 
-  /* 카드 색 적용 */
-  .card[data-theme="red"]    { border-color:var(--t-red-br) }
-  .card[data-theme="blue"]   { border-color:var(--t-blue-br) }
-  .card[data-theme="yellow"] { border-color:var(--t-yellow-br) }
-  .card[data-theme="green"]  { border-color:var(--t-green-br) }
-  .card[data-theme="purple"] { border-color:var(--t-purple-br) }
-  .card[data-theme="red"]    .theme-tag,.card[data-theme="red"]    .route{ color:var(--t-red) }
-  .card[data-theme="blue"]   .theme-tag,.card[data-theme="blue"]   .route{ color:var(--t-blue) }
-  .card[data-theme="yellow"] .theme-tag,.card[data-theme="yellow"] .route{ color:var(--t-yellow) }
-  .card[data-theme="green"]  .theme-tag,.card[data-theme="green"]  .route{ color:var(--t-green) }
-  .card[data-theme="purple"] .theme-tag,.card[data-theme="purple"] .route{ color:var(--t-purple) }
-
-  /* 하단 네비 */
+  .edit-banner{margin:8px 0 0;color:#cfe0ff;font-size:12px}
   .btmnav{position:fixed;left:0;right:0;bottom:0;z-index:10;background:rgba(11,11,15,.9);backdrop-filter:blur(10px);border-top:1px solid var(--line)}
   .btmnav .wrap{max-width:980px;margin:0 auto;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;padding:8px}
-  .navitem{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px 4px;border-radius:10px;border:1px solid #2b2e48;background:#14172a;cursor:pointer;font-size:12px;text-align:center;user-select:none;transition:background .2s,transform .1s;text-decoration:none;color:var(--fg)}
+  .navitem{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px 4px;border-radius:10px;border:1px solid #2b2e48;background:#14172a;cursor:pointer;font-size:12px;text-align:center;user-select:none;text-decoration:none;color:var(--fg)}
   .navitem.active{background:#27306a;border-color:#3a4aa2}
   .navitem .ico{font-size:18px;line-height:1}
-  .navitem:active{transform:translateY(1px)}
 </style>
 </head>
 <body>
@@ -172,20 +96,19 @@
 <main>
   <section class="panel">
 
+    <!-- 편집 배너 -->
+    <div id="editBanner" class="edit-banner" style="display:none">✏️ 현재 <b id="editId"></b>를 수정 중입니다. 저장하면 카드가 업데이트됩니다.</div>
+
     <!-- 제목 -->
     <div class="row">
       <label for="c_title">제목</label>
-      <div class="field">
-        <input id="c_title" placeholder="예: &lt;가을맞이 카페 라이딩&gt;">
-      </div>
+      <div class="field"><input id="c_title" placeholder="예: &lt;가을맞이 카페 라이딩&gt;"></div>
     </div>
 
     <!-- 일시 -->
     <div class="row">
       <label for="c_datetime">일시</label>
-      <div class="field">
-        <input id="c_datetime" type="datetime-local" step="1800">
-      </div>
+      <div class="field"><input id="c_datetime" type="datetime-local" step="1800"></div>
     </div>
 
     <!-- 출발 -->
@@ -248,25 +171,19 @@
       <div class="field"><div id="paceToggles" class="toggles"></div></div>
     </div>
 
-    <!-- 메시지 (한 줄) -->
+    <!-- 메시지 -->
     <div class="row">
       <label for="c_msg">메시지</label>
-      <div class="field">
-        <input id="c_msg" maxlength="30" placeholder="30자 이내">
-      </div>
+      <div class="field"><input id="c_msg" maxlength="30" placeholder="30자 이내"></div>
     </div>
 
-    <!-- 테마(라벨 없음 / 메시지 하단) -->
-    <div class="row no-label">
-      <div class="field">
-        <div id="themeBar" class="themes"></div>
-      </div>
-    </div>
+    <!-- 테마 -->
+    <div class="row no-label"><div class="field"><div id="themeBar" class="themes"></div></div></div>
 
-    <!-- 기능 버튼 -->
+    <!-- 버튼 -->
     <div class="btnbar">
       <button class="btn" id="btnDraft">드래프트 저장</button>
-      <button class="btn primary" id="btnPublish">메인에 발행</button>
+      <button class="btn primary" id="btnSave">메인에 발행</button>
       <button class="btn" id="btnReset">새로 작성</button>
     </div>
   </section>
@@ -279,7 +196,7 @@
 
 <nav class="btmnav" aria-label="하단 내비게이션">
   <div class="wrap">
-    <a class="navitem active" href="rimo_crew.html" title="크루 생성">
+    <a class="navitem active" href="rimo_crew_publish.html" title="크루 생성">
       <div class="ico">🛠️</div><div>크루 생성</div>
     </a>
     <a class="navitem" href="rimo_joins.html" title="매칭 희망">
@@ -303,13 +220,13 @@ const MAIN_URL = "https://roowalix.github.io/RIMO-test/index.html";
 
 /* ---------- 스프레드시트 웹앱 ---------- */
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyPQj9gyhrjWUj0gvsv2Xs5Syr06H-ST8dyJyghPJ_5DPx3WQz_i-Jbdsoz1H3KUtqc2g/exec";
-const SHARED_TOKEN = ""; // Apps Script에서 토큰 검사를 안 하면 빈 문자열로 두세요.
+const SHARED_TOKEN = ""; // (옵션) Apps Script에서 검사 시 맞춰주세요.
 
 /* ---------- 옵션 ---------- */
 const STYLE_OPTS = ["Urban","Curve","Tour"];
 const PACE_OPTS  = ["Easy","Balanced","Dynamic"];
+/* 레드 제거 */
 const THEME_OPTS = [
-  {key:'red',    label:'레드',   emoji:'🔴'},
   {key:'blue',   label:'블루',   emoji:'🔵'},
   {key:'yellow', label:'옐로',   emoji:'🟡'},
   {key:'green',  label:'그린',   emoji:'🟢'},
@@ -321,6 +238,11 @@ const qs=(s,p=document)=>p.querySelector(s);
 const qsa=(s,p=document)=>Array.from(p.querySelectorAll(s));
 const save=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
 const load=(k,def)=>{try{return JSON.parse(localStorage.getItem(k)||JSON.stringify(def))}catch(e){return def}};
+
+/* 상태 */
+const DRAFT_KEY='rimo_create_draft_v5';
+const PUBLIST_KEY='rimo_published_cards_server_cache';
+let editingId = null;
 
 /* 토글 */
 function makeToggle(label, active=false){
@@ -340,7 +262,7 @@ function selectedToggles(containerId){
   return qsa('#'+containerId+' .toggle.active').map(el=>el.dataset.val);
 }
 
-/* 테마 버튼(네비 스타일) */
+/* 테마 */
 function renderThemes(selected='blue'){
   const bar = qs('#themeBar'); bar.innerHTML='';
   THEME_OPTS.forEach(opt=>{
@@ -348,10 +270,7 @@ function renderThemes(selected='blue'){
     btn.type='button';
     btn.className='theme-btn'+(opt.key===selected?' active':'');
     btn.dataset.theme=opt.key;
-    btn.innerHTML = `
-      <span class="badge">${opt.emoji}</span>
-      <span class="tx">${opt.label}</span>
-    `;
+    btn.innerHTML = `<span class="badge">${opt.emoji}</span><span class="tx">${opt.label}</span>`;
     btn.addEventListener('click',()=>{
       qsa('.theme-btn', bar).forEach(b=>b.classList.remove('active'));
       btn.classList.add('active');
@@ -364,7 +283,7 @@ function getSelectedTheme(){
   return cur ? cur.dataset.theme : 'blue';
 }
 
-/* 날짜 포맷 */
+/* 날짜 */
 function pad(n){return String(n).padStart(2,'0')}
 function formatKDate(dt){return `${dt.getMonth()+1}월 ${dt.getDate()}일 ${pad(dt.getHours())}:${pad(dt.getMinutes())}`}
 function toLocalDatetimeValue(d){
@@ -374,14 +293,13 @@ function toLocalDatetimeValue(d){
 function getDateFromInput(){
   const v = qs('#c_datetime').value;
   if(!v) return null;
-  const [date,time] = v.split('T');
-  if(!date||!time) return null;
+  const [date,time] = v.split('T'); if(!date||!time) return null;
   const [Y,M,D] = date.split('-').map(Number);
   const [h,m] = time.split(':').map(Number);
   return new Date(Y, M-1, D, h, m||0, 0);
 }
 
-/* ===== 좌표 자동 분리(붙여넣기/변경 시) ===== */
+/* 좌표 자동 분리 */
 function extractCoords(text){
   if(!text) return null;
   text = String(text).trim();
@@ -398,28 +316,24 @@ function extractCoords(text){
   return {lat, lng};
 }
 function attachAutoSplit(latId,lngId){
-  const latEl = qs('#'+latId);
-  const lngEl = qs('#'+lngId);
+  const latEl = qs('#'+latId), lngEl = qs('#'+lngId);
   const onPaste = (e)=>{
-    const text = e.clipboardData?.getData('text');
-    const c = extractCoords(text);
+    const text = e.clipboardData?.getData('text'); const c = extractCoords(text);
     if(c){ e.preventDefault(); latEl.value=c.lat; lngEl.value=c.lng; }
   };
   const onChange = (e)=>{
     const c = extractCoords(e.target.value);
     if(c){ latEl.value=c.lat; lngEl.value=c.lng; }
   };
-  latEl.addEventListener('paste', onPaste);
-  lngEl.addEventListener('paste', onPaste);
-  latEl.addEventListener('change', onChange);
-  lngEl.addEventListener('change', onChange);
+  latEl.addEventListener('paste', onPaste); lngEl.addEventListener('paste', onPaste);
+  latEl.addEventListener('change', onChange); lngEl.addEventListener('change', onChange);
 }
 
-/* 폼 수집 */
+/* 폼 수집/세팅 */
 function getForm(){
   const dt = getDateFromInput() || new Date();
   return {
-    id: '', // publish 시에 채움
+    id: editingId || '',
     title: qs('#c_title').value.trim(),
     datetime: dt.toISOString(),
     datetime_display: formatKDate(dt),
@@ -433,10 +347,28 @@ function getForm(){
     styles: selectedToggles('styleToggles'),
     pace: selectedToggles('paceToggles'),
     message: qs('#c_msg').value.trim(),
-    remaining: parseInt(qs('#c_remaining').value||'0',10), // 잔여
-    capacity: parseInt(qs('#c_capacity').value||'0',10),   // 정원
+    remaining: parseInt(qs('#c_remaining').value||'0',10),
+    capacity: parseInt(qs('#c_capacity').value||'0',10),
     theme: getSelectedTheme()
   };
+}
+function setForm(it){
+  qs('#c_title').value = it.title||'';
+  qs('#c_from').value = it.from||'';
+  qs('#c_to').value = it.to||'';
+  qs('#from_lat').value = it.from_lat??'';
+  qs('#from_lng').value = it.from_lng??'';
+  qs('#to_lat').value = it.to_lat??'';
+  qs('#to_lng').value = it.to_lng??'';
+  qs('#c_cc').value = it.cc||'';
+  qs('#c_msg').value = it.message||'';
+  qs('#c_remaining').value = it.remaining ?? '';
+  qs('#c_capacity').value  = it.capacity ?? '';
+  const dt = it.datetime ? new Date(it.datetime) : new Date();
+  qs('#c_datetime').value = toLocalDatetimeValue(dt);
+  renderToggles('styleToggles', STYLE_OPTS, it.styles||[]);
+  renderToggles('paceToggles',  PACE_OPTS,  it.pace||[]);
+  renderThemes(it.theme || 'blue');
 }
 
 /* 유효성 */
@@ -453,124 +385,113 @@ function validate(form){
   return errs;
 }
 
-/* 저장/발행/초기화 */
-const DRAFT_KEY='rimo_create_draft_v4';
-const PUBLIST_KEY='rimo_published_cards_v1';
-
-function loadDraft(){
-  const d=load(DRAFT_KEY,null);
-
-  renderToggles('styleToggles', STYLE_OPTS, d?.styles||[]);
-  renderToggles('paceToggles',  PACE_OPTS,  d?.pace||[]);
-
-  const now = new Date();
-  const dt = d?.datetime ? new Date(d.datetime) : now;
-  qs('#c_datetime').value = toLocalDatetimeValue(dt);
-
-  // 테마: 저장값 있으면 복원, 없으면 blue
-  renderThemes(d?.theme || 'blue');
-
-  if(!d) return;
-  qs('#c_title').value=d.title||'';
-  qs('#c_from').value=d.from||'';
-  qs('#c_to').value=d.to||'';
-  qs('#from_lat').value=d.from_lat??'';
-  qs('#from_lng').value=d.from_lng??'';
-  qs('#to_lat').value=d.to_lat??'';
-  qs('#to_lng').value=d.to_lng??'';
-  qs('#c_cc').value=d.cc||'';
-  qs('#c_msg').value=d.message||'';
-  qs('#c_remaining').value = (d.remaining ?? d.capacity_min ?? '');
-  qs('#c_capacity').value  = d.capacity ?? '';
-}
-function saveDraft(){
-  const form=getForm();
-  save(DRAFT_KEY, form);
-  alert('드래프트 저장 완료');
-}
-
-/* === 웹앱 POST (스프레드시트 저장) === */
-async function sendToSheet(form){
+/* 서버 연동 */
+async function sendToSheet(form, op){
+  const payload = new URLSearchParams();
+  payload.set('op', op);
+  payload.set('token', SHARED_TOKEN);
+  Object.entries({
+    id:form.id,title:form.title,datetime:form.datetime,datetime_display:form.datetime_display,
+    from:form.from,to:form.to,from_lat:form.from_lat,from_lng:form.from_lng,
+    to_lat:form.to_lat,to_lng:form.to_lng,cc:form.cc,styles:(form.styles||[]).join(','),
+    pace:(form.pace||[]).join(','),message:form.message,remaining:form.remaining,capacity:form.capacity,theme:form.theme
+  }).forEach(([k,v])=>payload.set(k,String(v ?? '')));
+  payload.set('record', JSON.stringify(form));
   try{
-    const payload = new URLSearchParams();
-    payload.set('op','publish');           // 서버에서 구분용(원하는 이름으로 변경 가능)
-    payload.set('token', SHARED_TOKEN);    // 토큰 검사 시 사용
-    // 개별 필드
-    payload.set('id', form.id);
-    payload.set('title', form.title);
-    payload.set('datetime', form.datetime);
-    payload.set('datetime_display', form.datetime_display);
-    payload.set('from', form.from);
-    payload.set('to', form.to);
-    payload.set('from_lat', String(form.from_lat ?? ''));
-    payload.set('from_lng', String(form.from_lng ?? ''));
-    payload.set('to_lat', String(form.to_lat ?? ''));
-    payload.set('to_lng', String(form.to_lng ?? ''));
-    payload.set('cc', form.cc);
-    payload.set('styles', (form.styles||[]).join(','));
-    payload.set('pace', (form.pace||[]).join(','));
-    payload.set('message', form.message);
-    payload.set('remaining', String(form.remaining ?? ''));
-    payload.set('capacity', String(form.capacity ?? ''));
-    payload.set('theme', form.theme);
-    // 전체 JSON(서버에서 이걸로만 처리해도 됨)
-    payload.set('record', JSON.stringify(form));
-
-    // CORS 회피를 위해 no-cors (응답 본문은 읽지 않음)
-    await fetch(WEB_APP_URL, {
-      method:'POST',
-      mode:'no-cors',
-      headers:{ 'Content-Type':'application/x-www-form-urlencoded' },
-      body: payload.toString()
-    });
-  }catch(err){
-    console.error('sendToSheet error', err);
-  }
+    // CORS 문제 있을 수 있어 write는 no-cors(응답 안 읽음)
+    await fetch(WEB_APP_URL, { method:'POST', mode:'no-cors',
+      headers:{ 'Content-Type':'application/x-www-form-urlencoded' }, body: payload.toString() });
+  }catch(e){ console.warn('sendToSheet failed', e); }
 }
 
-function publish(){
+function fetchJSONP(url, timeoutMs=9000){
+  return new Promise((resolve,reject)=>{
+    const cb = '__rimo_cb_'+Date.now();
+    const s = document.createElement('script');
+    const t = setTimeout(()=>{ cleanup(); reject(new Error('JSONP timeout')); }, timeoutMs);
+    function cleanup(){ delete window[cb]; s.remove(); clearTimeout(t); }
+    window[cb] = data => { cleanup(); resolve(data); };
+    s.src = url + (url.includes('?')?'&':'?') + 'callback=' + cb;
+    s.onerror = ()=>{ cleanup(); reject(new Error('JSONP error')); };
+    document.body.appendChild(s);
+  });
+}
+
+async function loadFromServer(){
+  // 1) 시도: 표준 fetch (CORS 허용인 경우)
+  try{
+    const res = await fetch(WEB_APP_URL+'?op=list', {cache:'no-store'});
+    if(res.ok){
+      const data = await res.json();
+      if(Array.isArray(data)){ save(PUBLIST_KEY,data); return data; }
+    }
+  }catch(e){}
+  // 2) 실패 시 JSONP 폴백
+  try{
+    const data = await fetchJSONP(WEB_APP_URL+'?op=list');
+    if(Array.isArray(data)){ save(PUBLIST_KEY,data); return data; }
+  }catch(e){}
+  // 3) 최종 폴백: 캐시
+  return load(PUBLIST_KEY,[]);
+}
+
+/* 저장/발행/수정/초기화 */
+function saveDraft(){ const form=getForm(); save(DRAFT_KEY, form); alert('드래프트 저장 완료'); }
+
+async function saveOrPublish(){
   const form=getForm();
-  const errs=validate(form);
-  if(errs.length){ alert(errs.join('\n')); return; }
+  const errs=validate(form); if(errs.length){ alert(errs.join('\n')); return; }
 
-  // ID 생성 후 저장
-  form.id = `crew_${Date.now().toString(36)}`;
-
-  // 시트에 전송(비동기)
-  sendToSheet(form);
-
-  // 로컬 목록 반영
-  const list = load(PUBLIST_KEY,[]);
-  list.unshift(form);
-  save(PUBLIST_KEY,list);
+  if(!editingId){ // 신규 발행
+    form.id = `crew_${Date.now().toString(36)}`;
+    await sendToSheet(form, 'publish');
+    // 로컬 즉시 반영
+    const list = load(PUBLIST_KEY,[]); list.unshift(form); save(PUBLIST_KEY,list);
+    renderCards(list);
+    qs('#cardsPanel')?.scrollIntoView({behavior:'smooth', block:'start'});
+    alert('발행 요청을 보냈습니다.');
+  }else{ // 수정 저장
+    form.id = editingId;
+    await sendToSheet(form, 'update');
+    // 로컬 즉시 반영
+    const list = load(PUBLIST_KEY,[]);
+    const idx = list.findIndex(x=>x.id===editingId);
+    if(idx>=0) list[idx]=form; else list.unshift(form);
+    save(PUBLIST_KEY,list);
+    renderCards(list);
+    exitEditMode();
+    alert('수정 요청을 보냈습니다.');
+  }
   save(DRAFT_KEY, form);
-  renderCards();
-
-  // 발행 후 목록으로 스크롤 + 안내
-  qs('#cardsPanel')?.scrollIntoView({ behavior:'smooth', block:'start' });
-  alert('발행 요청을 보냈습니다. (로컬 목록에도 반영되었습니다)');
 }
 
-function resetForm(){
-  localStorage.removeItem(DRAFT_KEY);
-  location.reload();
+function startEdit(it){
+  editingId = it.id;
+  qs('#editId').textContent = editingId;
+  qs('#editBanner').style.display='block';
+  qs('#btnSave').textContent = '변경 저장';
+  setForm(it);
 }
+function exitEditMode(){
+  editingId = null;
+  qs('#editBanner').style.display='none';
+  qs('#editId').textContent = '';
+  qs('#btnSave').textContent = '메인에 발행';
+  // 폼은 남겨둠(원하면 resetForm 호출)
+}
+function resetForm(){ localStorage.removeItem(DRAFT_KEY); location.reload(); }
 
-/* 카드 렌더 */
-function renderCards(){
+/* 카드 렌더 (좌표 줄은 숨김) */
+function renderCards(list){
   const box=qs('#cards'); box.innerHTML='';
-  const list = load(PUBLIST_KEY,[]);
-  if(list.length===0){ box.innerHTML='<div class="hint">아직 발행된 카드가 없습니다.</div>'; return; }
+  if(!list || list.length===0){ box.innerHTML='<div class="hint">아직 발행된 카드가 없습니다.</div>'; return; }
   list.forEach(it=>{
     const theme = it.theme || 'blue';
-    const remaining = (it.remaining ?? it.capacity_min ?? '-');
+    const remaining = (it.remaining ?? '-');
     const capacity  = (it.capacity ?? '-');
-
     const el=document.createElement('div');
-    el.className='card';
-    el.dataset.theme = theme;
-    const themeLabel = ({"red":"레드 크루","blue":"블루 크루","yellow":"옐로 크루","green":"그린 크루","purple":"퍼플 크루"})[theme] || '블루 크루';
-
+    el.className='card'; el.dataset.theme = theme; el.dataset.id = it.id;
+    const themeLabel = ({blue:'블루 크루',yellow:'옐로 크루',green:'그린 크루',purple:'퍼플 크루'})[theme] || '블루 크루';
     el.innerHTML = `
       <div class="tt">
         <span class="theme-tag">${themeLabel}</span>
@@ -581,35 +502,39 @@ function renderCards(){
         <span class="dash"></span>
         <span class="pin"></span><span class="place">${it.to||'-'}</span>
       </div>
-      <div class="sub">좌표: (${it.from_lat??'-'}, ${it.from_lng??'-'}) → (${it.to_lat??'-'}, ${it.to_lng??'-'})</div>
-      <div class="sub">배기량: ${(it.cc && it.cc.trim()) ? it.cc : '관계없음'} · 인원: 잔여 ${remaining} / 정원 ${capacity}</div>
+      <div class="sub">배기량: ${(it.cc && String(it.cc).trim()) ? it.cc : '관계없음'} · 인원: 잔여 ${remaining} / 정원 ${capacity}</div>
       <div class="sub">스타일: ${(it.styles||[]).join(', ')||'-'} · 페이스: ${(it.pace||[]).join(', ')||'-'}</div>
       <div class="sub">메시지: ${it.message||'-'}</div>
     `;
+    el.addEventListener('click', ()=> startEdit(it));
     box.appendChild(el);
   });
 }
 
 /* 초기화 */
-(function init(){
+(async function init(){
   renderToggles('styleToggles', STYLE_OPTS, []);
   renderToggles('paceToggles',  PACE_OPTS,  []);
   qs('#c_datetime').value = toLocalDatetimeValue(new Date());
 
-  /* 좌표 자동 분리 연결 */
   attachAutoSplit('from_lat','from_lng');
   attachAutoSplit('to_lat','to_lng');
 
-  renderThemes('blue');  // 기본 테마
-  loadDraft();
-  renderCards();
+  renderThemes('blue');
+
+  // 서버에서 목록을 불러오므로, PC/모바일 어디서든 동일하게 보임
+  const list = await loadFromServer();
+  renderCards(list);
+
+  // 드래프트 복원(원하면)
+  const d = load(DRAFT_KEY,null); if(d){ setForm(d); }
 
   qs('#btnDraft').addEventListener('click', saveDraft);
-  qs('#btnPublish').addEventListener('click', publish);
+  qs('#btnSave').addEventListener('click', saveOrPublish);
   qs('#btnReset').addEventListener('click', resetForm);
 
   qs('#goMain')?.addEventListener('click',(e)=>{
-    if(!MAIN_URL || MAIN_URL==="#"){ e.preventDefault(); alert("MAIN_URL을 메인주소로 설정하세요."); return; }
+    if(!MAIN_URL){ e.preventDefault(); alert("MAIN_URL을 메인주소로 설정하세요."); return; }
     window.open(MAIN_URL,'_blank');
   });
 })();
