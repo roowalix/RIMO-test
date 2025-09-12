@@ -4,43 +4,45 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>RIMO — 오늘의 라이딩 크루</title>
-
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin />
 <style>
   :root{
-    --btn:#2A2F4F; --btnHover:#3C4380;
+    --border-1:#2b304f;
+    --muted:#b9b9cc;
     --imminent-bg: rgba(255,199,94,.16);
     --imminent-bd: rgba(255,199,94,.45);
-    --tab-bg:#182039; --tab-bd:#2d3559; --tab-ink:#e6e8ef;
-    --tab-pri:#26346d; --tab-pri-bd:#3b53a8;
-    --border-1:#2b2e48; --muted:#b9b9cc;
+
+    --t-red-br:rgba(255,93,93,.45);
+    --t-blue-br:rgba(122,167,255,.45);
+    --t-yellow-br:rgba(255,216,93,.48);
+    --t-green-br:rgba(86,211,100,.50);
+    --t-purple-br:rgba(167,139,250,.52);
   }
   *{box-sizing:border-box}
-  body{margin:0;background:#0b0b0f;color:#e8e8ef;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Arial,sans-serif}
-
-  header{position:sticky;top:0;z-index:5;background:rgba(11,11,15,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--border-1)}
+  body{ margin:0; background:#0b0b0f; color:#e8e8ef; font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Arial,sans-serif; }
+  header{position:sticky; top:0; z-index:5; background:rgba(11,11,15,.9); backdrop-filter:blur(8px); border-bottom:1px solid var(--border-1)}
   .bar{display:flex;gap:10px;align-items:center;padding:14px 16px;height:56px}
   .logo{font-weight:900}
   .title{font-weight:800;opacity:.9}
   .pill{margin-left:auto;padding:6px 10px;border-radius:999px;background:#151525;color:#b9b9cc;font-size:12px}
 
   main{padding:16px;max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:14px;padding-bottom:120px}
-  #map{height:360px;border-radius:14px;outline:1px solid var(--border-1);background:#0f1220}
-  .leaflet-container{z-index:1;border-radius:14px}
+  #map{height:360px;border-radius:14px;outline:1px solid var(--border-1)}
+  .leaflet-container{z-index:1}
 
+  /* ====== 공통 카드 스타일(어드민과 동일) ====== */
   .carousel{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:8px 4px 0}
   .carousel::-webkit-scrollbar{display:none}
   .card{
-    scroll-snap-align:start;width:304px;flex:0 0 auto;border-radius:14px;padding:14px;
-    display:flex;flex-direction:column;gap:8px;border:1px solid transparent;position:relative;
-    background:rgba(255,255,255,.04);
+    scroll-snap-align:start;width:304px;flex:0 0 auto;
+    border:1px solid var(--border-1); border-radius:14px; padding:14px;
+    display:flex; flex-direction:column; gap:8px; background:#141628; position:relative;
   }
-  .card h3{margin:0 0 2px;font-size:18px}
-  .meta{font-size:14px;color:var(--muted)}
+  .card h3{margin:0 0 4px 0;font-size:18px}
+  .meta{font-size:14px;color:#bfc2dc}
   .msg{font-size:14px}
-
-  .pillrow{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
-  .chip{padding:6px 9px;border-radius:999px;font-size:12px;font-weight:500;display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#e6e8ef}
+  .pillrow{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{padding:6px 9px;border-radius:999px;font-size:12px;font-weight:600;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#e6e8ef}
   .chip.pill-urban{background:#1e2d55;border-color:#2c4484}
   .chip.pill-curve{background:#2a1f56;border-color:#40307a}
   .chip.pill-tour{background:#1e3b3a;border-color:#2f5f5d}
@@ -48,33 +50,22 @@
   .chip.pill-balanced{background:#3a341e;border-color:#5a4f2f}
   .chip.pill-dynamic{background:#3a1f1f;border-color:#5a2f2f}
 
-  .imminent{
-    position:absolute;top:10px;right:10px;display:inline-flex;align-items:center;gap:6px;
-    padding:8px 10px;border-radius:10px;font-size:12px;font-weight:700;
-    background:var(--imminent-bg);border:1px solid var(--imminent-bd);color:#ffe7a6;
-    animation:pulse 2.2s ease-in-out infinite;
-  }
-  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,199,94,.35)}70%{box-shadow:0 0 0 8px rgba(255,199,94,0)}100%{box-shadow:0 0 0 0 rgba(255,199,94,0)}}
+  .route{display:flex;align-items:center;gap:8px;color:#e6e8ef}
+  .pin{width:8px;height:8px;border-radius:999px;background:currentColor}
+  .dash{flex:1;border-top:1px dashed currentColor;opacity:.6}
 
-  .join{margin-top:2px;width:100%;padding:14px;border-radius:12px;border:none;color:#fff;font-weight:800;background:rgba(255,255,255,.16);cursor:pointer}
-  .card.selected{box-shadow:0 0 0 2px rgba(255,255,255,.12) inset}
+  /* 보더 색(테마) — 카드 내 테마 라벨은 출력 안 함 */
+  .card[data-theme="red"]{border-color:var(--t-red-br)}
+  .card[data-theme="blue"]{border-color:var(--t-blue-br)}
+  .card[data-theme="yellow"]{border-color:var(--t-yellow-br)}
+  .card[data-theme="green"]{border-color:var(--t-green-br)}
+  .card[data-theme="purple"]{border-color:var(--t-purple-br)}
 
-  .pin{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;color:#0b0b0f;border:2px solid rgba(255,255,255,.9);box-shadow:0 1px 6px rgba(0,0,0,.35)}
-
-  .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:4000;background:rgba(0,0,0,.45);padding:22px 12px}
-  .modal.show{display:flex}
-  #joinSheet.panel{width:calc(100% - 24px);max-width:680px;background:#0e1222;border:1px solid #2b304f;border-radius:18px;box-shadow:0 14px 40px rgba(0,0,0,.55);padding:16px 16px 20px}
-  #joinSheet h4{margin:4px 0 10px;font-size:18px}
-  .hint{color:#cfd2ff;line-height:1.5;margin-bottom:10px}
-  #preview.pre{background:#0b1020;border:1px solid #293059;border-radius:12px;padding:12px;white-space:pre-wrap;line-height:1.4;min-height:96px;max-height:42vh;overflow:auto;color:#e6e9ff}
-  .modal-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px;padding-bottom:6px}
-  .modal-actions button{flex:1;min-width:110px;max-width:160px;padding:12px 18px;border-radius:12px;border:none;background:var(--btn);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
-  .modal-actions button:hover{background:var(--btnHover)}
+  .imminent{position:absolute;top:10px;right:10px;display:inline-flex;gap:6px;padding:8px 10px;border-radius:10px;font-size:12px;font-weight:800;background:var(--imminent-bg);border:1px solid var(--imminent-bd);color:#ffe7a6}
 
   .tabbar{position:fixed;left:0;right:0;bottom:16px;z-index:1500;display:flex;gap:12px;justify-content:center}
-  .tabbar .tab{background:var(--tab-bg);border:1px solid var(--tab-bd);color:var(--tab-ink);padding:12px 18px;border-radius:22px;font-weight:800;text-decoration:none;font-size:14px}
-  .tabbar .tab.primary{background:var(--tab-pri);border-color:var(--tab-pri-bd)}
-  body.modal-open .tabbar{pointer-events:none;opacity:.28;filter:saturate(.2) blur(1px);transform:translateY(2px)}
+  .tabbar .tab{background:#182039;border:1px solid #2d3559;color:#e6e8ef;padding:12px 18px;border-radius:22px;font-weight:800;text-decoration:none;font-size:14px}
+  .tabbar .tab.primary{background:#26346d;border-color:#3b53a8}
 </style>
 </head>
 <body>
@@ -87,7 +78,7 @@
 </header>
 
 <main>
-  <div id="map" class="panel"></div>
+  <div id="map"></div>
   <section id="list" class="carousel"></section>
 </main>
 
@@ -97,61 +88,49 @@
   <a href="rimo_ambassadors.html" class="tab">엠버서더</a>
 </nav>
 
-<!-- 합류 안내 모달 -->
-<div class="modal" id="joinModal" role="dialog" aria-modal="true" aria-labelledby="joinTitle">
-  <div class="sheet panel" id="joinSheet">
-    <h4 id="joinTitle">✅ 합류 신청하기</h4>
-    <div class="hint">아래 버튼으로 <b>운영자 1:1 채팅</b>을 열어 붙여 넣어 주세요. 승인되면 라이더 크루 채팅방으로 초대됩니다.</div>
-    <div id="preview" class="pre"></div>
-    <div class="modal-actions">
-      <button id="goAdmin">이대로 신청하기</button>
-      <button id="editProfile">프로필 수정</button>
-      <button id="copyProfileBtn">다시 복사</button>
-    </div>
-  </div>
-</div>
-
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin></script>
 <script>
-/* ===== 공통 상수 ===== */
-const ADMIN_DM = "http://pf.kakao.com/_ceUDn/chat";
-const LS_KEY   = 'rimo_profile_v1';
-const PUBLIST_KEY = 'rimo_published_cards_server_cache';
-const EXP_MIN_AFTER_START = 5; // 출발 +5분까지 보이기
+/* ===== 상수 ===== */
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw7jNF2Qk0IqOSQhsGPJW5I7ifiSNl74FyNRTdHvi9jXikDDZAM19RG6zwNMakwPukn9w/exec";
-
-/* UI 보조 */
+const CACHE_KEY   = "rimo_published_cards_server_cache";
+const GRACE_MS    = 5*60*1000; // 출발 +5분까지 노출
 document.getElementById('today').textContent =
   new Date().toLocaleDateString('ko-KR',{month:'long',day:'numeric',weekday:'short'});
 
-/* 테마 색상 (지도/카드) */
-const THEMES = {
-  red:    { base:'#ff4d4d', cardBg:'rgba(255,77,77,.14)',  border:'rgba(255,77,77,.55)'},
-  yellow: { base:'#ffd24d', cardBg:'rgba(255,210,77,.16)', border:'rgba(255,210,77,.55)'},
-  blue:   { base:'#5b8cff', cardBg:'rgba(91,140,255,.16)', border:'rgba(91,140,255,.55)'},
-  green:  { base:'#46d37d', cardBg:'rgba(70,211,125,.16)', border:'rgba(70,211,125,.55)'},
-  purple: { base:'#a78bfa', cardBg:'rgba(167,139,250,.16)', border:'rgba(167,139,250,.55)'},
-};
-
 /* 유틸 */
-const $ = (s,p=document)=>p.querySelector(s);
 function pad(n){return String(n).padStart(2,'0')}
-function formatKDate(d){return `${d.getMonth()+1}월 ${d.getDate()}일 ${pad(d.getHours())}:${pad(d.getMinutes())}`}
-function normalizeArr(v){ if(Array.isArray(v)) return v; if(v==null) return []; return String(v).split(/[|,]/).map(s=>s.trim()).filter(Boolean); }
-function parseStartISO(rec){
-  if(rec.datetime){ const d=new Date(rec.datetime); if(!isNaN(d)) return d; }
-  if(rec.datetime_display){
-    const m = String(rec.datetime_display).match(/(\d+)월\s+(\d+)일\s+(\d+):(\d+)/);
-    if(m){ const now=new Date(); return new Date(now.getFullYear(), m[1]-1, m[2], m[3], m[4], 0); }
-  }
-  return null;
+function formatKDate(dt){return `${dt.getMonth()+1}월 ${dt.getDate()}일 ${pad(dt.getHours())}:${pad(dt.getMinutes())}`}
+function toList(v){
+  if (v==null) return [];
+  if (Array.isArray(v)) return v.map(x=>String(x).trim()).filter(Boolean);
+  const s=String(v).trim();
+  if (!s) return [];
+  if (/^\[Ljava\.lang\.Object;/.test(s)) return [];
+  try{ const j=JSON.parse(s); if(Array.isArray(j)) return j.map(x=>String(x).trim()).filter(Boolean); }catch(_){}
+  return s.split(/[,\|/·]/).map(x=>x.trim()).filter(Boolean);
+}
+function normalizeRow(it){
+  return {
+    id: it.id || `id_${Math.random().toString(36).slice(2,8)}`,
+    title: it.title||'(제목 없음)',
+    datetime: it.datetime || it.date || '',
+    datetime_display: it.datetime_display || (it.datetime?formatKDate(new Date(it.datetime)):''),
+    from: it.from||'-', to: it.to||'-',
+    from_lat:+it.from_lat||null, from_lng:+it.from_lng||null, to_lat:+it.to_lat||null, to_lng:+it.to_lng||null,
+    cc: it.cc||'',
+    styles: toList(it.styles),
+    pace: toList(it.pace),
+    message: it.message||'',
+    remaining: Number.isFinite(+it.remaining)? +it.remaining : 0,
+    capacity:  Number.isFinite(+it.capacity)?  +it.capacity  : 0,
+    theme: it.theme||'blue'
+  };
 }
 
-/* 데이터 로드 (fetch → JSONP 폴백) */
+/* 데이터 로드(CORS → fetch, 실패 시 JSONP, 최종 로컬 캐시) */
 function fetchJSONP(url, timeoutMs=9000){
   return new Promise((resolve,reject)=>{
-    const cb='__rimo_cb_'+Date.now();
-    const s=document.createElement('script');
+    const cb='__rimo_cb_'+Date.now(); const s=document.createElement('script');
     const t=setTimeout(()=>{cleanup();reject(new Error('JSONP timeout'));},timeoutMs);
     function cleanup(){ delete window[cb]; s.remove(); clearTimeout(t); }
     window[cb]=data=>{ cleanup(); resolve(data); };
@@ -160,209 +139,97 @@ function fetchJSONP(url, timeoutMs=9000){
     document.body.appendChild(s);
   });
 }
-async function loadFromServer(){
-  // 1) 캐시 먼저
-  let cached=[]; try{ cached=JSON.parse(localStorage.getItem(PUBLIST_KEY)||'[]'); }catch(_){}
-  if (cached.length) renderAll(cached);
+async function loadCrews(){
+  let cached=[]; try{ cached=JSON.parse(localStorage.getItem(CACHE_KEY)||'[]'); }catch(_){}
+  if(cached.length) renderAll(cached.map(normalizeRow));
 
-  // 2) 표준 fetch
   try{
-    const res = await fetch(WEB_APP_URL+'?op=list&_='+Date.now(), {cache:'no-store'});
-    if(res.ok){
-      const data = await res.json();
-      const rows = Array.isArray(data) ? data : (Array.isArray(data?.rows) ? data.rows : []);
-      if(rows.length){ localStorage.setItem(PUBLIST_KEY, JSON.stringify(rows)); return rows; }
+    const r=await fetch(WEB_APP_URL+'?op=list&_='+Date.now(),{cache:'no-store'});
+    if(r.ok){
+      const j=await r.json(); const rows=Array.isArray(j)?j:(Array.isArray(j?.rows)?j.rows:[]);
+      localStorage.setItem(CACHE_KEY, JSON.stringify(rows));
+      return rows.map(normalizeRow);
     }
-  }catch(e){ console.warn('fetch list failed; jsonp fallback', e); }
+  }catch(_){}
 
-  // 3) JSONP 폴백
   try{
-    const data = await fetchJSONP(WEB_APP_URL+'?op=list');
-    const rows = Array.isArray(data) ? data : (Array.isArray(data?.rows) ? data.rows : []);
-    if(rows.length){ localStorage.setItem(PUBLIST_KEY, JSON.stringify(rows)); return rows; }
-  }catch(e){ console.warn('jsonp list failed', e); }
+    const j=await fetchJSONP(WEB_APP_URL+'?op=list'); const rows=Array.isArray(j)?j:(Array.isArray(j?.rows)?j.rows:[]);
+    if(rows.length){ localStorage.setItem(CACHE_KEY, JSON.stringify(rows)); return rows.map(normalizeRow); }
+  }catch(_){}
 
-  return cached;
+  return cached.map(normalizeRow);
 }
 
 /* 지도 */
-const map = L.map('map',{scrollWheelZoom:true});
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
-const group=L.featureGroup().addTo(map);
-const arcs=L.layerGroup().addTo(map);
-
+let map, group, arcs;
+function initMap(){
+  map=L.map('map',{scrollWheelZoom:true});
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
+  group=L.featureGroup().addTo(map);
+  arcs=L.layerGroup().addTo(map);
+}
 function makePin(color,label){
-  return L.divIcon({className:'pin',
-    html:`<div class="pin" style="background:${color}">${label}</div>`,
-    iconSize:[28,28],iconAnchor:[14,14]
-  });
+  return L.divIcon({className:'pin',html:`<div style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;color:#0b0b0f;border:2px solid rgba(255,255,255,.9);box-shadow:0 1px 6px rgba(0,0,0,.35);background:${color}">${label}</div>`,iconSize:[28,28],iconAnchor:[14,14]});
 }
-function arcCoords(aLat,aLng,bLat,bLng,k=0.18){
-  const x1=aLng,y1=aLat,x2=bLng,y2=bLat,mx=(x1+x2)/2,my=(y1+y2)/2;
-  const vx=x2-x1,vy=y2-y1,len=Math.hypot(vx,vy)||1;
-  const nx=-vy/len,ny=vx/len; let off=len*k; if(off<0.01) off=0.01;
-  const cx=mx+nx*off,cy=my+ny*off; return [[y1,x1],[cy,cx],[y2,x2]];
-}
+function arcCoords(aLat,aLng,bLat,bLng,k=.18){const x1=aLng,y1=aLat,x2=bLng,y2=bLat,mx=(x1+x2)/2,my=(y1+y2)/2,vx=x2-x1,vy=y2-y1,len=Math.hypot(vx,vy)||1,nx=-vy/len,ny=vx/len,off=Math.max(len*k,0.01);const cx=mx+nx*off,cy=my+ny*off;return [[y1,x1],[cy,cx],[y2,x2]];}
 function renderMap(crews){
   group.clearLayers(); arcs.clearLayers();
   const bounds=L.latLngBounds([]);
   crews.forEach(c=>{
-    const t=THEMES[c.theme]||THEMES.blue;
-    if(!(isFinite(c.from_lat)&&isFinite(c.from_lng)&&isFinite(c.to_lat)&&isFinite(c.to_lng))) return;
-    const ms=L.marker([c.from_lat,c.from_lng],{icon:makePin(t.base,'S')}).addTo(group);
-    const md=L.marker([c.to_lat,c.to_lng],{icon:makePin(t.base,'D')}).addTo(group);
-    const a=L.polyline(arcCoords(c.from_lat,c.from_lng,c.to_lat,c.to_lng),{color:t.base,weight:2.5,dashArray:"6 8",opacity:.9}).addTo(arcs);
-    [ms,md].forEach(m=>bounds.extend(m.getLatLng()));
-    a.getLatLngs().forEach(p=>bounds.extend(p));
+    if(!(c.from_lat&&c.from_lng&&c.to_lat&&c.to_lng)) return;
+    const color = '#7aa7ff';
+    const ms=L.marker([c.from_lat,c.from_lng],{icon:makePin(color,'S')}).addTo(group);
+    const md=L.marker([c.to_lat,c.to_lng],{icon:makePin(color,'D')}).addTo(group);
+    const a=L.polyline(arcCoords(c.from_lat,c.from_lng,c.to_lat,c.to_lng),{color:color,weight:2.5,dashArray:"6 8",opacity:.9}).addTo(arcs);
+    [ms,md].forEach(m=>bounds.extend(m.getLatLng())); a.getLatLngs().forEach(p=>bounds.extend(p));
   });
   if(bounds.isValid()) map.fitBounds(bounds.pad(0.25));
 }
 
 /* 카드 */
-const listEl=document.getElementById('list');
-function chipClass(label){
-  switch(String(label).toLowerCase()){
-    case 'urban': return 'pill-urban';
-    case 'curve': return 'pill-curve';
-    case 'tour': return 'pill-tour';
-    case 'easy': return 'pill-easy';
-    case 'balanced': return 'pill-balanced';
-    case 'dynamic': return 'pill-dynamic';
-    default: return '';
-  }
-}
-function chip(label){ return `<span class="chip ${chipClass(label)}">${label}</span>`; }
-
+function chipClass(v){ switch(String(v).toLowerCase()){ case 'urban':return 'pill-urban'; case 'curve':return 'pill-curve'; case 'tour':return 'pill-tour'; case 'easy':return 'pill-easy'; case 'balanced':return 'pill-balanced'; case 'dynamic':return 'pill-dynamic'; default:return ''; } }
+function chip(v){ return `<span class="chip ${chipClass(v)}">${v}</span>`; }
 function renderCards(crews){
-  listEl.innerHTML="";
+  const list=document.getElementById('list'); list.innerHTML='';
   crews.forEach(c=>{
-    const t=THEMES[c.theme]||THEMES.blue;
-    const styles = normalizeArr(c.styles);
-    const paces  = normalizeArr(c.pace);
-    const start  = parseStartISO(c);
-    const immin  = start ? (start - Date.now() <= 20*60*1000 && start - Date.now() > -5*60*1000) : false;
-
+    const joined=Math.max(0,(c.capacity||0)-(c.remaining||0));
     const el=document.createElement('article');
-    el.className="card"; el.dataset.id=c.id;
-    el.style.border=`1px solid ${t.border}`; el.style.background=t.cardBg;
+    el.className='card'; el.dataset.theme=c.theme;
+    const immin = (c.datetime && (Date.now() <= new Date(c.datetime).getTime()) && (new Date(c.datetime).getTime() - Date.now() < 30*60*1000));
     el.innerHTML=`
-      <h3>${c.title || '(제목 없음)'}</h3>
-      <div class="meta">⏰ ${c.datetime_display || (start?formatKDate(start):'-')}</div>
-      <div class="meta">📍 ${c.from || '-'} → ${c.to || '-'}</div>
-      <div class="msg">💬 ${c.message || '-'}</div>
-      ${immin ? `<div class="imminent">🚦 출발 임박</div>` : ``}
+      <h3>${c.title}</h3>
+      <div class="meta">⏰ ${c.datetime_display || (c.datetime?formatKDate(new Date(c.datetime)):'')}</div>
+      <div class="route"><span class="pin"></span><span>${c.from}</span><span class="dash"></span><span class="pin"></span><span>${c.to}</span></div>
+      ${c.message?`<div class="msg">💬 ${c.message}</div>`:''}
       <div class="pillrow">
-        ${styles.map(chip).join("")}
-        ${paces.map(chip).join("")}
-        ${c.cc ? chip(c.cc) : ""}
+        ${c.styles.map(chip).join('')}
+        ${c.pace.map(chip).join('')}
+        ${c.cc?chip(c.cc):''}
       </div>
-      <button class="join">👥 ${(c.remaining ?? 0)}/${(c.capacity ?? '-')} · ✅ 합류 신청</button>
+      <div class="meta">👥 ${joined}/${c.capacity||0}</div>
+      ${immin?`<div class="imminent">🚦 출발 임박</div>`:''}
     `;
-    el.querySelector('.join').addEventListener('click',()=>openJoinModal(c));
-    listEl.appendChild(el);
+    list.appendChild(el);
   });
 }
 
-/* 합류 모달 */
-const modal=document.getElementById('joinModal');
-const sheet=document.getElementById('joinSheet');
-const preview=document.getElementById('preview');
-function closeJoinModal(){ modal.classList.remove('show'); document.body.classList.remove('modal-open'); }
-modal.addEventListener('click', closeJoinModal);
-sheet.addEventListener('click', e=>e.stopPropagation());
-document.getElementById('editProfile').onclick=()=> location.href='rimo_profile.html';
-
-function loadProfile(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)||'{}'); }catch(_){ return {}; } }
-function composeText(crew, profile){
-  const styles=(normalizeArr(profile.styles)).join(' · ') || '-';
-  const paces =(normalizeArr(profile.pace  )).join(' · ') || '-';
-  return (
-`[✅ 합류 신청] ${crew.title}
-📍 출발 → 도착
-${crew.from || '-'} → ${crew.to || '-'}
-
-👤 라이더 : ${profile.name || '이름 미입력'} ${profile.icon || ''}
-🏍️ 바이크 : ${profile.bike || '미입력'}
-⏰ 선호 시간대 : ${profile.time || '-'}
-👥 탠덤 : ${profile.tandem ? '탠덤 ' + profile.tandem : '-'}
-
-🎯 스타일/페이스
-${styles} · ${paces}`
-  );
-}
-async function copyText(txt){
-  try{ await navigator.clipboard.writeText(txt); return true; }
-  catch(_){ const ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta);
-            ta.select(); document.execCommand('copy'); ta.remove(); return true; }
-}
-function openJoinModal(crew){
-  const profile=loadProfile();
-  const text=composeText(crew, profile);
-  preview.textContent=text;
-  copyText(text);
-  document.body.classList.add('modal-open');
-  modal.classList.add('show');
-  document.getElementById('goAdmin').onclick=()=>{ location.href=ADMIN_DM; };
-  document.getElementById('copyProfileBtn').onclick=()=> copyText(text);
-}
-
-/* 렌더 파이프라인 */
-function filterActiveRows(rows){
-  const now = Date.now();
-  return rows
-    .map(r=>({
-      id: r.id || r.ID || `crew_${Math.random().toString(36).slice(2,8)}`,
-      title: r.title || r.제목 || '',
-      datetime: r.datetime || r.Datetime || '',
-      datetime_display: r.datetime_display || r.Time || r.일시표시 || '',
-      from: r.from || r.출발 || '',
-      to: r.to || r.도착 || '',
-      from_lat: Number(r.from_lat ?? r.From_Lat ?? r.위도 ?? NaN),
-      from_lng: Number(r.from_lng ?? r.From_Lng ?? r.경도 ?? NaN),
-      to_lat:   Number(r.to_lat   ?? r.To_Lat   ?? r.도착위도 ?? NaN),
-      to_lng:   Number(r.to_lng   ?? r.To_Lng   ?? r.도착경도 ?? NaN),
-      capacity: Number(r.capacity ?? r.정원 ?? NaN),
-      remaining:Number(r.remaining?? r.잔여 ?? NaN),
-      cc: r.cc || r.배기량 || '',
-      styles: r.styles ?? r.스타일 ?? '',
-      pace: r.pace ?? r.페이스 ?? '',
-      message: r.message || r.메시지 || '',
-      theme: r.theme || r.테마 || 'blue',
-    }))
-    .filter(rec=>{
-      const start = parseStartISO(rec);
-      if(!start) return true;
-      const hideAfter = start.getTime() + EXP_MIN_AFTER_START*60*1000;
-      return Date.now() <= hideAfter;
-    })
-    .sort((a,b)=>{
-      const da=parseStartISO(a)?.getTime() ?? 0;
-      const db=parseStartISO(b)?.getTime() ?? 0;
-      return da - db;
-    });
-}
+/* 전체 렌더: 시간 필터(+5분 유예) 적용 */
 function renderAll(rows){
-  const active = filterActiveRows(rows);
-  renderCards(active);
-  renderMap(active);
+  const now=Date.now();
+  const live=rows.filter(r=>{
+    if(!r.datetime) return true;
+    const t=new Date(r.datetime).getTime();
+    return t + GRACE_MS >= now;
+  });
+  renderCards(live);
+  renderMap(live);
 }
 
 /* init */
 (async function init(){
-  const rows = await loadFromServer();
-  renderAll(rows.length ? rows : [{
-    id:"demo1", theme:"blue", title:"<예시 카드 — 관리자에서 발행하세요>",
-    datetime_display:"10월 10일 19:00",
-    from:"출발지", to:"도착지",
-    from_lat:37.5665, from_lng:126.9780, to_lat:37.55, to_lng:127.0,
-    remaining:0, capacity:4, styles:["Urban","Easy"], cc:"", message:"관리자 페이지에서 발행하면 이 예시는 사라집니다."
-  }]);
-
-  // 1분마다 자동 갱신 (만료/신규 반영)
-  setInterval(async()=>{
-    const latest = await loadFromServer();
-    renderAll(latest);
-  }, 60*1000);
+  initMap();
+  const rows = await loadCrews();
+  renderAll(rows);
 })();
 </script>
 </body>
