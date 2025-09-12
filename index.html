@@ -9,6 +9,7 @@
   :root{
     --border-1:#2b304f;
     --muted:#b9b9cc;
+
     --imminent-bg: rgba(255,199,94,.16);
     --imminent-bd: rgba(255,199,94,.45);
 
@@ -20,17 +21,20 @@
   }
   *{box-sizing:border-box}
   body{ margin:0; background:#0b0b0f; color:#e8e8ef; font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Arial,sans-serif; }
+
+  /* 헤더 */
   header{position:sticky; top:0; z-index:5; background:rgba(11,11,15,.9); backdrop-filter:blur(8px); border-bottom:1px solid var(--border-1)}
   .bar{display:flex;gap:10px;align-items:center;padding:14px 16px;height:56px}
   .logo{font-weight:900}
   .title{font-weight:800;opacity:.9}
   .pill{margin-left:auto;padding:6px 10px;border-radius:999px;background:#151525;color:#b9b9cc;font-size:12px}
 
+  /* 본문 */
   main{padding:16px;max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:14px;padding-bottom:120px}
   #map{height:360px;border-radius:14px;outline:1px solid var(--border-1)}
   .leaflet-container{z-index:1}
 
-  /* ====== 공통 카드 스타일(어드민과 동일) ====== */
+  /* ====== 공통 카드 스타일(어드민과 동일 톤) ====== */
   .carousel{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:8px 4px 0}
   .carousel::-webkit-scrollbar{display:none}
   .card{
@@ -41,6 +45,7 @@
   .card h3{margin:0 0 4px 0;font-size:18px}
   .meta{font-size:14px;color:#bfc2dc}
   .msg{font-size:14px}
+
   .pillrow{display:flex;flex-wrap:wrap;gap:6px}
   .chip{padding:6px 9px;border-radius:999px;font-size:12px;font-weight:600;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#e6e8ef}
   .chip.pill-urban{background:#1e2d55;border-color:#2c4484}
@@ -54,15 +59,28 @@
   .pin{width:8px;height:8px;border-radius:999px;background:currentColor}
   .dash{flex:1;border-top:1px dashed currentColor;opacity:.6}
 
-  /* 보더 색(테마) — 카드 내 테마 라벨은 출력 안 함 */
+  /* 테마별 보더(카드 안 라벨은 숨김 유지) */
   .card[data-theme="red"]{border-color:var(--t-red-br)}
   .card[data-theme="blue"]{border-color:var(--t-blue-br)}
   .card[data-theme="yellow"]{border-color:var(--t-yellow-br)}
   .card[data-theme="green"]{border-color:var(--t-green-br)}
   .card[data-theme="purple"]{border-color:var(--t-purple-br)}
 
-  .imminent{position:absolute;top:10px;right:10px;display:inline-flex;gap:6px;padding:8px 10px;border-radius:10px;font-size:12px;font-weight:800;background:var(--imminent-bg);border:1px solid var(--imminent-bd);color:#ffe7a6}
+  /* 출발 임박 배지 + 글로우 */
+  .imminent{
+    position:absolute;top:10px;right:10px;
+    display:inline-flex;gap:6px;align-items:center;
+    padding:8px 10px;border-radius:10px;font-size:12px;font-weight:800;
+    background:var(--imminent-bg);border:1px solid var(--imminent-bd);color:#ffe7a6;
+    animation:pulse 2.2s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(255,199,94,.35)}
+    70%{box-shadow:0 0 0 10px rgba(255,199,94,0)}
+    100%{box-shadow:0 0 0 0 rgba(255,199,94,0)}
+  }
 
+  /* 하단 탭 */
   .tabbar{position:fixed;left:0;right:0;bottom:16px;z-index:1500;display:flex;gap:12px;justify-content:center}
   .tabbar .tab{background:#182039;border:1px solid #2d3559;color:#e6e8ef;padding:12px 18px;border-radius:22px;font-weight:800;text-decoration:none;font-size:14px}
   .tabbar .tab.primary{background:#26346d;border-color:#3b53a8}
@@ -94,10 +112,11 @@
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw7jNF2Qk0IqOSQhsGPJW5I7ifiSNl74FyNRTdHvi9jXikDDZAM19RG6zwNMakwPukn9w/exec";
 const CACHE_KEY   = "rimo_published_cards_server_cache";
 const GRACE_MS    = 5*60*1000; // 출발 +5분까지 노출
+
 document.getElementById('today').textContent =
   new Date().toLocaleDateString('ko-KR',{month:'long',day:'numeric',weekday:'short'});
 
-/* 유틸 */
+/* ===== 유틸 ===== */
 function pad(n){return String(n).padStart(2,'0')}
 function formatKDate(dt){return `${dt.getMonth()+1}월 ${dt.getDate()}일 ${pad(dt.getHours())}:${pad(dt.getMinutes())}`}
 function toList(v){
@@ -127,10 +146,11 @@ function normalizeRow(it){
   };
 }
 
-/* 데이터 로드(CORS → fetch, 실패 시 JSONP, 최종 로컬 캐시) */
+/* ===== 데이터 로드 (fetch → JSONP → 캐시) ===== */
 function fetchJSONP(url, timeoutMs=9000){
   return new Promise((resolve,reject)=>{
-    const cb='__rimo_cb_'+Date.now(); const s=document.createElement('script');
+    const cb='__rimo_cb_'+Date.now();
+    const s=document.createElement('script');
     const t=setTimeout(()=>{cleanup();reject(new Error('JSONP timeout'));},timeoutMs);
     function cleanup(){ delete window[cb]; s.remove(); clearTimeout(t); }
     window[cb]=data=>{ cleanup(); resolve(data); };
@@ -153,14 +173,15 @@ async function loadCrews(){
   }catch(_){}
 
   try{
-    const j=await fetchJSONP(WEB_APP_URL+'?op=list'); const rows=Array.isArray(j)?j:(Array.isArray(j?.rows)?j.rows:[]);
+    const j=await fetchJSONP(WEB_APP_URL+'?op=list');
+    const rows=Array.isArray(j)?j:(Array.isArray(j?.rows)?j.rows:[]);
     if(rows.length){ localStorage.setItem(CACHE_KEY, JSON.stringify(rows)); return rows.map(normalizeRow); }
   }catch(_){}
 
   return cached.map(normalizeRow);
 }
 
-/* 지도 */
+/* ===== 지도 ===== */
 let map, group, arcs;
 function initMap(){
   map=L.map('map',{scrollWheelZoom:true});
@@ -186,7 +207,7 @@ function renderMap(crews){
   if(bounds.isValid()) map.fitBounds(bounds.pad(0.25));
 }
 
-/* 카드 */
+/* ===== 카드 ===== */
 function chipClass(v){ switch(String(v).toLowerCase()){ case 'urban':return 'pill-urban'; case 'curve':return 'pill-curve'; case 'tour':return 'pill-tour'; case 'easy':return 'pill-easy'; case 'balanced':return 'pill-balanced'; case 'dynamic':return 'pill-dynamic'; default:return ''; } }
 function chip(v){ return `<span class="chip ${chipClass(v)}">${v}</span>`; }
 function renderCards(crews){
@@ -195,7 +216,8 @@ function renderCards(crews){
     const joined=Math.max(0,(c.capacity||0)-(c.remaining||0));
     const el=document.createElement('article');
     el.className='card'; el.dataset.theme=c.theme;
-    const immin = (c.datetime && (Date.now() <= new Date(c.datetime).getTime()) && (new Date(c.datetime).getTime() - Date.now() < 30*60*1000));
+    const t = c.datetime ? new Date(c.datetime).getTime() : null;
+    const immin = t && (t - Date.now() < 30*60*1000) && (t + GRACE_MS >= Date.now()); // 출발 30분 전~출발+5분
     el.innerHTML=`
       <h3>${c.title}</h3>
       <div class="meta">⏰ ${c.datetime_display || (c.datetime?formatKDate(new Date(c.datetime)):'')}</div>
@@ -213,7 +235,7 @@ function renderCards(crews){
   });
 }
 
-/* 전체 렌더: 시간 필터(+5분 유예) 적용 */
+/* ===== 전체 렌더: 시간 필터(+5분 유예) ===== */
 function renderAll(rows){
   const now=Date.now();
   const live=rows.filter(r=>{
@@ -225,7 +247,7 @@ function renderAll(rows){
   renderMap(live);
 }
 
-/* init */
+/* ===== init ===== */
 (async function init(){
   initMap();
   const rows = await loadCrews();
