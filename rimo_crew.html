@@ -17,21 +17,19 @@
     --t-green:#56d364;    --t-green-bg:rgba(86,211,100,.16);   --t-green-br:rgba(86,211,100,.42);
     --t-purple:#a78bfa;   --t-purple-bg:rgba(167,139,250,.16); --t-purple-br:rgba(167,139,250,.42);
 
-    /* 라벨/간격(절대값) */
+    /* 라벨/간격 */
     --label-w: 56px; --label-gap: 2px;
     --label-w-sm: 44px; --label-gap-sm: 2px;
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Arial,sans-serif}
 
-  /* 헤더 */
   header{position:sticky;top:0;z-index:5;background:rgba(11,11,15,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
   .bar{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:12px 16px}
   .title{font-weight:900;font-size:16px}
   .home-btn{width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:30px;border-radius:8px;border:none;background:transparent;cursor:pointer;transition:background .2s}
   .home-btn:hover{background:rgba(255,255,255,.08)}
 
-  /* 본문 */
   main{padding:16px;display:grid;gap:16px;max-width:980px;margin:0 auto;padding-bottom:120px}
   .panel{background:var(--tile);border:1px solid var(--line);border-radius:14px;padding:4px 14px 16px 16px}
 
@@ -48,12 +46,10 @@
 
   .coords{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 
-  /* 토글(상단 필버튼) */
   .toggles{display:flex;gap:10px;flex-wrap:wrap;margin:0}
   .toggle{display:inline-flex;align-items:center;gap:14px;padding:8px 12px;border-radius:999px;color:#e6e9ff;font-size:13px;cursor:pointer;user-select:none;white-space:nowrap;transition:transform .15s, box-shadow .15s;background:var(--chip-bg); border:1px solid var(--chip-bd)}
   .toggle.active{border-color:var(--accent); background:rgba(122,167,255,.16); box-shadow:0 0 10px var(--accent-glow); transform:translateY(-1px) scale(1.01); font-weight:500}
 
-  /* 테마 선택 버튼 */
   .themes{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
   .theme-btn{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:0;padding:4px 8px;border-radius:16px;border:1px solid #2b2e48;background:#14172a;color:#e8e8ef;font-size:12px;font-weight:500;cursor:pointer;user-select:none;flex:0 0 auto;white-space:nowrap;transition:transform .12s, box-shadow .12s}
   .theme-btn .badge{width:14px;height:14px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;background:#0f1020;border:0}
@@ -68,23 +64,14 @@
   .btn.primary{background:#2a5bff;border-color:#3d6aff}
   .btnbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;justify-content:center;}
 
-  /* ===== 공통 카드 컴포넌트 ===== */
+  /* ===== 공통 카드 컴포넌트 (메인과 동일) ===== */
   .r-card{
     position:relative; background:#121428; border:1px solid rgba(255,255,255,.14);
     border-radius:16px; padding:14px; box-shadow:0 2px 14px rgba(0,0,0,.28);
-    cursor:pointer;
   }
   .r-card h3{margin:0 0 6px;font-size:18px;font-weight:800}
   .r-meta{display:flex;align-items:center;gap:8px;color:#cfd2ff;font-size:14px}
-  /* 기존 .r-route 정의가 있다면 아래로 덮어쓰기 */
-.r-route{
-  display:block;
-  margin:6px 0 4px;
-  color:#cfd2ff;      
-  font-size:14px;
-}
-
-/* 더 이상 쓰지 않으면 .r-dot, .r-dash는 남겨도 무방(영향 없음) */
+  .r-route{display:flex;align-items:center;gap:8px;margin:6px 0 4px;color:#ced2f9}
   .r-dot{width:8px;height:8px;border-radius:999px;background:currentColor;opacity:.9}
   .r-dash{flex:1;border-top:1px dashed currentColor;opacity:.8}
   .r-msg{color:#e6e8ff;font-size:14px;margin:6px 0}
@@ -106,16 +93,7 @@
     color:#dfe3ff;font-weight:800;display:flex;align-items:center;gap:10px;justify-content:flex-start
   }
 
-  /* 카드 우측 상단 ‘삭제’ 버튼 */
-  .r-del{
-    position:absolute; top:10px; right:10px;
-    padding:6px 8px; border-radius:8px; border:1px solid rgba(255,93,93,.38);
-    background:rgba(255,93,93,.12); color:#ffb3b3; font-size:12px; font-weight:800;
-    cursor:pointer;
-  }
-  .r-del:hover{ background:rgba(255,93,93,.22) }
-
-  /* 테마별 보더(테마 라벨은 출력 X) */
+  /* 테마 보더 */
   .r-card[data-theme="red"]   { border-color:var(--t-red-br) }
   .r-card[data-theme="blue"]  { border-color:var(--t-blue-br) }
   .r-card[data-theme="yellow"]{ border-color:var(--t-yellow-br) }
@@ -286,19 +264,12 @@ const qsa=(s,p=document)=>Array.from(p.querySelectorAll(s));
 const save=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
 const load=(k,def)=>{try{return JSON.parse(localStorage.getItem(k)||JSON.stringify(def))}catch(e){return def}};
 
-/* ---------- 상태 ---------- */
+/* 상태 */
 const DRAFT_KEY='rimo_create_draft_v6';
 const PUBLIST_KEY='rimo_published_cards_server_cache';
-const HIDE_KEY='rimo_hidden_cards_v1';
 let editingId = null;
 
-/* 숨김 목록 */
-function loadHiddenSet(){ try{ return new Set(JSON.parse(localStorage.getItem(HIDE_KEY)||'[]')); }catch(_){ return new Set(); } }
-function saveHiddenSet(set){ localStorage.setItem(HIDE_KEY, JSON.stringify([...set])); }
-function hideCardId(id){ const s=loadHiddenSet(); s.add(id); saveHiddenSet(s); }
-function unhideCardId(id){ const s=loadHiddenSet(); s.delete(id); saveHiddenSet(s); }
-
-/* ---------- 토글 ---------- */
+/* 토글 */
 function makeToggle(label, active=false){
   const el=document.createElement('button');
   el.type='button';
@@ -316,7 +287,7 @@ function selectedToggles(containerId){
   return qsa('#'+containerId+' .toggle.active').map(el=>el.dataset.val);
 }
 
-/* ---------- 테마 ---------- */
+/* 테마 */
 function renderThemes(selected='blue'){
   const bar = qs('#themeBar'); bar.innerHTML='';
   THEME_OPTS.forEach(opt=>{
@@ -337,9 +308,19 @@ function getSelectedTheme(){
   return cur ? cur.dataset.theme : 'blue';
 }
 
-/* ---------- 날짜 ---------- */
+/* 날짜 */
+function formatKDate(dt){
+  const y  = dt.getFullYear();
+  const mm = String(dt.getMonth()+1).padStart(2,'0');
+  const dd = String(dt.getDate()).padStart(2,'0');
+  let h = dt.getHours();
+  const ampm = (h >= 12) ? '오후' : '오전';
+  h = h % 12; if (h === 0) h = 12;
+  const hh = String(h).padStart(2,'0');
+  const mi = String(dt.getMinutes()).padStart(2,'0');
+  return `${y}/${mm}/${dd}/${ampm} ${hh}:${mi}`;
+}
 const pad=n=>String(n).padStart(2,'0');
-function formatKDate(dt){return `${dt.getMonth()+1}월 ${dt.getDate()}일 ${pad(dt.getHours())}:${pad(dt.getMinutes())}`}
 function toLocalDatetimeValue(d){
   const y=d.getFullYear(), m=pad(d.getMonth()+1), day=pad(d.getDate()), hh=pad(d.getHours()), mi=pad(d.getMinutes());
   return `${y}-${m}-${day}T${hh}:${mi}`;
@@ -353,7 +334,7 @@ function getDateFromInput(){
   return new Date(Y, M-1, D, h, m||0, 0);
 }
 
-/* ---------- 좌표 자동 분리 ---------- */
+/* 좌표 자동 분리 */
 function extractCoords(text){
   if(!text) return null;
   text = String(text).trim();
@@ -383,17 +364,21 @@ function attachAutoSplit(latId,lngId){
   latEl.addEventListener('change', onChange); lngEl.addEventListener('change', onChange);
 }
 
-/* ---------- 값 보정 ---------- */
+/* 값 보정 */
 function normList(v){
   if(Array.isArray(v)) return v.map(x=>String(x));
   if(v==null) return [];
   let s=String(v).trim();
-  try{ if(s.startsWith('[') && s.endsWith(']')){ const a=JSON.parse(s); if(Array.isArray(a)) return a.map(x=>String(x)); } }catch(_){}
+  try{
+    if(s.startsWith('[') && s.endsWith(']')){
+      const a=JSON.parse(s); if(Array.isArray(a)) return a.map(x=>String(x));
+    }
+  }catch(_){}
   if(/Ljava\.lang\.Object/i.test(s)) return [];
   return s.split(/[,\|]/).map(t=>t.trim()).filter(Boolean);
 }
 
-/* ---------- 폼 수집/세팅 ---------- */
+/* 폼 수집/세팅 */
 function getForm(){
   const dt = getDateFromInput() || new Date();
   return {
@@ -435,7 +420,7 @@ function setForm(it){
   renderThemes(it.theme || 'blue');
 }
 
-/* ---------- 유효성 ---------- */
+/* 유효성 */
 function validate(form){
   const errs=[];
   if(!form.title) errs.push('제목을 입력하세요.');
@@ -449,7 +434,7 @@ function validate(form){
   return errs;
 }
 
-/* ---------- 서버 연동 (쓰기: no-cors, 읽기: fetch→JSONP 폴백) ---------- */
+/* 서버 연동 (쓰기: no-cors, 읽기: fetch→JSONP 폴백) */
 function fetchJSONP(url, timeoutMs=9000){
   return new Promise((resolve,reject)=>{
     const cb='__rimo_cb_'+Date.now();
@@ -494,7 +479,7 @@ async function loadFromServer(){
   return cached;
 }
 
-/* ---------- 저장/발행/수정/초기화 ---------- */
+/* 저장/발행/수정/초기화 */
 function saveDraft(){ const form=getForm(); save(DRAFT_KEY, form); alert('드래프트 저장 완료'); }
 async function saveOrPublish(){
   const form=getForm();
@@ -504,16 +489,12 @@ async function saveOrPublish(){
   if(!editingId){
     form.id = `crew_${Date.now().toString(36)}`;
     await sendToSheet(form,'publish');
-    // 새로 만든 카드는 혹시 동일 id가 숨김 목록에 있더라도 보이도록 보장
-    unhideCardId(form.id);
     list.unshift(form); save(PUBLIST_KEY,list); renderCards(list);
     qs('#cardsPanel')?.scrollIntoView({behavior:'smooth', block:'start'});
     alert('발행 요청을 보냈습니다.');
   }else{
     form.id = editingId;
     await sendToSheet(form,'update');
-    // 수정 저장 시에도 보이도록 보장
-    unhideCardId(form.id);
     const idx=list.findIndex(x=>x.id===editingId);
     if(idx>=0) list[idx]=form; else list.unshift(form);
     save(PUBLIST_KEY,list); renderCards(list);
@@ -537,7 +518,7 @@ function exitEditMode(){
 }
 function resetForm(){ localStorage.removeItem(DRAFT_KEY); location.reload(); }
 
-/* ---------- 카드 렌더(공통 디자인, 잔여/정원 표기 + 로컬 '삭제') ---------- */
+/* 카드 렌더(공통 디자인) */
 function cls(label){
   switch(String(label).toLowerCase()){
     case 'urban': return 'is-urban';
@@ -553,56 +534,40 @@ function chip(label){ return `<span class="r-chip ${cls(label)}">${label}</span>
 
 function renderCards(list){
   const box=qs('#cards'); box.innerHTML='';
-  const hidden = loadHiddenSet();
-  const view = Array.isArray(list) ? list.filter(it=>!hidden.has(it.id)) : [];
-
-  if(view.length===0){ box.innerHTML='<div class="hint">아직 발행된 카드가 없습니다.</div>'; return; }
-
-  view.forEach(it=>{
+  if(!list || list.length===0){ box.innerHTML='<div class="hint">아직 발행된 카드가 없습니다.</div>'; return; }
+  list.forEach(it=>{
     const theme = it.theme || 'blue';
     const styles=normList(it.styles);
     const pace  =normList(it.pace);
     const dt    = new Date(it.datetime || Date.now());
     const when  = it.datetime_display || formatKDate(dt);
-    const remain = Number.isFinite(+it.remaining) ? +it.remaining : 0;
-    const cap    = Number.isFinite(+it.capacity)  ? +it.capacity  : 0;
+    const joined = (it.capacity? (it.capacity - (it.remaining ?? 0)) : 0);
 
     const el=document.createElement('article');
     el.className='r-card'; el.dataset.theme=theme; el.dataset.id=it.id;
 
     el.innerHTML = `
-      <button type="button" class="r-del" title="이 카드를 어드민 목록에서만 숨깁니다. (시트 데이터는 유지)">삭제</button>
       <h3>${it.title||'(제목 없음)'}</h3>
       <div class="r-meta">⏰ <span>${when}</span></div>
-      <!-- 교체할 부분 (한 줄) -->
-<div class="r-route">📍 ${it.from || '-'} - ${it.to || '-'}</div>
+      <div class="r-route" style="color:#cfd2ff">
+        <span class="r-dot"></span><span>${it.from||'-'}</span>
+        <span class="r-dash"></span>
+        <span class="r-dot"></span><span>${it.to||'-'}</span>
+      </div>
       <div class="r-msg">💬 ${it.message||'-'}</div>
       <div class="r-chips">
         ${styles.map(chip).join('')}
         ${pace.map(chip).join('')}
         ${it.cc ? `<span class="r-chip">${it.cc}</span>` : ``}
       </div>
-      <div class="r-btm">👥 ${remain}/${cap}</div>
+      <div class="r-btm">👥 ${it.capacity ? `${joined}/${it.capacity}` : ''}</div>
     `;
-
-    // 카드 클릭 → 편집
     el.addEventListener('click', ()=> startEdit(it));
-    // 삭제 버튼 → 로컬 숨김
-    el.querySelector('.r-del').addEventListener('click',(e)=>{
-      e.stopPropagation();
-      if(confirm('이 카드를 어드민 목록에서 숨길까요?\n(구글 시트 데이터는 삭제되지 않습니다)')){
-        hideCardId(it.id);
-        el.remove();
-        // 빈 상태면 안내 표시
-        if(!qs('.r-card')) box.innerHTML='<div class="hint">아직 발행된 카드가 없습니다.</div>';
-      }
-    });
-
     box.appendChild(el);
   });
 }
 
-/* ---------- 초기화 ---------- */
+/* 초기화 */
 (async function init(){
   renderToggles('styleToggles', STYLE_OPTS, []);
   renderToggles('paceToggles',  PACE_OPTS,  []);
