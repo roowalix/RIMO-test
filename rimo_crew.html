@@ -68,7 +68,7 @@
   .btn.primary{background:#2a5bff;border-color:#3d6aff}
   .btnbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;justify-content:center;}
 
-  /* ===== 공통 카드 컴포넌트 (메인과 동일 스타일) ===== */
+  /* ===== 공통 카드 컴포넌트 ===== */
   .r-card{
     position:relative; background:#121428; border:1px solid rgba(255,255,255,.14);
     border-radius:16px; padding:14px; box-shadow:0 2px 14px rgba(0,0,0,.28);
@@ -98,7 +98,16 @@
     color:#dfe3ff;font-weight:800;display:flex;align-items:center;gap:10px;justify-content:flex-start
   }
 
-  /* 테마별 보더 컬러만 적용(카드 내 테마 라벨은 출력 X) */
+  /* 카드 우측 상단 ‘삭제’ 버튼 */
+  .r-del{
+    position:absolute; top:10px; right:10px;
+    padding:6px 8px; border-radius:8px; border:1px solid rgba(255,93,93,.38);
+    background:rgba(255,93,93,.12); color:#ffb3b3; font-size:12px; font-weight:800;
+    cursor:pointer;
+  }
+  .r-del:hover{ background:rgba(255,93,93,.22) }
+
+  /* 테마별 보더(테마 라벨은 출력 X) */
   .r-card[data-theme="red"]   { border-color:var(--t-red-br) }
   .r-card[data-theme="blue"]  { border-color:var(--t-blue-br) }
   .r-card[data-theme="yellow"]{ border-color:var(--t-yellow-br) }
@@ -272,7 +281,14 @@ const load=(k,def)=>{try{return JSON.parse(localStorage.getItem(k)||JSON.stringi
 /* ---------- 상태 ---------- */
 const DRAFT_KEY='rimo_create_draft_v6';
 const PUBLIST_KEY='rimo_published_cards_server_cache';
+const HIDE_KEY='rimo_hidden_cards_v1';
 let editingId = null;
+
+/* 숨김 목록 */
+function loadHiddenSet(){ try{ return new Set(JSON.parse(localStorage.getItem(HIDE_KEY)||'[]')); }catch(_){ return new Set(); } }
+function saveHiddenSet(set){ localStorage.setItem(HIDE_KEY, JSON.stringify([...set])); }
+function hideCardId(id){ const s=loadHiddenSet(); s.add(id); saveHiddenSet(s); }
+function unhideCardId(id){ const s=loadHiddenSet(); s.delete(id); saveHiddenSet(s); }
 
 /* ---------- 토글 ---------- */
 function makeToggle(label, active=false){
@@ -480,12 +496,16 @@ async function saveOrPublish(){
   if(!editingId){
     form.id = `crew_${Date.now().toString(36)}`;
     await sendToSheet(form,'publish');
+    // 새로 만든 카드는 혹시 동일 id가 숨김 목록에 있더라도 보이도록 보장
+    unhideCardId(form.id);
     list.unshift(form); save(PUBLIST_KEY,list); renderCards(list);
     qs('#cardsPanel')?.scrollIntoView({behavior:'smooth', block:'start'});
     alert('발행 요청을 보냈습니다.');
   }else{
     form.id = editingId;
     await sendToSheet(form,'update');
+    // 수정 저장 시에도 보이도록 보장
+    unhideCardId(form.id);
     const idx=list.findIndex(x=>x.id===editingId);
     if(idx>=0) list[idx]=form; else list.unshift(form);
     save(PUBLIST_KEY,list); renderCards(list);
@@ -509,7 +529,7 @@ function exitEditMode(){
 }
 function resetForm(){ localStorage.removeItem(DRAFT_KEY); location.reload(); }
 
-/* ---------- 카드 렌더(공통 디자인, 잔여/정원 표기) ---------- */
+/* ---------- 카드 렌더(공통 디자인, 잔여/정원 표기 + 로컬 '삭제') ---------- */
 function cls(label){
   switch(String(label).toLowerCase()){
     case 'urban': return 'is-urban';
@@ -525,8 +545,12 @@ function chip(label){ return `<span class="r-chip ${cls(label)}">${label}</span>
 
 function renderCards(list){
   const box=qs('#cards'); box.innerHTML='';
-  if(!list || list.length===0){ box.innerHTML='<div class="hint">아직 발행된 카드가 없습니다.</div>'; return; }
-  list.forEach(it=>{
+  const hidden = loadHiddenSet();
+  const view = Array.isArray(list) ? list.filter(it=>!hidden.has(it.id)) : [];
+
+  if(view.length===0){ box.innerHTML='<div class="hint">아직 발행된 카드가 없습니다.</div>'; return; }
+
+  view.forEach(it=>{
     const theme = it.theme || 'blue';
     const styles=normList(it.styles);
     const pace  =normList(it.pace);
@@ -539,6 +563,7 @@ function renderCards(list){
     el.className='r-card'; el.dataset.theme=theme; el.dataset.id=it.id;
 
     el.innerHTML = `
+      <button type="button" class="r-del" title="이 카드를 어드민 목록에서만 숨깁니다. (시트 데이터는 유지)">삭제</button>
       <h3>${it.title||'(제목 없음)'}</h3>
       <div class="r-meta">⏰ <span>${when}</span></div>
       <div class="r-route" style="color:#cfd2ff">
@@ -554,7 +579,20 @@ function renderCards(list){
       </div>
       <div class="r-btm">👥 ${remain}/${cap}</div>
     `;
+
+    // 카드 클릭 → 편집
     el.addEventListener('click', ()=> startEdit(it));
+    // 삭제 버튼 → 로컬 숨김
+    el.querySelector('.r-del').addEventListener('click',(e)=>{
+      e.stopPropagation();
+      if(confirm('이 카드를 어드민 목록에서 숨길까요?\n(구글 시트 데이터는 삭제되지 않습니다)')){
+        hideCardId(it.id);
+        el.remove();
+        // 빈 상태면 안내 표시
+        if(!qs('.r-card')) box.innerHTML='<div class="hint">아직 발행된 카드가 없습니다.</div>';
+      }
+    });
+
     box.appendChild(el);
   });
 }
