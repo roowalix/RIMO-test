@@ -76,7 +76,15 @@
   }
   .r-card h3{margin:0 0 6px;font-size:18px;font-weight:800}
   .r-meta{display:flex;align-items:center;gap:8px;color:#cfd2ff;font-size:14px}
-  .r-route{display:flex;align-items:center;gap:8px;margin:6px 0 4px;color:#ced2f9}
+  /* 기존 .r-route 정의가 있다면 아래로 덮어쓰기 */
+.r-route{
+  display:block;
+  margin:6px 0 4px;
+  color:#cfd2ff;         /* 기존 색 유지 */
+  font-size:14px;
+}
+
+/* 더 이상 쓰지 않으면 .r-dot, .r-dash는 남겨도 무방(영향 없음) */
   .r-dot{width:8px;height:8px;border-radius:999px;background:currentColor;opacity:.9}
   .r-dash{flex:1;border-top:1px dashed currentColor;opacity:.8}
   .r-msg{color:#e6e8ff;font-size:14px;margin:6px 0}
