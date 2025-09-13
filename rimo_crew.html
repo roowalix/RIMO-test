@@ -574,11 +574,8 @@ function renderCards(list){
       <button type="button" class="r-del" title="이 카드를 어드민 목록에서만 숨깁니다. (시트 데이터는 유지)">삭제</button>
       <h3>${it.title||'(제목 없음)'}</h3>
       <div class="r-meta">⏰ <span>${when}</span></div>
-      <div class="r-route" style="color:#cfd2ff">
-        <span class="r-dot"></span><span>${it.from||'-'}</span>
-        <span class="r-dash"></span>
-        <span class="r-dot"></span><span>${it.to||'-'}</span>
-      </div>
+      <!-- 교체할 부분 (한 줄) -->
+<div class="r-route">📍 ${it.from || '-'} - ${it.to || '-'}</div>
       <div class="r-msg">💬 ${it.message||'-'}</div>
       <div class="r-chips">
         ${styles.map(chip).join('')}
