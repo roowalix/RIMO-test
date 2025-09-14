@@ -574,9 +574,10 @@ function renderCards(list){
     const pace  =normList(it.pace);
     const dt    = new Date(it.datetime || Date.now());
     const when  = it.datetime_display || formatKDate(dt);
-    const capacity = Number(it.capacity)||0;
+
+    const capacity  = Number(it.capacity) || 0;
+    // ✅ 잔여를 그대로 표시 (기본값 0)
     const remaining = Number.isFinite(Number(it.remaining)) ? Number(it.remaining) : 0;
-    const joined = Math.max(0, capacity - remaining);
 
     const el=document.createElement('article');
     el.className='r-card'; el.dataset.theme=theme; el.dataset.id=it.id;
@@ -592,11 +593,11 @@ function renderCards(list){
         ${pace.map(chip).join('')}
         ${it.cc ? `<span class="r-chip">${it.cc}</span>` : ``}
       </div>
-      <div class="r-btm">👥 ${capacity ? `${joined}/${capacity}` : ''}</div>
+      <!-- ✅ 잔여/정원 으로 표시 -->
+      <div class="r-btm" title="잔여/정원">👥 ${capacity ? `${remaining}/${capacity}` : ''}</div>
     `;
-    // 클릭: 편집 열기
+
     el.addEventListener('click', ()=> startEdit(it));
-    // 삭제(숨김): 전파 막고 처리
     el.querySelector('.r-del').addEventListener('click', (e)=>{
       e.stopPropagation();
       hideCard(it.id);
@@ -604,6 +605,7 @@ function renderCards(list){
     box.appendChild(el);
   });
 }
+
 
 /* 초기화 */
 (async function init(){
