@@ -64,7 +64,7 @@
   .btn.primary{background:#2a5bff;border-color:#3d6aff}
   .btnbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;justify-content:center;}
 
-  /* ===== 공통 카드 컴포넌트 (메인과 동일) ===== */
+  /* ===== 공통 카드 컴포넌트 ===== */
   .r-card{
     position:relative; background:#121428; border:1px solid rgba(255,255,255,.14);
     border-radius:16px; padding:14px; box-shadow:0 2px 14px rgba(0,0,0,.28);
@@ -72,8 +72,6 @@
   .r-card h3{margin:0 0 6px;font-size:18px;font-weight:800}
   .r-meta{display:flex;align-items:center;gap:8px;color:#cfd2ff;font-size:14px}
   .r-route{display:flex;align-items:center;gap:8px;margin:6px 0 4px;color:#ced2f9}
-  .r-dot{width:8px;height:8px;border-radius:999px;background:currentColor;opacity:.9}
-  .r-dash{flex:1;border-top:1px dashed currentColor;opacity:.8}
   .r-msg{color:#e6e8ff;font-size:14px;margin:6px 0}
   .r-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
   .r-chip{
@@ -93,6 +91,14 @@
     color:#dfe3ff;font-weight:800;display:flex;align-items:center;gap:10px;justify-content:flex-start
   }
 
+  /* 카드 삭제(숨김) 버튼 */
+  .r-del{
+    position:absolute; top:8px; right:8px;
+    width:28px; height:28px; border-radius:8px; border:1px solid #2b2e48;
+    background:#171a2c; color:#cfd2ff; font-weight:900; cursor:pointer;
+  }
+  .r-del:hover{background:#1f2340}
+
   /* 테마 보더 */
   .r-card[data-theme="red"]   { border-color:var(--t-red-br) }
   .r-card[data-theme="blue"]  { border-color:var(--t-blue-br) }
@@ -108,6 +114,10 @@
   .navitem{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px 4px;border-radius:10px;border:1px solid #2b2e48;background:#14172a;cursor:pointer;font-size:12px;text-align:center;user-select:none;text-decoration:none;color:var(--fg)}
   .navitem.active{background:#27306a;border-color:#3a4aa2}
   .navitem .ico{font-size:18px;line-height:1}
+
+  /* 작은 버튼 */
+  .small-btn{margin-left:auto;padding:6px 10px;border-radius:8px;border:1px solid #2b2e48;background:#14172a;color:#e6e8ef;cursor:pointer;font-size:12px}
+  .list-head{display:flex;align-items:center;gap:10px;margin:0 0 8px 0}
 </style>
 </head>
 <body>
@@ -214,7 +224,10 @@
   </section>
 
   <section class="panel" id="cardsPanel">
-    <h3 style="margin:0 0 8px 0;font-size:16px;">발행된 라이딩 카드 목록</h3>
+    <div class="list-head">
+      <h3 style="margin:0;font-size:16px;">발행된 라이딩 카드 목록</h3>
+      <button class="small-btn" id="btnClearHidden" title="숨긴 카드 모두 복구">숨김 초기화</button>
+    </div>
     <div id="cards" class="cards"></div>
   </section>
 </main>
@@ -264,10 +277,27 @@ const qsa=(s,p=document)=>Array.from(p.querySelectorAll(s));
 const save=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
 const load=(k,def)=>{try{return JSON.parse(localStorage.getItem(k)||JSON.stringify(def))}catch(e){return def}};
 
-/* 상태 */
+/* 상태 키 */
 const DRAFT_KEY='rimo_create_draft_v6';
 const PUBLIST_KEY='rimo_published_cards_server_cache';
+const HIDE_KEY='rimo_hidden_card_ids_v1';
 let editingId = null;
+
+/* 숨김 유틸(로컬 전용) */
+const getHidden=()=>{ try{return JSON.parse(localStorage.getItem(HIDE_KEY)||'[]')}catch(_){return[]} };
+const setHidden=(arr)=>localStorage.setItem(HIDE_KEY, JSON.stringify(arr));
+function hideCard(id){
+  const a=getHidden(); if(!a.includes(id)) a.push(id);
+  setHidden(a);
+  // 최신 리스트로 다시 그림
+  const list = load(PUBLIST_KEY,[]);
+  renderCards(list);
+}
+function clearHidden(){
+  localStorage.removeItem(HIDE_KEY);
+  const list = load(PUBLIST_KEY,[]);
+  renderCards(list);
+}
 
 /* 토글 */
 function makeToggle(label, active=false){
@@ -308,7 +338,7 @@ function getSelectedTheme(){
   return cur ? cur.dataset.theme : 'blue';
 }
 
-/* 날짜 */
+/* 날짜 (연/월/일/오전·오후 시:분) */
 function formatKDate(dt){
   const y  = dt.getFullYear();
   const mm = String(dt.getMonth()+1).padStart(2,'0');
@@ -518,7 +548,7 @@ function exitEditMode(){
 }
 function resetForm(){ localStorage.removeItem(DRAFT_KEY); location.reload(); }
 
-/* 카드 렌더(공통 디자인) */
+/* 카드 렌더(공통 디자인 + 숨김 반영 + 우측 X 버튼) */
 function cls(label){
   switch(String(label).toLowerCase()){
     case 'urban': return 'is-urban';
@@ -533,36 +563,44 @@ function cls(label){
 function chip(label){ return `<span class="r-chip ${cls(label)}">${label}</span>`; }
 
 function renderCards(list){
+  const hidden = new Set(getHidden());
   const box=qs('#cards'); box.innerHTML='';
-  if(!list || list.length===0){ box.innerHTML='<div class="hint">아직 발행된 카드가 없습니다.</div>'; return; }
-  list.forEach(it=>{
+  const visible = (list||[]).filter(it => !hidden.has(it.id));
+  if(visible.length===0){ box.innerHTML='<div class="hint">아직 발행된 카드가 없거나 숨겨졌습니다.</div>'; return; }
+
+  visible.forEach(it=>{
     const theme = it.theme || 'blue';
     const styles=normList(it.styles);
     const pace  =normList(it.pace);
     const dt    = new Date(it.datetime || Date.now());
     const when  = it.datetime_display || formatKDate(dt);
-    const joined = (it.capacity? (it.capacity - (it.remaining ?? 0)) : 0);
+    const capacity = Number(it.capacity)||0;
+    const remaining = Number.isFinite(Number(it.remaining)) ? Number(it.remaining) : 0;
+    const joined = Math.max(0, capacity - remaining);
 
     const el=document.createElement('article');
     el.className='r-card'; el.dataset.theme=theme; el.dataset.id=it.id;
 
     el.innerHTML = `
+      <button class="r-del" title="이 화면에서 숨기기" aria-label="숨기기">✕</button>
       <h3>${it.title||'(제목 없음)'}</h3>
       <div class="r-meta">⏰ <span>${when}</span></div>
-      <div class="r-route" style="color:#cfd2ff">
-        <span class="r-dot"></span><span>${it.from||'-'}</span>
-        <span class="r-dash"></span>
-        <span class="r-dot"></span><span>${it.to||'-'}</span>
-      </div>
+      <div class="r-route">📍 ${it.from||'-'} - ${it.to||'-'}</div>
       <div class="r-msg">💬 ${it.message||'-'}</div>
       <div class="r-chips">
         ${styles.map(chip).join('')}
         ${pace.map(chip).join('')}
         ${it.cc ? `<span class="r-chip">${it.cc}</span>` : ``}
       </div>
-      <div class="r-btm">👥 ${it.capacity ? `${joined}/${it.capacity}` : ''}</div>
+      <div class="r-btm">👥 ${capacity ? `${joined}/${capacity}` : ''}</div>
     `;
+    // 클릭: 편집 열기
     el.addEventListener('click', ()=> startEdit(it));
+    // 삭제(숨김): 전파 막고 처리
+    el.querySelector('.r-del').addEventListener('click', (e)=>{
+      e.stopPropagation();
+      hideCard(it.id);
+    });
     box.appendChild(el);
   });
 }
@@ -583,6 +621,7 @@ function renderCards(list){
   qs('#btnDraft').addEventListener('click', saveDraft);
   qs('#btnSave').addEventListener('click', saveOrPublish);
   qs('#btnReset').addEventListener('click', resetForm);
+  qs('#btnClearHidden').addEventListener('click', clearHidden);
 
   qs('#goMain')?.addEventListener('click',(e)=>{
     if(!MAIN_URL){ e.preventDefault(); alert("MAIN_URL을 메인주소로 설정하세요."); return; }
