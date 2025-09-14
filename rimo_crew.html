@@ -64,7 +64,6 @@
   .btn.primary{background:#2a5bff;border-color:#3d6aff}
   .btnbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;justify-content:center;}
 
-
   /* ===== 공통 카드 컴포넌트 ===== */
   .r-card{
     position:relative; background:#121428; border:1px solid rgba(255,255,255,.14);
@@ -120,12 +119,9 @@
   .small-btn{margin-left:auto;padding:6px 10px;border-radius:8px;border:1px solid #2b2e48;background:#14172a;color:#e6e8ef;cursor:pointer;font-size:12px}
   .list-head{display:flex;align-items:center;gap:10px;margin:0 0 8px 0}
 
- /* 카드 패널 */
-#cardsPanel {
-  padding : 8px 16px 4px;
-  margin-top: 16px;   /* ⬆️ 위쪽 여백을 기존보다 늘림 */
-  margin-bottom: 0px; /* ⬇️ 아래쪽 여백은 줄임 */
-}
+  /* 카드 패널 내부여백/간격 */
+  #cardsPanel { padding: 12px 16px 6px; margin-top: 16px; margin-bottom: 0; }
+  .hint{color:#cfd2ff99;font-size:14px;padding:12px}
 
 </style>
 </head>
@@ -236,6 +232,7 @@
     <div class="list-head">
       <h3 style="margin:0;font-size:16px;">발행된 라이딩 카드 목록</h3>
       <button class="small-btn" id="btnClearHidden" title="숨긴 카드 모두 복구">숨김 초기화</button>
+      <button class="small-btn" id="btnResync" title="로컬캐시 초기화 후 서버에서 다시 받기">동기화 새로고침</button>
     </div>
     <div id="cards" class="cards"></div>
   </section>
@@ -298,7 +295,6 @@ const setHidden=(arr)=>localStorage.setItem(HIDE_KEY, JSON.stringify(arr));
 function hideCard(id){
   const a=getHidden(); if(!a.includes(id)) a.push(id);
   setHidden(a);
-  // 최신 리스트로 다시 그림
   const list = load(PUBLIST_KEY,[]);
   renderCards(list);
 }
@@ -499,23 +495,51 @@ async function sendToSheet(form, op){
     });
   }catch(e){ console.warn('sendToSheet failed:', e); }
 }
+
+/* 서버 ↔ 로컬 목록 병합(동일 id는 서버 데이터로 갱신, 나머지는 보존) */
+function mergeById(localArr=[], serverArr=[]){
+  const map = new Map();
+  (localArr||[]).forEach(it => { if (it?.id) map.set(it.id, it); });
+  (serverArr||[]).forEach(it => { if (it?.id) map.set(it.id, it); });
+  return Array.from(map.values()).sort((a,b)=>{
+    const ad = a?.datetime || '';
+    const bd = b?.datetime || '';
+    return bd.localeCompare(ad);
+  });
+}
+
 async function loadFromServer(){
-  let cached=[]; try{ cached=JSON.parse(localStorage.getItem(PUBLIST_KEY)||'[]'); }catch(_){}
+  let cached=[]; 
+  try{ cached=JSON.parse(localStorage.getItem(PUBLIST_KEY)||'[]'); }catch(_){}
   if(cached.length) renderCards(cached);
+
+  // 서버에서 최신 목록 요청 (과거 포함)
+  let serverRows = null;
   try{
-    const res = await fetch(WEB_APP_URL+'?op=list&_='+Date.now(), {cache:'no-store'});
+    const res = await fetch(WEB_APP_URL+'?op=list&scope=all&_='+Date.now(), {cache:'no-store'});
     if(res.ok){
       const data = await res.json();
-      if(Array.isArray(data)){ save(PUBLIST_KEY,data); return data; }
-      if(Array.isArray(data?.rows)){ save(PUBLIST_KEY,data.rows); return data.rows; }
+      if (Array.isArray(data)) serverRows = data;
+      else if (Array.isArray(data?.rows)) serverRows = data.rows;
     }
   }catch(e){ console.warn('fetch list failed, fallback to JSONP'); }
-  try{
-    const data = await fetchJSONP(WEB_APP_URL+'?op=list');
-    if(Array.isArray(data)){ save(PUBLIST_KEY,data); return data; }
-    if(Array.isArray(data?.rows)){ save(PUBLIST_KEY,data.rows); return data.rows; }
-  }catch(e){ console.warn('jsonp failed'); }
-  return cached;
+
+  if(!serverRows){
+    try{
+      const data = await fetchJSONP(WEB_APP_URL+'?op=list&scope=all');
+      if (Array.isArray(data)) serverRows = data;
+      else if (Array.isArray(data?.rows)) serverRows = data.rows;
+    }catch(e){ console.warn('jsonp failed'); }
+  }
+
+  if(!Array.isArray(serverRows) || serverRows.length===0){
+    return cached;
+  }
+
+  const merged = mergeById(cached, serverRows);
+  save(PUBLIST_KEY, merged);
+  renderCards(merged);
+  return merged;
 }
 
 /* 저장/발행/수정/초기화 */
@@ -541,7 +565,10 @@ async function saveOrPublish(){
     alert('수정 요청을 보냈습니다.');
   }
   save(DRAFT_KEY, form);
+
+  try { await loadFromServer(); } catch(_){}
 }
+
 function startEdit(it){
   editingId = it.id;
   qs('#editId').textContent = editingId;
@@ -556,6 +583,13 @@ function exitEditMode(){
   qs('#btnSave').textContent = '메인에 발행';
 }
 function resetForm(){ localStorage.removeItem(DRAFT_KEY); location.reload(); }
+
+async function fullResync(){
+  localStorage.removeItem(PUBLIST_KEY);
+  localStorage.removeItem(HIDE_KEY);
+  const rows = await loadFromServer();
+  renderCards(rows);
+}
 
 /* 카드 렌더(공통 디자인 + 숨김 반영 + 우측 X 버튼) */
 function cls(label){
@@ -585,7 +619,6 @@ function renderCards(list){
     const when  = it.datetime_display || formatKDate(dt);
 
     const capacity  = Number(it.capacity) || 0;
-    // ✅ 잔여를 그대로 표시 (기본값 0)
     const remaining = Number.isFinite(Number(it.remaining)) ? Number(it.remaining) : 0;
 
     const el=document.createElement('article');
@@ -602,10 +635,8 @@ function renderCards(list){
         ${pace.map(chip).join('')}
         ${it.cc ? `<span class="r-chip">${it.cc}</span>` : ``}
       </div>
-      <!-- ✅ 잔여/정원 으로 표시 -->
       <div class="r-btm" title="잔여/정원">👥 ${capacity ? `${remaining}/${capacity}` : ''}</div>
     `;
-
     el.addEventListener('click', ()=> startEdit(it));
     el.querySelector('.r-del').addEventListener('click', (e)=>{
       e.stopPropagation();
@@ -614,7 +645,6 @@ function renderCards(list){
     box.appendChild(el);
   });
 }
-
 
 /* 초기화 */
 (async function init(){
@@ -633,6 +663,7 @@ function renderCards(list){
   qs('#btnSave').addEventListener('click', saveOrPublish);
   qs('#btnReset').addEventListener('click', resetForm);
   qs('#btnClearHidden').addEventListener('click', clearHidden);
+  qs('#btnResync')?.addEventListener('click', ()=>{ fullResync().catch(()=>alert('동기화 실패')); });
 
   qs('#goMain')?.addEventListener('click',(e)=>{
     if(!MAIN_URL){ e.preventDefault(); alert("MAIN_URL을 메인주소로 설정하세요."); return; }
