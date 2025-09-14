@@ -585,8 +585,8 @@ function renderCards(list){
       <button class="r-del" title="이 화면에서 숨기기" aria-label="숨기기">✕</button>
       <h3>${it.title||'(제목 없음)'}</h3>
       <div class="r-meta">⏰<span>${when}</span></div>
-      <div class="r-route">📌" " ${it.from||'-'} - ${it.to||'-'}</div>
-      <div class="r-msg">💬" " ${it.message||'-'}</div>
+      <div class="r-route">📌  ${it.from||'-'} - ${it.to||'-'}</div>
+      <div class="r-msg">💬  ${it.message||'-'}</div>
       <div class="r-chips">
         ${styles.map(chip).join('')}
         ${pace.map(chip).join('')}
