@@ -100,17 +100,49 @@
     .r-card{width:88vw;max-width:420px}
   }
 
-  /* 모달 */
-  .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:4000;
-         background:rgba(0,0,0,.45);padding:22px 12px}
-  .modal.show{display:flex}
-  .sheet{width:calc(100% - 24px); max-width:680px; background:#0e1222; border:1px solid #2b304f; border-radius:18px; box-shadow:0 14px 40px rgba(0,0,0,.55); padding:16px 16px 20px;}
-  .sheet h4{margin:4px 0 10px;font-size:18px}
-  .hint{color:#cfd2ff;line-height:1.5;margin-bottom:10px}
-  .pre{background:#0b1020; border:1px solid #293059; border-radius:12px; padding:12px; white-space:pre-wrap; line-height:1.4; min-height:96px; max-height:42vh; overflow:auto; color:#e6e9ff;}
-  .modal-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px;padding-bottom:6px}
-  .modal-actions button{flex:1;min-width:110px;max-width:160px;padding:12px 18px;border-radius:12px;border:none;background:#2A2F4F;color:#fff;font-size:15px;font-weight:700;cursor:pointer}
-  .modal-actions button:hover{background:#3C4380}
+/* ==== 모달: 타이포/패딩 축소 & 여백 확대 ==== */
+.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:4000;
+/* 바깥 클릭 공간 넓힘 */
+background:rgba(0,0,0,.45);padding:min(8vh,48px) 16px;}
+.modal.show{display:flex}
+
+/* 패널 크기·타이포 축소 */
+#joinSheet.panel{
+  width:100%; max-width:560px;
+  background:#0e1222; border:1px solid #2b304f; border-radius:16px;
+  padding:12px 12px 14px; /* ↓ */
+  font-size:13px;         /* ↓ */
+}
+#joinSheet h4{margin:2px 0 8px;font-size:16px} /* ↓ */
+.hint{color:#cfd2ff;line-height:1.45;margin-bottom:8px;font-size:12.5px} /* ↓ */
+#preview.pre{
+  background:#0b1020; border:1px solid #293059; border-radius:12px;
+  padding:10px; white-space:pre-wrap; line-height:1.35;
+  min-height:72px; max-height:35vh; overflow:auto; color:#e6e9ff; font-size:13px; /* ↓ */
+}
+.modal-actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+.modal-actions button{flex:1;min-width:112px;max-width:168px;padding:10px 12px;border-radius:10px;
+  border:none;background:var(--btn,#2A2F4F);color:#fff;font-size:14px;font-weight:800;cursor:pointer}
+
+/* 합류 버튼(카드 하단) 스타일 보강 */
+.join{margin-top:6px;width:100%;padding:14px;border-radius:12px;border:none;color:#fff;font-weight:800;
+      background:rgba(255,255,255,.14);cursor:pointer}
+.join:hover{background:rgba(255,255,255,.20)}
+
+/* 출발 임박 글로우 */
+.imminent{
+  position:absolute; top:10px; right:10px; display:inline-flex; gap:6px;
+  padding:8px 10px; border-radius:10px; font-size:12px; font-weight:800;
+  background:var(--imminent-bg,rgba(255,199,94,.16));
+  border:1px solid var(--imminent-bd,rgba(255,199,94,.45)); color:#ffe7a6;
+  animation:rimoPulse 2.2s ease-in-out infinite;
+}
+@keyframes rimoPulse{
+  0%{box-shadow:0 0 0 0 rgba(255,199,94,.35)}
+  70%{box-shadow:0 0 0 10px rgba(255,199,94,0)}
+  100%{box-shadow:0 0 0 0 rgba(255,199,94,0)}
+}
+
 </style>
 </head>
 <body>
@@ -171,7 +203,10 @@ function formatKDate(dt){
   h = h % 12; if (h === 0) h = 12;
   const hh = pad(h); const mi = pad(dt.getMinutes());
   return `${y}/${mm}/${dd}/${ampm} ${hh}:${mi}`;
-}
+  const THEME_COLORS = {
+  red:'#ff5d5d', blue:'#7aa7ff', yellow:'#ffd85d', green:'#56d364', purple:'#a78bfa'
+};
+
 function toList(v){
   if (v==null) return [];
   if (Array.isArray(v)) return v.map(x=>String(x).trim()).filter(Boolean);
@@ -249,14 +284,15 @@ function renderMap(crews){
   const bounds=L.latLngBounds([]);
   crews.forEach(c=>{
     if(!(c.from_lat&&c.from_lng&&c.to_lat&&c.to_lng)) return;
-    const color = '#7aa7ff';
+    const color = THEME_COLORS[c.theme] || THEME_COLORS.blue; // ← 카드 테마와 동일
     const ms=L.marker([c.from_lat,c.from_lng],{icon:makePin(color,'S')}).addTo(group);
     const md=L.marker([c.to_lat,c.to_lng],{icon:makePin(color,'D')}).addTo(group);
-    const a=L.polyline(arcCoords(c.from_lat,c.from_lng,c.to_lat,c.to_lng),{color:color,weight:2.5,dashArray:"6 8",opacity:.9}).addTo(arcs);
+    const a=L.polyline(arcCoords(c.from_lat,c.from_lng,c.to_lat,c.to_lng),{color,weight:2.5,dashArray:"6 8",opacity:.9}).addTo(arcs);
     [ms,md].forEach(m=>bounds.extend(m.getLatLng())); a.getLatLngs().forEach(p=>bounds.extend(p));
   });
   if(bounds.isValid()) map.fitBounds(bounds.pad(0.25));
 }
+
 
 /* ===== 카드 ===== */
 function cls(label){
@@ -275,29 +311,33 @@ function chip(label){ return `<span class="r-chip ${cls(label)}">${label}</span>
 const listEl=document.getElementById('list');
 
 function renderCards(crews){
-  listEl.innerHTML='';
+  const list=document.getElementById('list'); list.innerHTML='';
   crews.forEach(c=>{
-    const joined=Math.max(0,(c.capacity||0)-(c.remaining||0));
-    const immin = (c.datetime && (new Date(c.datetime).getTime() - Date.now() <= IMMINENT_MS) && (new Date(c.datetime).getTime() >= Date.now()));
-    const el=document.createElement('article');
-    el.className='r-card'; el.dataset.theme=c.theme;
+    const capacity = Number(c.capacity)||0;
+    const remaining = Number.isFinite(Number(c.remaining)) ? Number(c.remaining) : 0;
+    const joined = Math.max(0, capacity - remaining);
+    const immin = (c.datetime && (new Date(c.datetime).getTime() - Date.now() < 30*60*1000) && (Date.now() <= new Date(c.datetime).getTime()));
 
+    const el=document.createElement('article');
+    el.className='card'; el.dataset.theme=c.theme;
     el.innerHTML=`
-      <h3>${c.title}</h3>
-      <div class="r-meta">⏰ ${c.datetime_display || (c.datetime?formatKDate(new Date(c.datetime)):'')}</div>
-      <div class="r-route">📍 ${c.from} - ${c.to}</div>
-      ${c.message?`<div class="r-msg">💬 ${c.message}</div>`:''}
-      <div class="r-chips">
+      <h3>${c.title||''}</h3>
+      <div class="meta">⏰ ${c.datetime_display || (c.datetime?formatKDate(new Date(c.datetime)):'')}</div>
+      <div class="route"><span class="pin"></span><span>${c.from||'-'}</span><span class="dash"></span><span class="pin"></span><span>${c.to||'-'}</span></div>
+      ${c.message?`<div class="msg">💬 ${c.message}</div>`:''}
+      <div class="pillrow">
         ${c.styles.map(chip).join('')}
         ${c.pace.map(chip).join('')}
-        ${c.cc?`<span class="r-chip">${c.cc}</span>`:''}
+        ${c.cc?chip(c.cc):''}
       </div>
-      <div class="r-btm">
-        <button class="join">✅ 합류 신청</button>
-        <div class="cap">👥 ${joined}/${c.capacity||0}</div>
-      </div>
+      <button class="join">👥 ${joined}/${capacity} · ✅ 합류 신청</button>
       ${immin?`<div class="imminent">🚦 출발 임박</div>`:''}
     `;
+    el.querySelector('.join').addEventListener('click',()=>openJoinModal(c));
+    list.appendChild(el);
+  });
+}
+
 
     // 합류 버튼
     el.querySelector('.join').addEventListener('click',()=>openJoinModal(c));
