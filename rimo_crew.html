@@ -64,7 +64,7 @@
   .btn.primary{background:#2a5bff;border-color:#3d6aff}
   .btnbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;justify-content:center;}
 
-  /* ===== 공통 카드 컴포넌트 ===== */
+  /* ===== 카드 컴포넌트 ===== */
   .r-card{
     position:relative; background:#121428; border:1px solid rgba(255,255,255,.14);
     border-radius:16px; padding:14px; box-shadow:0 2px 14px rgba(0,0,0,.28);margin-bottom:10px
@@ -85,17 +85,9 @@
   .r-chip.is-balanced{background:#3a341e;border-color:#5a4f2f}
   .r-chip.is-dynamic{background:#3a1f1f;border-color:#5a2f2f}
 
-  .r-btm{
-    margin-top:10px;padding:10px 12px;border-radius:12px;
-    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14);
-    color:#dfe3ff;font-weight:800;display:flex;align-items:center;gap:10px;justify-content:flex-start
-  }
+  .r-btm{margin-top:10px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);color:#dfe3ff;font-weight:800;display:flex;align-items:center;gap:10px;justify-content:flex-start}
 
-  .r-del{
-    position:absolute; top:8px; right:8px;
-    width:28px; height:28px; border-radius:8px; border:1px solid #2b2e48;
-    background:#171a2c; color:#cfd2ff; font-weight:900; cursor:pointer;
-  }
+  .r-del{position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:8px;border:1px solid #2b2e48;background:#171a2c;color:#cfd2ff;font-weight:900;cursor:pointer;}
   .r-del:hover{background:#1f2340}
 
   .r-card[data-theme="red"]   { border-color:var(--t-red-br) }
@@ -128,80 +120,572 @@
 </header>
 
 <main>
-  <!-- … (위쪽 form 패널 부분 동일) … -->
+  <section class="panel">
+
+    <!-- 편집 배너 -->
+    <div id="editBanner" class="edit-banner" style="display:none">✏️ 현재 <b id="editId"></b>를 수정 중입니다. 저장하면 카드가 업데이트됩니다.</div>
+
+    <!-- 제목 -->
+    <div class="row">
+      <label for="c_title">제목</label>
+      <div class="field"><input id="c_title" placeholder="예: &lt;가을맞이 카페 라이딩&gt;"></div>
+    </div>
+
+    <!-- 일시 -->
+    <div class="row">
+      <label for="c_datetime">일시</label>
+      <div class="field"><input id="c_datetime" type="datetime-local" step="1800"></div>
+    </div>
+
+    <!-- 출발 -->
+    <div class="row">
+      <label for="c_from">출발</label>
+      <div class="field">
+        <input id="c_from" placeholder="예: GS25 한강르네상스 반포2호">
+        <div class="coords" style="margin-top:8px">
+          <input id="from_lat" type="number" step="any" placeholder="위도 (예: 33.509768)" inputmode="decimal" min="-90" max="90">
+          <input id="from_lng" type="number" step="any" placeholder="경도 (예: 126.511954)" inputmode="decimal" min="-180" max="180">
+        </div>
+      </div>
+    </div>
+
+    <!-- 도착 -->
+    <div class="row">
+      <label for="c_to">도착</label>
+      <div class="field">
+        <input id="c_to" placeholder="예: RSG 성수">
+        <div class="coords" style="margin-top:8px">
+          <input id="to_lat" type="number" step="any" placeholder="위도" inputmode="decimal" min="-90" max="90">
+          <input id="to_lng" type="number" step="any" placeholder="경도" inputmode="decimal" min="-180" max="180">
+        </div>
+      </div>
+    </div>
+
+    <!-- 인원 (잔여/정원) -->
+    <div class="row">
+      <label>인원</label>
+      <div class="field">
+        <div class="coords">
+          <input id="c_remaining" type="number" min="0" placeholder="잔여">
+          <input id="c_capacity" type="number" min="1" placeholder="정원">
+        </div>
+      </div>
+    </div>
+
+    <!-- 배기량 -->
+    <div class="row">
+      <label for="c_cc">배기량</label>
+      <div class="field">
+        <select id="c_cc">
+          <option value="">관계없음</option>
+          <option>125cc 이하</option>
+          <option>125~250</option>
+          <option>250~400</option>
+          <option>400~800</option>
+          <option>800 이상</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 스타일/페이스 -->
+    <div class="row">
+      <label>스타일</label>
+      <div class="field"><div id="styleToggles" class="toggles"></div></div>
+    </div>
+    <div class="row">
+      <label>페이스</label>
+      <div class="field"><div id="paceToggles" class="toggles"></div></div>
+    </div>
+
+    <!-- 메시지 -->
+    <div class="row">
+      <label for="c_msg">메시지</label>
+      <div class="field"><input id="c_msg" maxlength="30" placeholder="30자 이내"></div>
+    </div>
+
+    <!-- 테마 -->
+    <div class="row no-label"><div class="field"><div id="themeBar" class="themes"></div></div></div>
+
+    <!-- 버튼 -->
+    <div class="btnbar">
+      <button class="btn" id="btnDraft">드래프트 저장</button>
+      <button class="btn primary" id="btnSave">메인에 발행</button>
+      <button class="btn" id="btnReset">새로 작성</button>
+    </div>
+  </section>
 
   <section class="panel" id="cardsPanel">
     <div class="list-head">
       <h3 style="margin:0;font-size:16px;">발행된 라이딩 카드 목록</h3>
-      <button class="small-btn" id="btnClearHidden">💾 복구</button>
-      <button class="small-btn" id="btnResync">동기화 🔄</button>
+      <button class="small-btn" id="btnClearHidden" title="숨긴 카드 모두 복구">💾 복구</button>
+      <button class="small-btn" id="btnResync" title="서버와 새로 동기화">동기화 🔄</button>
     </div>
     <div id="cards" class="cards"></div>
   </section>
 </main>
 
-<nav class="btmnav">
+<nav class="btmnav" aria-label="하단 내비게이션">
   <div class="wrap">
-    <!-- nav items 동일 -->
+    <a class="navitem active" href="rimo_crew.html" title="크루 생성">
+      <div class="ico">🛠️</div><div>크루 생성</div>
+    </a>
+    <a class="navitem" href="rimo_joins.html" title="매칭 희망">
+      <div class="ico">🤝</div><div>매칭 희망</div>
+    </a>
+    <a class="navitem" href="rimo_routes.html" title="루트 제안">
+      <div class="ico">🗺️</div><div>루트 제안</div>
+    </a>
+    <a class="navitem" href="rimo_feedback.html" title="후기 모음">
+      <div class="ico">📝</div><div>후기 모음</div>
+    </a>
+    <a class="navitem" href="rimo_data.html" title="자료 관리">
+      <div class="ico">🗄️</div><div>자료 관리</div>
+    </a>
   </div>
 </nav>
 
 <script>
-/* ---------- 핵심 수정된 부분만 하이라이트 ---------- */
+/* ---------- 기본 설정 ---------- */
+const MAIN_URL = "https://roowalix.github.io/RIMO-test/index.html";
 
-/* 안전한 서버 호출 */
+/* ---------- 스프레드시트 웹앱 (최신) ---------- */
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxwCUfrSHKH9KcBcUAJNPDkJ5kn1ZA4Nag9AKV2SipG4LM3WiSSeqhsvRtHpDAh8df_2g/exec";
+const SHARED_TOKEN = ""; // (옵션) Apps Script에서 검사 시 맞춰주세요.
+
+/* ---------- 옵션 ---------- */
+const STYLE_OPTS = ["Urban","Curve","Tour"];
+const PACE_OPTS  = ["Easy","Balanced","Dynamic"];
+const THEME_OPTS = [
+  {key:'red',    label:'레드',   emoji:'🔴'},
+  {key:'blue',   label:'블루',   emoji:'🔵'},
+  {key:'yellow', label:'옐로',   emoji:'🟡'},
+  {key:'green',  label:'그린',   emoji:'🟢'},
+  {key:'purple', label:'퍼플',   emoji:'🟣'}
+];
+
+/* ---------- 유틸 ---------- */
+const qs=(s,p=document)=>p.querySelector(s);
+const qsa=(s,p=document)=>Array.from(p.querySelectorAll(s));
+const save=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+const load=(k,def)=>{try{return JSON.parse(localStorage.getItem(k)||JSON.stringify(def))}catch(e){return def}};
+
+/* 상태 키 */
+const DRAFT_KEY='rimo_create_draft_v6';
+const PUBLIST_KEY='rimo_published_cards_server_cache';
+const HIDE_KEY='rimo_hidden_card_ids_v1';
+let editingId = null;
+
+/* 숨김 유틸(로컬 전용) */
+const getHidden=()=>{ try{return JSON.parse(localStorage.getItem(HIDE_KEY)||'[]')}catch(_){return[]} };
+const setHidden=(arr)=>localStorage.setItem(HIDE_KEY, JSON.stringify(arr));
+function hideCard(id){
+  const a=getHidden(); if(!a.includes(id)) a.push(id);
+  setHidden(a);
+  const list = load(PUBLIST_KEY,[]);
+  renderCards(list);
+}
+function clearHidden(){
+  localStorage.removeItem(HIDE_KEY);
+  const list = load(PUBLIST_KEY,[]);
+  renderCards(list);
+}
+
+/* 토글 */
+function makeToggle(label, active=false){
+  const el=document.createElement('button');
+  el.type='button';
+  el.className='toggle'+(active?' active':'');
+  el.dataset.val=label;
+  el.textContent = label;
+  el.addEventListener('click',()=> el.classList.toggle('active'));
+  return el;
+}
+function renderToggles(containerId, options, selected=[]){
+  const box=qs('#'+containerId); box.innerHTML='';
+  options.forEach(opt=> box.appendChild(makeToggle(opt, selected.includes(opt))) );
+}
+function selectedToggles(containerId){
+  return qsa('#'+containerId+' .toggle.active').map(el=>el.dataset.val);
+}
+
+/* 테마 */
+function renderThemes(selected='blue'){
+  const bar = qs('#themeBar'); bar.innerHTML='';
+  THEME_OPTS.forEach(opt=>{
+    const btn=document.createElement('button');
+    btn.type='button';
+    btn.className='theme-btn'+(opt.key===selected?' active':'');
+    btn.dataset.theme=opt.key;
+    btn.innerHTML = `<span class="badge">${opt.emoji}</span><span class="tx">${opt.label}</span>`;
+    btn.addEventListener('click',()=>{
+      qsa('.theme-btn', bar).forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+    bar.appendChild(btn);
+  });
+}
+function getSelectedTheme(){
+  const cur = qs('#themeBar .theme-btn.active');
+  return cur ? cur.dataset.theme : 'blue';
+}
+
+/* 날짜 (연/월/일/오전·오후 시:분) */
+function formatKDate(dt){
+  const y  = dt.getFullYear();
+  const mm = String(dt.getMonth()+1).padStart(2,'0');
+  const dd = String(dt.getDate()).padStart(2,'0');
+  let h = dt.getHours();
+  const ampm = (h >= 12) ? '오후' : '오전';
+  h = h % 12; if (h === 0) h = 12;
+  const hh = String(h).padStart(2,'0');
+  const mi = String(dt.getMinutes()).padStart(2,'0');
+  return `${y}/${mm}/${dd}/${ampm} ${hh}:${mi}`;
+}
+const pad=n=>String(n).padStart(2,'0');
+function toLocalDatetimeValue(d){
+  const y=d.getFullYear(), m=pad(d.getMonth()+1), day=pad(d.getDate()), hh=pad(d.getHours()), mi=pad(d.getMinutes());
+  return `${y}-${m}-${day}T${hh}:${mi}`;
+}
+function getDateFromInput(){
+  const v = qs('#c_datetime').value;
+  if(!v) return null;
+  const [date,time] = v.split('T'); if(!date||!time) return null;
+  const [Y,M,D] = date.split('-').map(Number);
+  const [h,m] = time.split(':').map(Number);
+  return new Date(Y, M-1, D, h, m||0, 0);
+}
+
+/* 좌표 자동 분리 */
+function extractCoords(text){
+  if(!text) return null;
+  text = String(text).trim();
+  let m = text.match(/@(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)/);
+  if(!m) m = text.match(/[?&]q=(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)/);
+  if(!m){
+    const nums = text.match(/-?\d+(?:\.\d+)?/g);
+    if(nums && nums.length>=2) m=[, nums[0], nums[1]];
+  }
+  if(!m) return null;
+  let lat = parseFloat(m[1]), lng = parseFloat(m[2]);
+  if(Math.abs(lat)>90 && Math.abs(lng)<=90){ const t=lat; lat=lng; lng=t; }
+  if(Math.abs(lat)>90 || Math.abs(lng)>180) return null;
+  return {lat, lng};
+}
+function attachAutoSplit(latId,lngId){
+  const latEl = qs('#'+latId), lngEl = qs('#'+lngId);
+  const onPaste = (e)=>{
+    const text = e.clipboardData?.getData('text'); const c = extractCoords(text);
+    if(c){ e.preventDefault(); latEl.value=c.lat; lngEl.value=c.lng; }
+  };
+  const onChange = (e)=>{
+    const c = extractCoords(e.target.value);
+    if(c){ latEl.value=c.lat; lngEl.value=c.lng; }
+  };
+  latEl.addEventListener('paste', onPaste); lngEl.addEventListener('paste', onPaste);
+  latEl.addEventListener('change', onChange); lngEl.addEventListener('change', onChange);
+}
+
+/* 값 보정 */
+function normList(v){
+  if(Array.isArray(v)) return v.map(x=>String(x));
+  if(v==null) return [];
+  let s=String(v).trim();
+  try{
+    if(s.startsWith('[') && s.endsWith(']')){
+      const a=JSON.parse(s); if(Array.isArray(a)) return a.map(x=>String(x));
+    }
+  }catch(_){}
+  if(/Ljava\.lang\.Object/i.test(s)) return [];
+  return s.split(/[,\|]/).map(t=>t.trim()).filter(Boolean);
+}
+
+/* 폼 수집/세팅 */
+function getForm(){
+  const dt = getDateFromInput() || new Date();
+  return {
+    id: editingId || '',
+    title: qs('#c_title').value.trim(),
+    datetime: dt.toISOString(),
+    datetime_display: formatKDate(dt),
+    from: qs('#c_from').value.trim(),
+    to: qs('#c_to').value.trim(),
+    from_lat: parseFloat(qs('#from_lat').value||''),
+    from_lng: parseFloat(qs('#from_lng').value||''),
+    to_lat: parseFloat(qs('#to_lat').value||''),
+    to_lng: parseFloat(qs('#to_lng').value||''),
+    cc: qs('#c_cc').value,
+    styles: selectedToggles('styleToggles'),
+    pace: selectedToggles('paceToggles'),
+    message: qs('#c_msg').value.trim(),
+    remaining: parseInt(qs('#c_remaining').value||'0',10),
+    capacity: parseInt(qs('#c_capacity').value||'0',10),
+    theme: getSelectedTheme()
+  };
+}
+function setForm(it){
+  qs('#c_title').value = it.title||'';
+  qs('#c_from').value = it.from||'';
+  qs('#c_to').value = it.to||'';
+  qs('#from_lat').value = it.from_lat??'';
+  qs('#from_lng').value = it.from_lng??'';
+  qs('#to_lat').value = it.to_lat??'';
+  qs('#to_lng').value = it.to_lng??'';
+  qs('#c_cc').value = it.cc||'';
+  qs('#c_msg').value = it.message||'';
+  qs('#c_remaining').value = it.remaining ?? '';
+  qs('#c_capacity').value  = it.capacity ?? '';
+  const dt = it.datetime ? new Date(it.datetime) : new Date();
+  qs('#c_datetime').value = toLocalDatetimeValue(dt);
+  renderToggles('styleToggles', STYLE_OPTS, normList(it.styles));
+  renderToggles('paceToggles',  PACE_OPTS,  normList(it.pace));
+  renderThemes(it.theme || 'blue');
+}
+
+/* 유효성 */
+function validate(form){
+  const errs=[];
+  if(!form.title) errs.push('제목을 입력하세요.');
+  if(!qs('#c_datetime').value) errs.push('일시를 선택하세요.');
+  if(!form.from) errs.push('출발을 입력하세요.');
+  if(!form.to) errs.push('도착을 입력하세요.');
+  if(!(form.capacity>0)) errs.push('정원은 1 이상이어야 합니다.');
+  if(form.remaining<0) errs.push('잔여는 0 이상이어야 합니다.');
+  if(form.remaining>form.capacity) errs.push('잔여가 정원보다 클 수 없습니다.');
+  if(form.message.length>30) errs.push('메시지는 30자 이내입니다.');
+  return errs;
+}
+
+/* 서버 연동 (쓰기: no-cors, 읽기: fetch→JSONP 폴백) */
+function fetchJSONP(url, timeoutMs=9000){
+  return new Promise((resolve,reject)=>{
+    const cb='__rimo_cb_'+Date.now();
+    const s=document.createElement('script');
+    const t=setTimeout(()=>{cleanup();reject(new Error('JSONP timeout'));},timeoutMs);
+    function cleanup(){ delete window[cb]; s.remove(); clearTimeout(t); }
+    window[cb]=data=>{ cleanup(); resolve(data); };
+    const hasQuery = url.includes('?');
+    const u = url + (hasQuery ? '&' : '?') + 'callback=' + cb + '&_=' + Date.now();
+    s.src=u;
+    s.onerror=()=>{ cleanup(); reject(new Error('JSONP error')); };
+    document.body.appendChild(s);
+  });
+}
+async function sendToSheet(form, op){
+  const payload = new URLSearchParams();
+  payload.set('op', op);
+  payload.set('token', SHARED_TOKEN);
+  payload.set('record', JSON.stringify(form));
+  try{
+    await fetch(WEB_APP_URL, {
+      method:'POST', mode:'no-cors',
+      headers:{ 'Content-Type':'application/x-www-form-urlencoded' },
+      body: payload.toString()
+    });
+  }catch(e){ console.warn('sendToSheet failed:', e); }
+}
+
+/* 서버 ↔ 로컬 목록 병합(동일 id는 서버 데이터로 갱신, 나머지는 보존) */
+function mergeById(localArr=[], serverArr=[]){
+  const map = new Map();
+  (localArr||[]).forEach(it => { if (it?.id) map.set(it.id, it); });
+  (serverArr||[]).forEach(it => { if (it?.id) map.set(it.id, it); });
+  return Array.from(map.values()).sort((a,b)=>{
+    const ad = a?.datetime || '';
+    const bd = b?.datetime || '';
+    return bd.localeCompare(ad);
+  });
+}
+
+/* 💡보수적 동기화: 서버 성공 시에만 캐시 교체 */
 async function loadFromServer(){
+  // 1) 현재 로컬 캐시 우선 표시
   let cached=[]; 
-  try { cached=JSON.parse(localStorage.getItem(PUBLIST_KEY)||'[]'); }catch(_){}
+  try { cached=JSON.parse(localStorage.getItem(PUBLIST_KEY)||'[]'); } catch(_){}
   if(cached.length) renderCards(cached);
 
-  const listURL = WEB_APP_URL + `?op=list&scope=all${SHARED_TOKEN ? `&token=${encodeURIComponent(SHARED_TOKEN)}`:''}&_=${Date.now()}`;
+  // 2) 서버 요청 (fetch → JSONP 폴백)
+  const listURL = WEB_APP_URL + `?op=list&scope=all${SHARED_TOKEN ? `&token=${encodeURIComponent(SHARED_TOKEN)}` : ''}&_=${Date.now()}`;
 
-  let serverRows=null;
+  let serverRows = null;
   try{
-    const res=await fetch(listURL,{cache:'no-store'});
+    const res = await fetch(listURL, {cache:'no-store'});
     if(res.ok){
-      const data=await res.json().catch(()=>null);
-      if(Array.isArray(data)) serverRows=data;
-      else if(Array.isArray(data?.rows)) serverRows=data.rows;
+      const data = await res.json().catch(()=>null);
+      if (Array.isArray(data)) serverRows = data;
+      else if (Array.isArray(data?.rows)) serverRows = data.rows;
     }
-  }catch(e){ console.warn(e); }
+  }catch(e){ console.warn('fetch list failed, fallback to JSONP'); }
 
   if(!serverRows){
     try{
-      const data=await fetchJSONP(listURL);
-      if(Array.isArray(data)) serverRows=data;
-      else if(Array.isArray(data?.rows)) serverRows=data.rows;
-    }catch(e){ console.warn(e); }
+      const data = await fetchJSONP(listURL);
+      if (Array.isArray(data)) serverRows = data;
+      else if (Array.isArray(data?.rows)) serverRows = data.rows;
+    }catch(e){ console.warn('jsonp failed'); }
   }
 
-  if(!Array.isArray(serverRows)||!serverRows.length){
+  // 3) 실패/빈 결과면 로컬 유지
+  if(!Array.isArray(serverRows) || serverRows.length===0){
     return cached;
   }
-  const merged=mergeById(cached,serverRows);
-  save(PUBLIST_KEY,merged);
+
+  // 4) 성공 시에만 병합/저장/렌더
+  const merged = mergeById(cached, serverRows);
+  save(PUBLIST_KEY, merged);
   renderCards(merged);
   return merged;
 }
 
-/* 동기화 버튼 */
+/* 저장/발행/수정/초기화 */
+function saveDraft(){ const form=getForm(); save(DRAFT_KEY, form); alert('드래프트 저장 완료'); }
+async function saveOrPublish(){
+  const form=getForm();
+  const errs=validate(form); if(errs.length){ alert(errs.join('\n')); return; }
+  let list=[]; try{ list=JSON.parse(localStorage.getItem(PUBLIST_KEY)||'[]'); }catch(_){}
+
+  if(!editingId){
+    form.id = `crew_${Date.now().toString(36)}`;
+    await sendToSheet(form,'publish');
+    list.unshift(form); save(PUBLIST_KEY,list); renderCards(list);
+    qs('#cardsPanel')?.scrollIntoView({behavior:'smooth', block:'start'});
+    alert('발행 요청을 보냈습니다.');
+  }else{
+    form.id = editingId;
+    await sendToSheet(form,'update');
+    const idx=list.findIndex(x=>x.id===editingId);
+    if(idx>=0) list[idx]=form; else list.unshift(form);
+    save(PUBLIST_KEY,list); renderCards(list);
+    exitEditMode();
+    alert('수정 요청을 보냈습니다.');
+  }
+  save(DRAFT_KEY, form);
+
+  try { await loadFromServer(); } catch(_){}
+}
+
+function startEdit(it){
+  editingId = it.id;
+  qs('#editId').textContent = editingId;
+  qs('#editBanner').style.display='block';
+  qs('#btnSave').textContent = '변경 저장';
+  setForm(it);
+}
+function exitEditMode(){
+  editingId = null;
+  qs('#editBanner').style.display='none';
+  qs('#editId').textContent = '';
+  qs('#btnSave').textContent = '메인에 발행';
+}
+function resetForm(){ localStorage.removeItem(DRAFT_KEY); location.reload(); }
+
+/* ✅안전한 동기화: 로컬 먼저 지우지 않음 */
 async function fullResync(){
-  const backup=load(PUBLIST_KEY,[]);
+  const backup = load(PUBLIST_KEY, []);
   try{
-    const rows=await loadFromServer();
-    if(Array.isArray(rows)&&rows.length){
-      save(PUBLIST_KEY,rows);
+    const rows = await loadFromServer();
+    if (Array.isArray(rows) && rows.length){
+      save(PUBLIST_KEY, rows);
       renderCards(rows);
       return;
     }
     renderCards(backup);
-    alert('서버 목록 없음 → 기존 유지');
+    alert('서버에서 목록을 받지 못했습니다. 네트워크/권한을 확인해주세요.');
   }catch(e){
     console.warn(e);
     renderCards(backup);
-    alert('동기화 실패 → 기존 목록 유지');
+    alert('동기화 실패: 기존 목록을 유지합니다.');
   }
 }
+
+/* 카드 렌더 */
+function cls(label){
+  switch(String(label).toLowerCase()){
+    case 'urban': return 'is-urban';
+    case 'curve': return 'is-curve';
+    case 'tour': return 'is-tour';
+    case 'easy': return 'is-easy';
+    case 'balanced': return 'is-balanced';
+    case 'dynamic': return 'is-dynamic';
+    default: return '';
+  }
+}
+function chip(label){ return `<span class="r-chip ${cls(label)}">${label}</span>`; }
+
+function renderCards(list){
+  const hidden = new Set(getHidden());
+  const box=qs('#cards'); box.innerHTML='';
+  const visible = (list||[]).filter(it => !hidden.has(it.id));
+  if(visible.length===0){ box.innerHTML='<div class="hint">아직 발행된 카드가 없거나 숨겨졌습니다.</div>'; return; }
+
+  visible.forEach(it=>{
+    const theme = it.theme || 'blue';
+    const styles=normList(it.styles);
+    const pace  =normList(it.pace);
+    const dt    = new Date(it.datetime || Date.now());
+    const when  = it.datetime_display || formatKDate(dt);
+
+    const capacity  = Number(it.capacity) || 0;
+    const remaining = Number.isFinite(Number(it.remaining)) ? Number(it.remaining) : 0;
+
+    const el=document.createElement('article');
+    el.className='r-card'; el.dataset.theme=theme; el.dataset.id=it.id;
+
+    el.innerHTML = `
+      <button class="r-del" title="이 화면에서 숨기기" aria-label="숨기기">✕</button>
+      <h3>${escapeHtml(it.title||'(제목 없음)')}</h3>
+      <div class="r-meta">⏰<span>${when}</span></div>
+      <div class="r-route">📌  ${escapeHtml(it.from||'-')} - ${escapeHtml(it.to||'-')}</div>
+      <div class="r-msg">💬  ${escapeHtml(it.message||'-')}</div>
+      <div class="r-chips">
+        ${styles.map(chip).join('')}
+        ${pace.map(chip).join('')}
+        ${it.cc ? `<span class="r-chip">${escapeHtml(it.cc)}</span>` : ``}
+      </div>
+      <div class="r-btm" title="잔여/정원">👥 ${capacity ? `${remaining}/${capacity}` : ''}</div>
+    `;
+    el.addEventListener('click', ()=> startEdit(it));
+    el.querySelector('.r-del').addEventListener('click', (e)=>{
+      e.stopPropagation();
+      hideCard(it.id);
+    });
+    box.appendChild(el);
+  });
+}
+
+/* XSS 방지용 간단 이스케이프 */
+function escapeHtml(s){
+  return String(s)
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'","&#39;");
+}
+
+/* 초기화 */
+(async function init(){
+  renderToggles('styleToggles', STYLE_OPTS, []);
+  renderToggles('paceToggles',  PACE_OPTS,  []);
+  qs('#c_datetime').value = toLocalDatetimeValue(new Date());
+  attachAutoSplit('from_lat','from_lng'); attachAutoSplit('to_lat','to_lng');
+  renderThemes('blue');
+
+  const list = await loadFromServer();
+  renderCards(list);
+
+  const d = load(DRAFT_KEY,null); if(d){ setForm(d); }
+
+  qs('#btnDraft').addEventListener('click', saveDraft);
+  qs('#btnSave').addEventListener('click', saveOrPublish);
+  qs('#btnReset').addEventListener('click', resetForm);
+  qs('#btnClearHidden').addEventListener('click', clearHidden);
+  qs('#btnResync')?.addEventListener('click', ()=>{ fullResync().catch(()=>alert('동기화 실패')); });
+
+  qs('#goMain')?.addEventListener('click',(e)=>{
+    if(!MAIN_URL){ e.preventDefault(); alert("MAIN_URL을 메인주소로 설정하세요."); return; }
+    window.open(MAIN_URL,'_blank');
+  });
+})();
 </script>
 </body>
 </html>
