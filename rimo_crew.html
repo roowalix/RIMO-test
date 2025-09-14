@@ -67,7 +67,7 @@
   /* ===== 공통 카드 컴포넌트 ===== */
   .r-card{
     position:relative; background:#121428; border:1px solid rgba(255,255,255,.14);
-    border-radius:16px; padding:14px; box-shadow:0 2px 14px rgba(0,0,0,.28);gap:10px
+    border-radius:16px; padding:14px; box-shadow:0 2px 14px rgba(0,0,0,.28);margin-bottom:10px
   }
   .r-card h3{margin:0 0 6px;font-size:16px;font-weight:700}
   .r-meta{display:flex;align-items:center;gap:8px;color:#cfd2ff;font-size:14px}
@@ -584,8 +584,8 @@ function renderCards(list){
     el.innerHTML = `
       <button class="r-del" title="이 화면에서 숨기기" aria-label="숨기기">✕</button>
       <h3>${it.title||'(제목 없음)'}</h3>
-      <div class="r-meta">⏰ <span>${when}</span></div>
-      <div class="r-route">📍 ${it.from||'-'} - ${it.to||'-'}</div>
+      <div class="r-meta">⏰<span>${when}</span></div>
+      <div class="r-route">📌 ${it.from||'-'} - ${it.to||'-'}</div>
       <div class="r-msg">💬 ${it.message||'-'}</div>
       <div class="r-chips">
         ${styles.map(chip).join('')}
