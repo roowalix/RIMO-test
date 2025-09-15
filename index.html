@@ -338,9 +338,9 @@ function renderCards(crews){
   const list=document.getElementById('list'); list.innerHTML='';
   crews.forEach(c=>{
     // 참석/정원 계산 (잔여 → 참석 변환)
-    const capacity = Math.max(0, c.capacity||0);
-    const remaining = Math.max(0, c.remaining||0);
-    const joined = Math.max(0, capacity - remaining); // 참석자 수
+   const capacity = Math.max(0, c.capacity||0);
+   const attendees = Math.max(0, c.remaining||0); // remaining = 참석자 수
+   const joined = attendees; // ✅ 참석/정원
 
     const immin  = (c.datetime? (new Date(c.datetime).getTime()-Date.now()) : 0);
     const showImmin = (immin<=IMMINENT_MS && immin>=-GRACE_MS);
