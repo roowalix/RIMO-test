@@ -177,7 +177,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin></script>
 <script>
 /* ===== 설정 & 상수 ===== */
-/* ※ RIMO 기준 최신 웹앱 URL (rimo_crew와 동일) */
+/* ※ rimo_crew.html과 동일한 최신 웹앱 */
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzjogZFqCVW3pjTRtvet4J0uTyu3gsNiEHbbsTND9nI6v6PPjbhYSW9R7iz0Kcy5N_t5w/exec";
 const CACHE_KEY   = "rimo_published_cards_server_cache";
 const PROFILE_KEY = "rimo_profile_v1";
@@ -322,7 +322,7 @@ function chipClass(v){ switch(String(v).toLowerCase()){
   default:return ''; } }
 const chip = v => `<span class="r-chip ${chipClass(v)}">${v}</span>`;
 
-/* ===== 카드 렌더 ===== */
+/* ===== 카드 렌더 & 선택 ===== */
 let currentSelectedId = null;
 function selectCardAndZoom(id){
   currentSelectedId = id;
@@ -376,7 +376,7 @@ function renderCards(crews){
 
   // 첫 카드 자동 선택
   const first = list.querySelector('.r-card');
-  if(first) selectCardAndZoom(first.dataset.id);
+  if(first && !currentSelectedId) selectCardAndZoom(first.dataset.id);
 }
 
 /* ===== 전체 렌더: 시간 필터(+8분 유예) + 시간순 정렬 ===== */
@@ -392,14 +392,14 @@ function renderAll(rows){
     return ta-tb; // 빠른 시간 순
   });
 
-  renderCards(live);
+  // ★ 지도 먼저 → 카드 (초기 선택시 즉시 줌)
   renderMap(live);
+  renderCards(live);
 }
 
 /* ===== 합류 신청 모달(작게) ===== */
 const modal=document.getElementById('joinModal');
 const preview=document.getElementById('joinPreview');
-const PROFILE_KEY = "rimo_profile_v1"; // 재확인
 function loadProfile(){ try{ return JSON.parse(localStorage.getItem(PROFILE_KEY)||'{}'); }catch(_){ return {}; } }
 function composeText(crew, profile){
   const styles=(profile.styles||[]).join(' · ') || '-';
@@ -451,7 +451,6 @@ document.getElementById('nextCard')?.addEventListener('click',()=>scrollByCard(1
 
 /* ===== init ===== */
 (async function init(){
-  initMap();
   const rows = await loadCrews();
   renderAll(rows);
 })();
