@@ -44,15 +44,13 @@
   #map{height:360px;border-radius:14px;outline:1px solid var(--border-1)}
   .leaflet-container{z-index:1}
 
-/* 기존: padding:8px 4px 0;  → 오른쪽/아래 공간 부족 */
-.carousel{
-  display:flex; gap:12px; overflow-x:auto;
-  /* 균형 잡힌 여백으로 교체 */
-  padding:8px 12px 12px;
-  scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; overscroll-behavior-x:contain;
-}
-.carousel::-webkit-scrollbar{display:none}
-
+  /* 캐러셀 패딩 대칭 */
+  .carousel{
+    display:flex; gap:12px; overflow-x:auto;
+    padding:8px 12px 12px;
+    scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; overscroll-behavior-x:contain;
+  }
+  .carousel::-webkit-scrollbar{display:none}
 
   /* 카드: 세로 리듬 정렬 */
   .r-card{
@@ -62,16 +60,16 @@
     display:flex; flex-direction:column; gap:10px; cursor:pointer;
     transition:box-shadow .18s, transform .12s, border-color .18s, background-color .18s;
   }
-  .r-card *{ line-height:1.35 }              /* 텍스트 라인 높이 통일 */
+  .r-card *{ line-height:1.35 }
   .r-card:hover{ transform:translateY(-1px); box-shadow:0 6px 18px rgba(0,0,0,.34) }
 
   .r-card h3{margin:0;font-size:16px;font-weight:700}
-  .r-meta{display:flex;align-items:center;gap:4px;color:#cfd2ff;font-size:14px}
+  .r-meta{display:flex;align-items:center;gap:4px;color:#cfd2ff;font-size:14px;margin:0}
   .r-route{display:flex;align-items:center;gap:8px;color:#ced2f9;font-size:14px;margin:0}
   .r-msg{color:#e6e8ff;font-size:14px;margin:0}
   .r-chips{display:flex;flex-wrap:wrap;gap:8px;margin:0}
   .r-chip{
-    padding:6px 8px;border-radius:999px;font-size:12px;font-weight:600;
+    padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700;
     background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);color:#e6e8ef
   }
   .r-chip.is-urban{background:#1e2d55;border-color:#2c4484}
@@ -94,27 +92,21 @@
   .r-card[data-theme="green"] { border-color:var(--t-green-br) }
   .r-card[data-theme="purple"]{ border-color:var(--t-purple-br) }
 
-  /* 공통: 과한 바깥 글로우 제거, 인셋 보더 + 미세 배경만 */
-.r-card.selected{
-  transform:none;
-  /* 공통 기본값(blue 계열) — 테마별 변수로 덮어씀 */
-  --sel-bd: rgba(122,167,255,.60);
-  --sel-bg: rgba(122,167,255,.06);
-
-  border-color: var(--sel-bd);
-  box-shadow:
-    0 0 0 1px var(--sel-bd) inset,    /* 얇은 인셋 보더 */
-    0 10px 26px rgba(0,0,0,.44);      /* 살짝만 드랍 */
-  background: linear-gradient(180deg, var(--sel-bg), #121428 42%);
-}
-
-/* 테마별 컬러 변수만 지정 (배경/보더 일관) */
-.r-card[data-theme="red"].selected    { --sel-bd: rgba(255, 93, 93,.60);  --sel-bg: rgba(255, 93, 93,.06); }
-.r-card[data-theme="yellow"].selected { --sel-bd: rgba(255,216, 93,.60);  --sel-bg: rgba(255,216, 93,.06); }
-.r-card[data-theme="green"].selected  { --sel-bd: rgba( 86,211,100,.60);  --sel-bg: rgba( 86,211,100,.06); }
-.r-card[data-theme="purple"].selected { --sel-bd: rgba(167,139,250,.60);  --sel-bg: rgba(167,139,250,.06); }
-/* blue 테마는 공통 기본값을 그대로 사용 */
-
+  /* 선택(활성) 스타일: 바깥 글로우 제거, 인셋 보더 + 미세 배경 */
+  .r-card.selected{
+    transform:none;
+    --sel-bd: rgba(122,167,255,.60);
+    --sel-bg: rgba(122,167,255,.06);
+    border-color: var(--sel-bd);
+    box-shadow:
+      0 0 0 1px var(--sel-bd) inset,
+      0 10px 26px rgba(0,0,0,.44);
+    background: linear-gradient(180deg, var(--sel-bg), #121428 42%);
+  }
+  .r-card[data-theme="red"].selected    { --sel-bd: rgba(255, 93, 93,.60);  --sel-bg: rgba(255, 93, 93,.06); }
+  .r-card[data-theme="yellow"].selected { --sel-bd: rgba(255,216, 93,.60);  --sel-bg: rgba(255,216, 93,.06); }
+  .r-card[data-theme="green"].selected  { --sel-bd: rgba( 86,211,100,.60);  --sel-bg: rgba( 86,211,100,.06); }
+  .r-card[data-theme="purple"].selected { --sel-bd: rgba(167,139,250,.60);  --sel-bg: rgba(167,139,250,.06); }
 
   /* 출발 임박 */
   .imminent{
@@ -404,8 +396,8 @@ function renderAll(rows){
     return ta-tb;
   });
 
-  renderMap(live);   // 지도 먼저
-  renderCards(live); // 그 다음 카드 (초기 선택 시 즉시 줌)
+  renderMap(live);
+  renderCards(live);
 }
 
 /* ===== 합류 신청 모달 ===== */
