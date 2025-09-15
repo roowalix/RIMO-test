@@ -161,12 +161,12 @@
       </div>
     </div>
 
-    <!-- 인원 (잔여/정원) -->
+    <!-- 인원 (참석/정원) -->
     <div class="row">
       <label>인원</label>
       <div class="field">
         <div class="coords">
-          <input id="c_remaining" type="number" min="0" placeholder="잔여">
+          <input id="c_remaining" type="number" min="0" placeholder="참석">
           <input id="c_capacity" type="number" min="1" placeholder="정원">
         </div>
       </div>
@@ -449,8 +449,8 @@ function validate(form){
   if(!form.from) errs.push('출발을 입력하세요.');
   if(!form.to) errs.push('도착을 입력하세요.');
   if(!(form.capacity>0)) errs.push('정원은 1 이상이어야 합니다.');
-  if(form.remaining<0) errs.push('잔여는 0 이상이어야 합니다.');
-  if(form.remaining>form.capacity) errs.push('잔여가 정원보다 클 수 없습니다.');
+  if(form.remaining<0) errs.push('참석은 0 이상이어야 합니다.');
+  if(form.remaining>form.capacity) errs.push('참석이 정원보다 클 수 없습니다.');
   if(form.message.length>30) errs.push('메시지는 30자 이내입니다.');
   return errs;
 }
@@ -641,7 +641,7 @@ function renderCards(list){
         ${pace.map(chip).join('')}
         ${it.cc ? `<span class="r-chip">${escapeHtml(it.cc)}</span>` : ``}
       </div>
-      <div class="r-btm" title="잔여/정원">👥 ${capacity ? `${remaining}/${capacity}` : ''}</div>
+      <div class="r-btm" title="참석/정원">👥 ${capacity ? `${remaining}/${capacity}` : ''}</div>
     `;
     el.addEventListener('click', ()=> startEdit(it));
     el.querySelector('.r-del').addEventListener('click', (e)=>{
