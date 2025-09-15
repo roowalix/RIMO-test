@@ -10,7 +10,7 @@
     --tile:#141627; --tile2:#101223; --accent:#7aa7ff; --good:#2aa84a; --bad:#ff5d5d;
     --chip-bg:#14172a; --chip-bd:#2b2e54; --accent-glow: rgba(122,167,255,.35);
 
-    /* Theme Colors */
+    /* Theme Colors (index와 동일 보더 감) */
     --t-red:#ff5d5d;      --t-red-bg:rgba(255,93,93,.14);      --t-red-br:rgba(255,93,93,.35);
     --t-blue:#7aa7ff;     --t-blue-bg:rgba(122,167,255,.14);   --t-blue-br:rgba(122,167,255,.35);
     --t-yellow:#ffd85d;   --t-yellow-bg:rgba(255,216,93,.16);  --t-yellow-br:rgba(255,216,93,.38);
@@ -46,9 +46,11 @@
 
   .coords{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 
+  /* 토글(여러 개 선택 가능) */
   .toggles{display:flex;gap:10px;flex-wrap:wrap;margin:0}
   .toggle{display:inline-flex;align-items:center;gap:14px;padding:8px 12px;border-radius:999px;color:#e6e9ff;font-size:13px;cursor:pointer;user-select:none;white-space:nowrap;transition:transform .15s, box-shadow .15s;background:var(--chip-bg); border:1px solid var(--chip-bd)}
-  .toggle.active{border-color:var(--accent); background:rgba(122,167,255,.16); box-shadow:0 0 10px var(--accent-glow); transform:translateY(-1px) scale(1.01); font-weight:500}
+  .toggle.active{border-color:var(--accent); background:rgba(122,167,255,.16); box-shadow:0 0 10px var(--accent-glow); transform:translateY(-1px) scale(1.01); font-weight:600}
+  .toggle-hint{color:#cfd2ff99;font-size:12px;margin-top:6px}
 
   .themes{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
   .theme-btn{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:0;padding:4px 8px;border-radius:16px;border:1px solid #2b2e48;background:#14172a;color:#e8e8ef;font-size:12px;font-weight:500;cursor:pointer;user-select:none;flex:0 0 auto;white-space:nowrap;transition:transform .12s, box-shadow .12s}
@@ -64,7 +66,7 @@
   .btn.primary{background:#2a5bff;border-color:#3d6aff}
   .btnbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;justify-content:center;}
 
-  /* ===== 카드 컴포넌트 ===== */
+  /* ===== 카드 컴포넌트(미리보기) ===== */
   .r-card{
     position:relative; background:#121428; border:1px solid rgba(255,255,255,.14);
     border-radius:16px; padding:14px; box-shadow:0 2px 14px rgba(0,0,0,.28);margin-bottom:10px
@@ -75,7 +77,7 @@
   .r-msg{color:#e6e8ff;font-size:14px;margin:6px 0}
   .r-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
   .r-chip{
-    padding:6px 8px;border-radius:999px;font-size:12px;font-weight:600;
+    padding:6px 10px;border-radius:999px;font-size:12px;font-weight:600;
     background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);color:#e6e8ef
   }
   .r-chip.is-urban{background:#1e2d55;border-color:#2c4484}
@@ -187,14 +189,20 @@
       </div>
     </div>
 
-    <!-- 스타일/페이스 -->
+    <!-- 스타일/페이스 (여러 개 선택 가능) -->
     <div class="row">
       <label>스타일</label>
-      <div class="field"><div id="styleToggles" class="toggles"></div></div>
+      <div class="field">
+        <div id="styleToggles" class="toggles"></div>
+        <div class="toggle-hint">여러 개 선택 가능</div>
+      </div>
     </div>
     <div class="row">
       <label>페이스</label>
-      <div class="field"><div id="paceToggles" class="toggles"></div></div>
+      <div class="field">
+        <div id="paceToggles" class="toggles"></div>
+        <div class="toggle-hint">여러 개 선택 가능</div>
+      </div>
     </div>
 
     <!-- 메시지 -->
@@ -290,13 +298,14 @@ function clearHidden(){
   renderCards(list);
 }
 
-/* 토글 */
+/* 토글 (여러 개 선택 가능) */
 function makeToggle(label, active=false){
   const el=document.createElement('button');
   el.type='button';
   el.className='toggle'+(active?' active':'');
   el.dataset.val=label;
   el.textContent = label;
+  // ✅ 다중 선택: 단순 토글 (형제들 상태에 영향 주지 않음)
   el.addEventListener('click',()=> el.classList.toggle('active'));
   return el;
 }
@@ -317,6 +326,7 @@ function renderThemes(selected='blue'){
     btn.className='theme-btn'+(opt.key===selected?' active':'');
     btn.dataset.theme=opt.key;
     btn.innerHTML = `<span class="badge">${opt.emoji}</span><span class="tx">${opt.label}</span>`;
+    // 테마는 단일 선택
     btn.addEventListener('click',()=>{
       qsa('.theme-btn', bar).forEach(b=>b.classList.remove('active'));
       btn.classList.add('active');
@@ -414,10 +424,10 @@ function getForm(){
     to_lat: parseFloat(qs('#to_lat').value||''),
     to_lng: parseFloat(qs('#to_lng').value||''),
     cc: qs('#c_cc').value,
-    styles: selectedToggles('styleToggles'),
-    pace: selectedToggles('paceToggles'),
+    styles: selectedToggles('styleToggles'),   // ✅ 다중 선택값
+    pace: selectedToggles('paceToggles'),      // ✅ 다중 선택값
     message: qs('#c_msg').value.trim(),
-    remaining: parseInt(qs('#c_remaining').value||'0',10),
+    remaining: parseInt(qs('#c_remaining').value||'0',10), // remaining = 참석자 수
     capacity: parseInt(qs('#c_capacity').value||'0',10),
     theme: getSelectedTheme()
   };
@@ -491,7 +501,7 @@ function mergeById(localArr=[], serverArr=[]){
   (serverArr||[]).forEach(it => { if (it?.id) map.set(it.id, it); });
   return Array.from(map.values()).sort((a,b)=>{
     const ad = a?.datetime || '';
-    const bd = b?.datetime || '';
+       const bd = b?.datetime || '';
     return bd.localeCompare(ad);
   });
 }
@@ -597,7 +607,7 @@ async function fullResync(){
   }
 }
 
-/* 카드 렌더 */
+/* 카드 렌더(미리보기) */
 function cls(label){
   switch(String(label).toLowerCase()){
     case 'urban': return 'is-urban';
@@ -625,7 +635,7 @@ function renderCards(list){
     const when  = it.datetime_display || formatKDate(dt);
 
     const capacity  = Number(it.capacity) || 0;
-    const remaining = Number.isFinite(Number(it.remaining)) ? Number(it.remaining) : 0;
+    const remaining = Number.isFinite(Number(it.remaining)) ? Number(it.remaining) : 0; // remaining = 참석자 수
 
     const el=document.createElement('article');
     el.className='r-card'; el.dataset.theme=theme; el.dataset.id=it.id;
@@ -633,7 +643,7 @@ function renderCards(list){
     el.innerHTML = `
       <button class="r-del" title="이 화면에서 숨기기" aria-label="숨기기">✕</button>
       <h3>${escapeHtml(it.title||'(제목 없음)')}</h3>
-      <div class="r-meta">⏰<span>${when}</span></div>
+      <div class="r-meta">⏰ <span>${when}</span></div>
       <div class="r-route">📌  ${escapeHtml(it.from||'-')} - ${escapeHtml(it.to||'-')}</div>
       <div class="r-msg">💬  ${escapeHtml(it.message||'-')}</div>
       <div class="r-chips">
