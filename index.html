@@ -23,13 +23,17 @@
   }
 
   *{box-sizing:border-box}
-  body{ margin:0; background:var(--bg); color:var(--fg);
-        font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Arial,sans-serif; }
+  body{
+    margin:0; background:var(--bg); color:var(--fg);
+    font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Arial,sans-serif;
+  }
 
   /* 헤더 */
-  header{position:sticky; top:0; z-index:5;
-          background:rgba(11,11,15,.9); backdrop-filter:blur(8px);
-          border-bottom:1px solid var(--border-1)}
+  header{
+    position:sticky; top:0; z-index:5;
+    background:rgba(11,11,15,.9); backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--border-1)
+  }
   .bar{display:flex;gap:10px;align-items:center;padding:14px 16px;height:56px}
   .logo{font-weight:900}
   .title{font-weight:800;opacity:.9}
@@ -40,7 +44,7 @@
   #map{height:360px;border-radius:14px;outline:1px solid var(--border-1)}
   .leaflet-container{z-index:1}
 
-  /* ===== 캐러셀 & 카드(크루/메인 공통 스타일) ===== */
+  /* ===== 캐러셀 & 카드(크루/메인 공통 톤) ===== */
   .carousel{
     display:flex; gap:12px; overflow-x:auto; padding:8px 4px 0;
     scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; overscroll-behavior-x:contain;
@@ -51,7 +55,13 @@
     flex:0 0 304px; width:304px; scroll-snap-align:start; scroll-snap-stop:always;
     position:relative; background:#121428; border:1px solid rgba(255,255,255,.14);
     border-radius:16px; padding:14px; box-shadow:0 2px 14px rgba(0,0,0,.28);
-    display:flex; flex-direction:column; gap:8px;
+    display:flex; flex-direction:column; gap:8px; cursor:pointer;
+    transition:box-shadow .2s, transform .12s, border-color .2s;
+  }
+  .r-card:hover{ transform:translateY(-1px); box-shadow:0 6px 18px rgba(0,0,0,.34) }
+  .r-card.selected{
+    border-color:rgba(122,167,255,.65);
+    box-shadow:0 0 0 6px rgba(122,167,255,.10), 0 8px 24px rgba(0,0,0,.45);
   }
   .r-card h3{margin:0 0 2px;font-size:18px;font-weight:800}
   .r-meta{font-size:14px;color:#cfd2ff}
@@ -72,6 +82,7 @@
     margin-top:4px; width:100%; padding:12px; border-radius:12px; border:none;
     background:rgba(255,255,255,.12); color:#fff; font-weight:900; cursor:pointer;
   }
+  .r-cta:focus{outline:2px solid rgba(122,167,255,.6); outline-offset:2px}
 
   /* 카드 테마 보더 */
   .r-card[data-theme="red"]   { border-color:var(--t-red-br) }
@@ -132,7 +143,7 @@
 </header>
 
 <main>
-  <div id="map"></div>
+  <div id="map" aria-label="라이딩 경로 지도"></div>
   <section id="list" class="carousel" aria-label="라이딩 목록"></section>
 
   <!-- (선택) 좌우 네비게이션 -->
@@ -264,6 +275,7 @@ async function loadCrews(){
 
 /* ===== 지도 ===== */
 let map, group, arcs;
+const boundsById = new Map();
 function initMap(){
   map=L.map('map',{scrollWheelZoom:true});
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
@@ -283,35 +295,60 @@ function arcCoords(aLat,aLng,bLat,bLng,k=.18){
   const cx=mx+nx*off,cy=my+ny*off; return [[y1,x1],[cy,cx],[y2,x2]];
 }
 function renderMap(crews){
-  group.clearLayers(); arcs.clearLayers();
-  const bounds=L.latLngBounds([]);
+  group.clearLayers(); arcs.clearLayers(); boundsById.clear();
+  const allBounds=L.latLngBounds([]);
   crews.forEach(c=>{
     if(!(c.from_lat&&c.from_lng&&c.to_lat&&c.to_lng)) return;
     const t=THEMES[c.theme]||THEMES.blue;
     const ms=L.marker([c.from_lat,c.from_lng],{icon:makePin(t.base,'S')}).addTo(group);
     const md=L.marker([c.to_lat,c.to_lng],{icon:makePin(t.base,'D')}).addTo(group);
     const a=L.polyline(arcCoords(c.from_lat,c.from_lng,c.to_lat,c.to_lng),{color:t.base,weight:2.5,dashArray:"6 8",opacity:.9}).addTo(arcs);
-    [ms,md].forEach(m=>bounds.extend(m.getLatLng())); a.getLatLngs().forEach(p=>bounds.extend(p));
+
+    // bounds 계산/저장
+    const b=L.latLngBounds([ms.getLatLng(), md.getLatLng(), ...a.getLatLngs()]);
+    boundsById.set(c.id, b);
+    allBounds.extend(b);
   });
-  if(bounds.isValid()) map.fitBounds(bounds.pad(0.25));
+  if(allBounds.isValid()) map.fitBounds(allBounds.pad(0.25));
 }
 
-/* ===== 카드 ===== */
+/* ===== 칩 ===== */
 function chipClass(v){ switch(String(v).toLowerCase()){
   case 'urban':return 'is-urban'; case 'curve':return 'is-curve'; case 'tour':return 'is-tour';
   case 'easy':return 'is-easy'; case 'balanced':return 'is-balanced'; case 'dynamic':return 'is-dynamic';
   default:return ''; } }
 const chip = v => `<span class="r-chip ${chipClass(v)}">${v}</span>`;
 
+/* ===== 카드 렌더 ===== */
+let currentSelectedId = null;
+function selectCardAndZoom(id){
+  currentSelectedId = id;
+  // 카드 하이라이트
+  document.querySelectorAll('.r-card').forEach($c=>{
+    $c.classList.toggle('selected', $c.dataset.id===id);
+  });
+  // 지도 줌/패닝
+  const b = boundsById.get(id);
+  if(b && b.isValid()){
+    map.fitBounds(b.pad(0.25), { animate:true, duration:.6 });
+  }
+}
+
 function renderCards(crews){
   const list=document.getElementById('list'); list.innerHTML='';
   crews.forEach(c=>{
-    const joined = Math.max(0,(c.capacity||0)-(c.remaining||0)); // 합류 인원 추정
+    // 참석/정원 계산 (잔여 → 참석 변환)
+    const capacity = Math.max(0, c.capacity||0);
+    const remaining = Math.max(0, c.remaining||0);
+    const joined = Math.max(0, capacity - remaining); // 참석자 수
+
     const immin  = (c.datetime? (new Date(c.datetime).getTime()-Date.now()) : 0);
     const showImmin = (immin<=IMMINENT_MS && immin>=-GRACE_MS);
 
     const el=document.createElement('article');
-    el.className='r-card'; el.dataset.theme=c.theme;
+    el.className='r-card'; el.dataset.theme=c.theme; el.dataset.id=c.id;
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+    el.setAttribute('aria-label', `${c.title} 상세 보기 및 지도 이동`);
 
     el.innerHTML=`
       <h3>${c.title}</h3>
@@ -323,12 +360,30 @@ function renderCards(crews){
         ${c.pace.map(chip).join('')}
         ${c.cc?chip(c.cc):''}
       </div>
-      <button class="r-cta">👥 ${joined}/${c.capacity||0} · 합류 신청</button>
+      <button class="r-cta" aria-label="합류 신청">👥 ${joined}/${capacity} · 합류 신청</button>
       ${showImmin?`<div class="imminent">🚦 출발 임박</div>`:''}
     `;
-    el.querySelector('.r-cta').addEventListener('click',()=>openJoinModal(c));
+
+    // 카드 클릭 → 선택 & 지도 이동
+    el.addEventListener('click', ()=>{
+      selectCardAndZoom(c.id);
+    });
+    el.addEventListener('keydown', (e)=>{
+      if(e.key==='Enter' || e.key===' '){ e.preventDefault(); selectCardAndZoom(c.id); }
+    });
+
+    // CTA → 모달
+    el.querySelector('.r-cta').addEventListener('click',(ev)=>{
+      ev.stopPropagation(); // 카드 클릭과 분리
+      openJoinModal(c);
+    });
+
     list.appendChild(el);
   });
+
+  // 첫 카드 자동 선택(있다면)
+  const first = list.querySelector('.r-card');
+  if(first) selectCardAndZoom(first.dataset.id);
 }
 
 /* ===== 전체 렌더: 시간 필터(+8분 유예) + 시간순 정렬 ===== */
