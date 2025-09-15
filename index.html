@@ -112,26 +112,8 @@
                padding:12px 18px;border-radius:22px;font-weight:800;text-decoration:none;font-size:14px}
   .tabbar .tab.primary{background:#26346d;border-color:#3b53a8}
 
-  /* 합류 모달(작게) */
-  .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:4000;
-         background:rgba(0,0,0,.45);padding:22px 12px}
-  .modal.show{display:flex}
-  .sheet{
-    width:min(680px, 92vw);
-    background:#0e1222; border:1px solid #2b304f; border-radius:16px;
-    box-shadow:0 14px 40px rgba(0,0,0,.55); padding:12px;
-  }
-  .sheet h4{margin:0 0 8px;font-size:16px}
-  .sheet .hint{color:#cfd2ff;line-height:1.45;margin-bottom:8px;font-size:13px}
-  .sheet .pre{
-    background:#0b1020; border:1px solid #293059; border-radius:12px;
-    padding:10px; white-space:pre-wrap; line-height:1.35;
-    min-height:84px; max-height:38vh; overflow:auto; color:#e6e9ff; font-size:13px;
-  }
-  .modal-actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px}
-  .modal-actions button{flex:1;min-width:110px;max-width:160px;padding:10px;border-radius:10px;border:none;
-                        background:#2A2F4F;color:#fff;font-size:14px;font-weight:800;cursor:pointer}
-  body.modal-open .tabbar{pointer-events:none;opacity:.28;filter:saturate(.2) blur(1px);transform:translateY(2px)}
+  /* 힌트 */
+  .hint{color:#cfd2ff99;font-size:14px;padding:12px}
 </style>
 </head>
 <body>
@@ -146,12 +128,7 @@
 <main>
   <div id="map" aria-label="라이딩 경로 지도"></div>
   <section id="list" class="carousel" aria-label="라이딩 목록"></section>
-
-  <!-- (선택) 좌우 네비게이션 -->
-  <div class="carousel-nav" style="display:flex;justify-content:flex-end;gap:8px;margin-top:6px;">
-    <button id="prevCard" style="padding:8px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.16);background:#1b1f34;color:#fff">‹ 이전</button>
-    <button id="nextCard" style="padding:8px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.16);background:#1b1f34;color:#fff">다음 ›</button>
-  </div>
+  <!-- 좌우 네비게이션 버튼 없음 -->
 </main>
 
 <nav class="tabbar" aria-label="하단 네비게이션">
@@ -161,15 +138,15 @@
 </nav>
 
 <!-- 합류 안내 모달 -->
-<div class="modal" id="joinModal" role="dialog" aria-modal="true" aria-labelledby="joinTitle">
-  <div class="sheet">
-    <h4 id="joinTitle">✅ 합류 신청하기</h4>
+<div class="modal" id="joinModal" role="dialog" aria-modal="true" aria-labelledby="joinTitle" style="display:none;align-items:center;justify-content:center;z-index:4000;background:rgba(0,0,0,.45);padding:22px 12px;position:fixed;inset:0;">
+  <div class="sheet" style="width:min(680px, 92vw);background:#0e1222;border:1px solid #2b304f;border-radius:16px;box-shadow:0 14px 40px rgba(0,0,0,.55);padding:12px;">
+    <h4 id="joinTitle" style="margin:0 0 8px;font-size:16px">✅ 합류 신청하기</h4>
     <div class="hint">아래 내용을 <b>운영자 1:1 채팅</b>에 붙여넣어 주세요. 승인되면 크루 채팅방으로 초대됩니다.</div>
-    <div id="joinPreview" class="pre"></div>
-    <div class="modal-actions">
-      <button id="goAdmin">이대로 신청</button>
-      <button id="editProfile">프로필 수정</button>
-      <button id="copyProfileBtn">복사</button>
+    <div id="joinPreview" class="pre" style="background:#0b1020;border:1px solid #293059;border-radius:12px;padding:10px;white-space:pre-wrap;line-height:1.35;min-height:84px;max-height:38vh;overflow:auto;color:#e6e9ff;font-size:13px"></div>
+    <div class="modal-actions" style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px">
+      <button id="goAdmin" style="flex:1;min-width:110px;max-width:160px;padding:10px;border-radius:10px;border:none;background:#2A2F4F;color:#fff;font-size:14px;font-weight:800;cursor:pointer">이대로 신청</button>
+      <button id="editProfile" style="flex:1;min-width:110px;max-width:160px;padding:10px;border-radius:10px;border:none;background:#2A2F4F;color:#fff;font-size:14px;font-weight:800;cursor:pointer">프로필 수정</button>
+      <button id="copyProfileBtn" style="flex:1;min-width:110px;max-width:160px;padding:10px;border-radius:10px;border:none;background:#2A2F4F;color:#fff;font-size:14px;font-weight:800;cursor:pointer">복사</button>
     </div>
   </div>
 </div>
@@ -177,8 +154,8 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin></script>
 <script>
 /* ===== 설정 & 상수 ===== */
-/* ※ rimo_crew.html과 동일한 최신 웹앱 */
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzjogZFqCVW3pjTRtvet4J0uTyu3gsNiEHbbsTND9nI6v6PPjbhYSW9R7iz0Kcy5N_t5w/exec";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzjogZFqCVW3pjTRtvet4J0uTyu3gsNiEHbbsTND9nI6v6PPjbhYSW9R7iz0Kcy5N_t5w/exec"; // rimo_crew와 동일
+const SHARED_TOKEN = ""; // (옵션) Apps Script에서 검사 시 맞추세요.
 const CACHE_KEY   = "rimo_published_cards_server_cache";
 const PROFILE_KEY = "rimo_profile_v1";
 const ADMIN_DM    = "http://pf.kakao.com/_ceUDn/chat";
@@ -203,7 +180,6 @@ document.getElementById('today').textContent =
 /* ===== 유틸 ===== */
 const pad = n => String(n).padStart(2,'0');
 function formatTimeKOR(d){
-  // "연/월/일/오전 00:00" 형식 (rimo_crew 형식과 호환)
   const Y=d.getFullYear(), M=pad(d.getMonth()+1), D=pad(d.getDate());
   const h=d.getHours(), m=pad(d.getMinutes());
   const ampm = h>=12 ? '오후' : '오전';
@@ -225,29 +201,30 @@ function normalizeRow(it){
     id: it.id || `id_${Math.random().toString(36).slice(2,8)}`,
     title: it.title||'(제목 없음)',
     datetime: dtStr,
-    timeLabel: dt ? formatTimeKOR(dt) : '',
+    timeLabel: it.datetime_display || (dt ? formatTimeKOR(dt) : ''),
     from: it.from||'-', to: it.to||'-',
     from_lat:+it.from_lat||null, from_lng:+it.from_lng||null, to_lat:+it.to_lat||null, to_lng:+it.to_lng||null,
     cc: it.cc||'',
     styles: toList(it.styles),
     pace: toList(it.pace),
     message: it.message||'',
-    /* 중요: remaining = 참석자 수 (rimo_crew와 동일 의미) */
-    remaining: Number.isFinite(+it.remaining)? +it.remaining : 0,
+    remaining: Number.isFinite(+it.remaining)? +it.remaining : 0, // remaining = 참석자 수
     capacity:  Number.isFinite(+it.capacity)?  +it.capacity  : 0,
     theme: it.theme||'blue'
   };
 }
 
 /* ===== 데이터 로드 (fetch → JSONP → 캐시) ===== */
+function buildListURL(){
+  return WEB_APP_URL + `?op=list&scope=all${SHARED_TOKEN ? `&token=${encodeURIComponent(SHARED_TOKEN)}` : ''}&_=${Date.now()}`;
+}
 function fetchJSONP(url, timeoutMs=9000){
   return new Promise((resolve,reject)=>{
     const cb='__rimo_cb_'+Date.now(), s=document.createElement('script');
     const t=setTimeout(()=>{cleanup();reject(new Error('JSONP timeout'));},timeoutMs);
     function cleanup(){ delete window[cb]; s.remove(); clearTimeout(t); }
     window[cb]=data=>{ cleanup(); resolve(data); };
-    const hasQ = url.includes('?');
-    s.src=url+(hasQ?'&':'?')+'op=list&callback='+cb+'&_='+Date.now();
+    s.src=url + (url.includes('?')?'&':'?') + 'callback=' + cb;
     s.onerror=()=>{ cleanup(); reject(new Error('JSONP error')); };
     document.body.appendChild(s);
   });
@@ -256,21 +233,29 @@ async function loadCrews(){
   let cached=[]; try{ cached=JSON.parse(localStorage.getItem(CACHE_KEY)||'[]'); }catch(_){}
   if(cached.length) renderAll(cached.map(normalizeRow)); // 먼저 캐시 표시
 
-  // 시도1: fetch (CORS 허용일 때)
+  const listURL = buildListURL();
+
+  // 시도1: fetch (CORS 허용시)
   try{
-    const r=await fetch(WEB_APP_URL+'?op=list&_='+Date.now(),{cache:'no-store'});
+    const r=await fetch(listURL,{cache:'no-store'});
     if(r.ok){
-      const j=await r.json(); const rows=Array.isArray(j)?j:(Array.isArray(j?.rows)?j.rows:[]);
-      localStorage.setItem(CACHE_KEY, JSON.stringify(rows));
-      return rows.map(normalizeRow);
+      const j=await r.json().catch(()=>null);
+      const rows=Array.isArray(j)?j:(Array.isArray(j?.rows)?j.rows:[]);
+      if(rows?.length){
+        localStorage.setItem(CACHE_KEY, JSON.stringify(rows));
+        return rows.map(normalizeRow);
+      }
     }
   }catch(_){}
 
   // 시도2: JSONP 폴백
   try{
-    const j=await fetchJSONP(WEB_APP_URL);
+    const j=await fetchJSONP(listURL);
     const rows=Array.isArray(j)?j:(Array.isArray(j?.rows)?j.rows:[]);
-    if(rows.length){ localStorage.setItem(CACHE_KEY, JSON.stringify(rows)); return rows.map(normalizeRow); }
+    if(rows?.length){
+      localStorage.setItem(CACHE_KEY, JSON.stringify(rows));
+      return rows.map(normalizeRow);
+    }
   }catch(_){}
 
   // 시도3: 캐시
@@ -337,10 +322,18 @@ function selectCardAndZoom(id){
 
 function renderCards(crews){
   const list=document.getElementById('list'); list.innerHTML='';
+
+  if(!crews.length){
+    const empty=document.createElement('div');
+    empty.className='r-card';
+    empty.innerHTML='<div class="r-msg">표시할 라이딩이 없습니다.</div>';
+    list.appendChild(empty);
+    return;
+  }
+
   crews.forEach(c=>{
-    /* 참석/정원: remaining = 참석자 수 */
     const capacity  = Math.max(0, c.capacity||0);
-    const attendees = Math.max(0, c.remaining||0);
+    const attendees = Math.max(0, c.remaining||0); // remaining = 참석자 수
 
     const immin  = (c.datetime? (new Date(c.datetime).getTime()-Date.now()) : 0);
     const showImmin = (immin<=IMMINENT_MS && immin>=-GRACE_MS);
@@ -364,17 +357,13 @@ function renderCards(crews){
       ${showImmin?`<div class="imminent">🚦 출발 임박</div>`:''}
     `;
 
-    // 카드 클릭 → 선택 & 지도 이동
     el.addEventListener('click', ()=> selectCardAndZoom(c.id));
     el.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); selectCardAndZoom(c.id); } });
-
-    // CTA → 모달 (카드 클릭과 충돌 방지)
     el.querySelector('.r-cta').addEventListener('click',(ev)=>{ ev.stopPropagation(); openJoinModal(c); });
 
     list.appendChild(el);
   });
 
-  // 첫 카드 자동 선택
   const first = list.querySelector('.r-card');
   if(first && !currentSelectedId) selectCardAndZoom(first.dataset.id);
 }
@@ -385,19 +374,18 @@ function renderAll(rows){
   const live=rows.filter(r=>{
     if(!r.datetime) return true;
     const t=new Date(r.datetime).getTime();
-    return (t + GRACE_MS) >= now; // 출발 8분 후부터 숨김
+    return (t + GRACE_MS) >= now;
   }).sort((a,b)=>{
     const ta=a.datetime?new Date(a.datetime).getTime():Infinity;
     const tb=b.datetime?new Date(b.datetime).getTime():Infinity;
-    return ta-tb; // 빠른 시간 순
+    return ta-tb;
   });
 
-  // ★ 지도 먼저 → 카드 (초기 선택시 즉시 줌)
-  renderMap(live);
-  renderCards(live);
+  renderMap(live);   // 지도 먼저
+  renderCards(live); // 그 다음 카드 (초기 선택 시 즉시 줌)
 }
 
-/* ===== 합류 신청 모달(작게) ===== */
+/* ===== 합류 신청 모달 ===== */
 const modal=document.getElementById('joinModal');
 const preview=document.getElementById('joinPreview');
 function loadProfile(){ try{ return JSON.parse(localStorage.getItem(PROFILE_KEY)||'{}'); }catch(_){ return {}; } }
@@ -427,32 +415,32 @@ function openJoinModal(crew){
   const profile=loadProfile();
   const text=composeText(crew, profile);
   preview.textContent=text;
-  copyText(text);
+  try{ awaitCopy(text); }catch(_){}
+  modal.style.display='flex';
   document.body.classList.add('modal-open');
-  modal.classList.add('show');
   document.getElementById('goAdmin').onclick=()=>{ location.href=ADMIN_DM; };
   document.getElementById('editProfile').onclick=()=>{ location.href='rimo_profile.html'; };
   document.getElementById('copyProfileBtn').onclick=()=> copyText(text);
 }
+function awaitCopy(t){ return copyText(t); }
 modal.addEventListener('click', e=>{
-  if(e.target===modal) { modal.classList.remove('show'); document.body.classList.remove('modal-open'); }
+  if(e.target===modal) { modal.style.display='none'; document.body.classList.remove('modal-open'); }
 });
-
-/* ===== 캐러셀 좌우 이동 버튼 ===== */
-const listEl = document.getElementById('list');
-function scrollByCard(dir){
-  const card = listEl.querySelector('.r-card');
-  const w = card ? card.offsetWidth : 300;
-  const gap = 12;
-  listEl.scrollBy({ left: dir*(w+gap), behavior:'smooth' });
-}
-document.getElementById('prevCard')?.addEventListener('click',()=>scrollByCard(-1));
-document.getElementById('nextCard')?.addEventListener('click',()=>scrollByCard(1));
 
 /* ===== init ===== */
 (async function init(){
-  const rows = await loadCrews();
-  renderAll(rows);
+  initMap();
+  try{
+    const rows = await loadCrews();
+    renderAll(rows);
+  }catch(err){
+    const list=document.getElementById('list');
+    const msg=document.createElement('div');
+    msg.className='r-card';
+    msg.innerHTML=`<div class="r-msg">데이터를 불러오지 못했습니다. (오프라인이거나 웹앱 응답 없음)</div>`;
+    list.appendChild(msg);
+    console.warn(err);
+  }
 })();
 </script>
 </body>
