@@ -10,7 +10,7 @@
     --tile:#141627; --tile2:#101223; --accent:#7aa7ff; --good:#2aa84a; --bad:#ff5d5d;
     --chip-bg:#14172a; --chip-bd:#2b2e54; --accent-glow: rgba(122,167,255,.35);
 
-    /* Theme Colors (index와 동일 보더 감) */
+    /* Theme Colors */
     --t-red:#ff5d5d;      --t-red-bg:rgba(255,93,93,.14);      --t-red-br:rgba(255,93,93,.35);
     --t-blue:#7aa7ff;     --t-blue-bg:rgba(122,167,255,.14);   --t-blue-br:rgba(122,167,255,.35);
     --t-yellow:#ffd85d;   --t-yellow-bg:rgba(255,216,93,.16);  --t-yellow-br:rgba(255,216,93,.38);
@@ -46,11 +46,9 @@
 
   .coords{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 
-  /* 토글(여러 개 선택 가능) */
   .toggles{display:flex;gap:10px;flex-wrap:wrap;margin:0}
   .toggle{display:inline-flex;align-items:center;gap:14px;padding:8px 12px;border-radius:999px;color:#e6e9ff;font-size:13px;cursor:pointer;user-select:none;white-space:nowrap;transition:transform .15s, box-shadow .15s;background:var(--chip-bg); border:1px solid var(--chip-bd)}
-  .toggle.active{border-color:var(--accent); background:rgba(122,167,255,.16); box-shadow:0 0 10px var(--accent-glow); transform:translateY(-1px) scale(1.01); font-weight:600}
-  .toggle-hint{color:#cfd2ff99;font-size:12px;margin-top:6px}
+  .toggle.active{border-color:var(--accent); background:rgba(122,167,255,.16); box-shadow:0 0 10px var(--accent-glow); transform:translateY(-1px) scale(1.01); font-weight:500}
 
   .themes{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
   .theme-btn{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:0;padding:4px 8px;border-radius:16px;border:1px solid #2b2e48;background:#14172a;color:#e8e8ef;font-size:12px;font-weight:500;cursor:pointer;user-select:none;flex:0 0 auto;white-space:nowrap;transition:transform .12s, box-shadow .12s}
@@ -66,7 +64,7 @@
   .btn.primary{background:#2a5bff;border-color:#3d6aff}
   .btnbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;justify-content:center;}
 
-  /* ===== 카드 컴포넌트(미리보기) ===== */
+  /* ===== 카드 컴포넌트 ===== */
   .r-card{
     position:relative; background:#121428; border:1px solid rgba(255,255,255,.14);
     border-radius:16px; padding:14px; box-shadow:0 2px 14px rgba(0,0,0,.28);margin-bottom:10px
@@ -74,10 +72,11 @@
   .r-card h3{margin:0 0 6px;font-size:16px;font-weight:700}
   .r-meta{display:flex;align-items:center;gap:4px;color:#cfd2ff;font-size:14px}
   .r-route{display:flex;align-items:center;gap:8px;margin:6px 0 4px;color:#ced2f9;font-size:14px}
+  .r-cc{margin:6px 0;color:#dfe3ff;font-size:14px;display:flex;align-items:center;gap:6px} /* 배기량 라인 */
   .r-msg{color:#e6e8ff;font-size:14px;margin:6px 0}
   .r-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
   .r-chip{
-    padding:6px 10px;border-radius:999px;font-size:12px;font-weight:600;
+    padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700;
     background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);color:#e6e8ef
   }
   .r-chip.is-urban{background:#1e2d55;border-color:#2c4484}
@@ -163,12 +162,12 @@
       </div>
     </div>
 
-    <!-- 인원 (참석/정원) -->
+    <!-- 인원 (잔여/정원) -->
     <div class="row">
       <label>인원</label>
       <div class="field">
         <div class="coords">
-          <input id="c_remaining" type="number" min="0" placeholder="참석">
+          <input id="c_remaining" type="number" min="0" placeholder="잔여">
           <input id="c_capacity" type="number" min="1" placeholder="정원">
         </div>
       </div>
@@ -178,31 +177,26 @@
     <div class="row">
       <label for="c_cc">배기량</label>
       <div class="field">
+        <!-- ✅ 명시적 값 + 관계없음 선택 보장 -->
         <select id="c_cc">
-          <option value="">관계없음</option>
-          <option>125cc 이하</option>
-          <option>125~250cc</option>
-          <option>250~400cc</option>
-          <option>400~800cc</option>
-          <option>800cc 이상</option>
+          <option value="none">관계없음</option>
+          <option value="u125">125cc 미만</option>
+          <option value="125_250">125~250cc</option>
+          <option value="250_400">250~400cc</option>
+          <option value="400_800">400~800cc</option>
+          <option value="o800">800cc 이상</option>
         </select>
       </div>
     </div>
 
-    <!-- 스타일/페이스 (여러 개 선택 가능) -->
+    <!-- 스타일/페이스 -->
     <div class="row">
       <label>스타일</label>
-      <div class="field">
-        <div id="styleToggles" class="toggles"></div>
-        <div class="toggle-hint">여러 개 선택 가능</div>
-      </div>
+      <div class="field"><div id="styleToggles" class="toggles"></div></div>
     </div>
     <div class="row">
       <label>페이스</label>
-      <div class="field">
-        <div id="paceToggles" class="toggles"></div>
-        <div class="toggle-hint">여러 개 선택 가능</div>
-      </div>
+      <div class="field"><div id="paceToggles" class="toggles"></div></div>
     </div>
 
     <!-- 메시지 -->
@@ -257,7 +251,8 @@
 const MAIN_URL = "https://roowalix.github.io/RIMO-test/index.html";
 
 /* ---------- 스프레드시트 웹앱 (최신) ---------- */
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzjogZFqCVW3pjTRtvet4J0uTyu3gsNiEHbbsTND9nI6v6PPjbhYSW9R7iz0Kcy5N_t5w/exec";
+/* ✅ 새 주소로 교체 */
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw4BXsdN6GEkqKyto0Yxwc3G1b6gn1p8YLOrW2PMOSRpbIZcKKZpjF0GlDcJuCPB7jiTw/exec";
 const SHARED_TOKEN = ""; // (옵션) Apps Script에서 검사 시 맞춰주세요.
 
 /* ---------- 옵션 ---------- */
@@ -270,6 +265,15 @@ const THEME_OPTS = [
   {key:'green',  label:'그린',   emoji:'🟢'},
   {key:'purple', label:'퍼플',   emoji:'🟣'}
 ];
+
+/* 배기량 표시용 매핑 */
+const CC_DISPLAY = {
+  'u125':    '🏍 125cc 미만',
+  '125_250': '🏍 125~250cc',
+  '250_400': '🏍 250~400cc',
+  '400_800': '🏍 400~800cc',
+  'o800':    '🏍 800cc 이상'
+};
 
 /* ---------- 유틸 ---------- */
 const qs=(s,p=document)=>p.querySelector(s);
@@ -298,14 +302,13 @@ function clearHidden(){
   renderCards(list);
 }
 
-/* 토글 (여러 개 선택 가능) */
+/* 토글 */
 function makeToggle(label, active=false){
   const el=document.createElement('button');
   el.type='button';
   el.className='toggle'+(active?' active':'');
   el.dataset.val=label;
   el.textContent = label;
-  // ✅ 다중 선택: 단순 토글 (형제들 상태에 영향 주지 않음)
   el.addEventListener('click',()=> el.classList.toggle('active'));
   return el;
 }
@@ -326,7 +329,6 @@ function renderThemes(selected='blue'){
     btn.className='theme-btn'+(opt.key===selected?' active':'');
     btn.dataset.theme=opt.key;
     btn.innerHTML = `<span class="badge">${opt.emoji}</span><span class="tx">${opt.label}</span>`;
-    // 테마는 단일 선택
     btn.addEventListener('click',()=>{
       qsa('.theme-btn', bar).forEach(b=>b.classList.remove('active'));
       btn.classList.add('active');
@@ -395,23 +397,38 @@ function attachAutoSplit(latId,lngId){
   latEl.addEventListener('change', onChange); lngEl.addEventListener('change', onChange);
 }
 
-/* 값 보정 */
+/* 값 보정 (여러 저장 형식 방어) */
 function normList(v){
-  if(Array.isArray(v)) return v.map(x=>String(x));
-  if(v==null) return [];
-  let s=String(v).trim();
-  try{
-    if(s.startsWith('[') && s.endsWith(']')){
-      const a=JSON.parse(s); if(Array.isArray(a)) return a.map(x=>String(x));
-    }
-  }catch(_){}
-  if(/Ljava\.lang\.Object/i.test(s)) return [];
-  return s.split(/[,\|]/).map(t=>t.trim()).filter(Boolean);
+  if (v == null) return [];
+  if (Array.isArray(v)) return v.map(x => String(x)).filter(Boolean);
+
+  let s = String(v).trim();
+
+  // JSON 배열 문자열 형태일 때
+  if (s.startsWith('[') && s.endsWith(']')) {
+    try {
+      const a = JSON.parse(s);
+      if (Array.isArray(a)) return a.map(x=>String(x)).filter(Boolean);
+    } catch(_){}
+  }
+
+  // "A,B" 또는 "A|B" 형태도 지원
+  const parts = s.split(/[,\|]/).map(t=>t.trim()).filter(Boolean);
+
+  // Google Sheets 이상한 toString 방어
+  if (parts.length === 1 && /Ljava\.lang\.Object/i.test(s)) return [];
+
+  return parts;
 }
 
 /* 폼 수집/세팅 */
 function getForm(){
   const dt = getDateFromInput() || new Date();
+
+  // ✅ cc는 'none'이면 빈 값으로 저장(관계없음)
+  const rawCc = qs('#c_cc').value;
+  const cc    = (rawCc === 'none') ? '' : rawCc;
+
   return {
     id: editingId || '',
     title: qs('#c_title').value.trim(),
@@ -423,11 +440,11 @@ function getForm(){
     from_lng: parseFloat(qs('#from_lng').value||''),
     to_lat: parseFloat(qs('#to_lat').value||''),
     to_lng: parseFloat(qs('#to_lng').value||''),
-    cc: qs('#c_cc').value,
-    styles: selectedToggles('styleToggles'),   // ✅ 다중 선택값
-    pace: selectedToggles('paceToggles'),      // ✅ 다중 선택값
+    cc: cc,
+    styles: selectedToggles('styleToggles'),
+    pace: selectedToggles('paceToggles'),
     message: qs('#c_msg').value.trim(),
-    remaining: parseInt(qs('#c_remaining').value||'0',10), // remaining = 참석자 수
+    remaining: parseInt(qs('#c_remaining').value||'0',10),
     capacity: parseInt(qs('#c_capacity').value||'0',10),
     theme: getSelectedTheme()
   };
@@ -440,7 +457,11 @@ function setForm(it){
   qs('#from_lng').value = it.from_lng??'';
   qs('#to_lat').value = it.to_lat??'';
   qs('#to_lng').value = it.to_lng??'';
-  qs('#c_cc').value = it.cc||'';
+
+  // ✅ 저장된 cc가 빈 값이면 'none'으로 표시
+  const ccVal = it.cc ? it.cc : 'none';
+  qs('#c_cc').value = ccVal;
+
   qs('#c_msg').value = it.message||'';
   qs('#c_remaining').value = it.remaining ?? '';
   qs('#c_capacity').value  = it.capacity ?? '';
@@ -459,8 +480,8 @@ function validate(form){
   if(!form.from) errs.push('출발을 입력하세요.');
   if(!form.to) errs.push('도착을 입력하세요.');
   if(!(form.capacity>0)) errs.push('정원은 1 이상이어야 합니다.');
-  if(form.remaining<0) errs.push('참석은 0 이상이어야 합니다.');
-  if(form.remaining>form.capacity) errs.push('참석이 정원보다 클 수 없습니다.');
+  if(form.remaining<0) errs.push('잔여는 0 이상이어야 합니다.');
+  if(form.remaining>form.capacity) errs.push('잔여가 정원보다 클 수 없습니다.');
   if(form.message.length>30) errs.push('메시지는 30자 이내입니다.');
   return errs;
 }
@@ -501,7 +522,7 @@ function mergeById(localArr=[], serverArr=[]){
   (serverArr||[]).forEach(it => { if (it?.id) map.set(it.id, it); });
   return Array.from(map.values()).sort((a,b)=>{
     const ad = a?.datetime || '';
-       const bd = b?.datetime || '';
+    const bd = b?.datetime || '';
     return bd.localeCompare(ad);
   });
 }
@@ -607,7 +628,7 @@ async function fullResync(){
   }
 }
 
-/* 카드 렌더(미리보기) */
+/* 카드 렌더 */
 function cls(label){
   switch(String(label).toLowerCase()){
     case 'urban': return 'is-urban';
@@ -635,23 +656,25 @@ function renderCards(list){
     const when  = it.datetime_display || formatKDate(dt);
 
     const capacity  = Number(it.capacity) || 0;
-    const remaining = Number.isFinite(Number(it.remaining)) ? Number(it.remaining) : 0; // remaining = 참석자 수
+    const remaining = Number.isFinite(Number(it.remaining)) ? Number(it.remaining) : 0;
 
     const el=document.createElement('article');
     el.className='r-card'; el.dataset.theme=theme; el.dataset.id=it.id;
 
+    const ccLine = it.cc && CC_DISPLAY[it.cc] ? `<div class="r-cc">${CC_DISPLAY[it.cc]}</div>` : '';
+
     el.innerHTML = `
       <button class="r-del" title="이 화면에서 숨기기" aria-label="숨기기">✕</button>
       <h3>${escapeHtml(it.title||'(제목 없음)')}</h3>
-      <div class="r-meta">⏰ <span>${when}</span></div>
+      <div class="r-meta">⏰<span>${when}</span></div>
       <div class="r-route">📌  ${escapeHtml(it.from||'-')} - ${escapeHtml(it.to||'-')}</div>
+      ${ccLine}
       <div class="r-msg">💬  ${escapeHtml(it.message||'-')}</div>
       <div class="r-chips">
         ${styles.map(chip).join('')}
         ${pace.map(chip).join('')}
-        ${it.cc ? `<span class="r-chip">${escapeHtml(it.cc)}</span>` : ``}
       </div>
-      <div class="r-btm" title="참석/정원">👥 ${capacity ? `${remaining}/${capacity}` : ''}</div>
+      <div class="r-btm" title="잔여/정원">👥 ${capacity ? `${remaining}/${capacity}` : ''}</div>
     `;
     el.addEventListener('click', ()=> startEdit(it));
     el.querySelector('.r-del').addEventListener('click', (e)=>{
