@@ -173,7 +173,7 @@
 /* ===== 설정 & 상수 ===== */
 const DEBUG = true;
 
-/* 엄지님이 주신 새 Apps Script 주소 */
+/* 새 Apps Script 주소 */
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw4BXsdN6GEkqKyto0Yxwc3G1b6gn1p8YLOrW2PMOSRpbIZcKKZpjF0GlDcJuCPB7jiTw/exec";
 
 const SHARED_TOKEN = ""; // (옵션)
@@ -273,7 +273,7 @@ function normalizeRow(it){
   return row;
 }
 
-/* ===== 데이터 로드 (fetch → JSONP → 캐시), 후보 엔드포인트 순차 시도 ===== */
+/* ===== 데이터 로드: fetch(강제 파싱) → JSONP → 캐시 ===== */
 function buildCandidateURLs() {
   const base = WEB_APP_URL + (WEB_APP_URL.includes('?') ? '&' : '?');
   const token = SHARED_TOKEN ? `&token=${encodeURIComponent(SHARED_TOKEN)}` : '';
@@ -287,10 +287,14 @@ function buildCandidateURLs() {
 function extractRows(payload) {
   if (Array.isArray(payload)) return payload;
   if (!payload || typeof payload !== 'object') return [];
-  if (Array.isArray(payload.rows))   return payload.rows;
-  if (Array.isArray(payload.data))   return payload.data;
-  if (Array.isArray(payload.items))  return payload.items;
-  if (Array.isArray(payload.result)) return payload.result;
+  if (Array.isArray(payload.rows))      return payload.rows;
+  if (Array.isArray(payload.data))      return payload.data;
+  if (Array.isArray(payload.items))     return payload.items;
+  if (Array.isArray(payload.result))    return payload.result;
+  if (Array.isArray(payload.published)) return payload.published;
+  if (Array.isArray(payload.list))      return payload.list;
+  if (Array.isArray(payload.cards))     return payload.cards;
+  if (payload.data && Array.isArray(payload.data.rows)) return payload.data.rows;
   return [];
 }
 function fetchJSONP(url, timeoutMs=9000){
@@ -304,57 +308,57 @@ function fetchJSONP(url, timeoutMs=9000){
     document.body.appendChild(s);
   });
 }
+async function tryParseResponse(r) {
+  try { return await r.json(); } catch(_){}
+  try { const txt = await r.text(); return JSON.parse(txt); } catch(_){}
+  return null;
+}
 async function loadCrews(){
-  // 1) 캐시 먼저
+  // 캐시 먼저 보여주기
   let cached=[]; try{ cached=JSON.parse(localStorage.getItem(CACHE_KEY)||'[]'); }catch(_){}
-  if(cached.length){ if(DEBUG) console.log('[rimo] use cache (pre-render):', cached.length); renderAll(cached.map(normalizeRow)); }
+  if(cached.length){ if(DEBUG) console.log('[rimo] cache pre-render:', cached.length); renderAll(cached.map(normalizeRow)); }
 
   const urls = buildCandidateURLs();
 
-  // 2) 후보 URL들 순차 시도: fetch → JSONP
   for (const url of urls) {
+    // 1) fetch: content-type 무시하고 강제 파싱
     try {
       const r = await fetch(url, { cache:'no-store' });
-      const ctype = (r.headers.get('content-type')||'').toLowerCase();
-      if (r.ok && ctype.includes('application/json')) {
-        const j = await r.json().catch(()=>null);
-        const rows = extractRows(j);
+      if (r.ok) {
+        const payload = await tryParseResponse(r);
+        const rows = extractRows(payload);
         if (rows.length) {
-          if(DEBUG) console.log('[rimo] fetch ok:', url, rows.length);
+          if (DEBUG) console.log('[rimo] fetch OK:', url, rows.length);
           localStorage.setItem(CACHE_KEY, JSON.stringify(rows));
           return rows.map(normalizeRow);
+        } else if (DEBUG) {
+          console.warn('[rimo] fetch parsed but no rows:', url, payload);
         }
-      } else {
-        try {
-          const j = await fetchJSONP(url);
-          const rows = extractRows(j);
-          if (rows.length) {
-            if(DEBUG) console.log('[rimo] jsonp ok:', url, rows.length);
-            localStorage.setItem(CACHE_KEY, JSON.stringify(rows));
-            return rows.map(normalizeRow);
-          }
-        } catch(e) {
-          if(DEBUG) console.warn('[rimo] jsonp fail:', url, e.message);
-        }
+      } else if (DEBUG) {
+        console.warn('[rimo] fetch not ok:', url, r.status);
       }
-    } catch (e) {
-      if(DEBUG) console.warn('[rimo] fetch fail:', url, e.message);
-      try {
-        const j = await fetchJSONP(url);
-        const rows = extractRows(j);
-        if (rows.length) {
-          if(DEBUG) console.log('[rimo] jsonp ok(after fetch fail):', url, rows.length);
-          localStorage.setItem(CACHE_KEY, JSON.stringify(rows));
-          return rows.map(normalizeRow);
-        }
-      } catch(e2) {
-        if(DEBUG) console.warn('[rimo] jsonp fail(after fetch fail):', url, e2.message);
+    } catch(e) {
+      if (DEBUG) console.warn('[rimo] fetch error:', url, e.message);
+    }
+
+    // 2) JSONP 폴백
+    try {
+      const j = await fetchJSONP(url);
+      const rows = extractRows(j);
+      if (rows.length) {
+        if (DEBUG) console.log('[rimo] JSONP OK:', url, rows.length);
+        localStorage.setItem(CACHE_KEY, JSON.stringify(rows));
+        return rows.map(normalizeRow);
+      } else if (DEBUG) {
+        console.warn('[rimo] jsonp parsed but no rows:', url, j);
       }
+    } catch(e) {
+      if (DEBUG) console.warn('[rimo] jsonp error:', url, e.message);
     }
   }
 
-  // 3) 전부 실패 → 캐시
-  if(DEBUG) console.log('[rimo] fallback to cache');
+  // 3) 최종 캐시
+  if (DEBUG) console.log('[rimo] fallback to cache');
   return cached.map(normalizeRow);
 }
 
