@@ -48,7 +48,7 @@
   .carousel{
     display:flex; gap:12px; overflow-x:auto;
     padding:8px 12px 12px;
-    scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; overscroll-behavior-x:contain;
+    scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; overscroll-beavior-x:contain;
   }
   .carousel::-webkit-scrollbar{display:none}
 
@@ -67,6 +67,16 @@
   .r-meta{display:flex;align-items:center;gap:4px;color:#cfd2ff;font-size:14px;margin:0}
   .r-route{display:flex;align-items:center;gap:8px;color:#ced2f9;font-size:14px;margin:0}
   .r-msg{color:#e6e8ff;font-size:14px;margin:0}
+
+  /* 배기량 라인(요청 ②) */
+  .r-cc{
+    margin:-2px 0 2px 0;
+    color:#cfd2ff; font-size:13px;
+    display:flex; align-items:center; gap:8px;
+    opacity:.95;
+  }
+
+  /* 칩(요청 ①: rimo_crew 선택값 전부 표시) */
   .r-chips{display:flex;flex-wrap:wrap;gap:8px;margin:0}
   .r-chip{
     padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700;
@@ -92,7 +102,7 @@
   .r-card[data-theme="green"] { border-color:var(--t-green-br) }
   .r-card[data-theme="purple"]{ border-color:var(--t-purple-br) }
 
-  /* 선택(활성) 스타일: 바깥 글로우 제거, 인셋 보더 + 미세 배경 */
+  /* 선택(활성) 스타일 */
   .r-card.selected{
     transform:none;
     --sel-bd: rgba(122,167,255,.60);
@@ -209,9 +219,27 @@ function toList(v){
   try{ const j=JSON.parse(s); if(Array.isArray(j)) return j.map(x=>String(x).trim()).filter(Boolean); }catch(_){}
   return s.split(/[,\|/·]/).map(x=>x.trim()).filter(Boolean);
 }
+function parseCcRange(ccStr){
+  // "125~250", "125-250", "125/250", "125–250", "125cc~250cc" 등 대응
+  const s = String(ccStr||'').replace(/[^\d~\-\/–]/g,'');
+  const m = s.match(/(\d{2,4})\s*[~\-\/–]\s*(\d{2,4})/);
+  if(m){ const a=+m[1], b=+m[2]; if(a && b){ return {min:Math.min(a,b), max:Math.max(a,b)}; } }
+  return null;
+}
 function normalizeRow(it){
   const dtStr = it.datetime || it.date || '';
   const dt = dtStr ? new Date(dtStr) : null;
+
+  // 배기량: 우선순위 (displacement_min/max) → cc 문자열 파싱
+  let displMin = Number.isFinite(+it.displacement_min) ? +it.displacement_min : null;
+  let displMax = Number.isFinite(+it.displacement_max) ? +it.displacement_max : null;
+  if(displMin==null || displMax==null){
+    const parsed = parseCcRange(it.cc || it.displacement || '');
+    if(parsed){ displMin = parsed.min; displMax = parsed.max; }
+  }
+  const displLabel = (displMin!=null && displMax!=null)
+      ? `${displMin}cc~${displMax}cc` : '';
+
   return {
     id: it.id || `id_${Math.random().toString(36).slice(2,8)}`,
     title: it.title||'(제목 없음)',
@@ -219,13 +247,16 @@ function normalizeRow(it){
     timeLabel: it.datetime_display || (dt ? formatTimeKOR(dt) : ''),
     from: it.from||'-', to: it.to||'-',
     from_lat:+it.from_lat||null, from_lng:+it.from_lng||null, to_lat:+it.to_lat||null, to_lng:+it.to_lng||null,
-    cc: it.cc||'',
-    styles: toList(it.styles),
-    pace: toList(it.pace),
+
+    styles: toList(it.styles),    // rimo_crew에서 선택한 스타일(복수)
+    pace:   toList(it.pace),      // rimo_crew에서 선택한 페이스(복수)
+
     message: it.message||'',
-    remaining: Number.isFinite(+it.remaining)? +it.remaining : 0, // remaining = 참석자 수
     capacity:  Number.isFinite(+it.capacity)?  +it.capacity  : 0,
-    theme: it.theme||'blue'
+    remaining: Number.isFinite(+it.remaining)? +it.remaining : 0, // 참석자 수
+    theme: it.theme||'blue',
+
+    displLabel // 렌더링용 문자열
   };
 }
 
@@ -363,10 +394,10 @@ function renderCards(crews){
       <div class="r-meta">⏰ <span>${c.timeLabel || ''}</span></div>
       <div class="r-route">📌  ${c.from} - ${c.to}</div>
       ${c.message?`<div class="r-msg">💬  ${c.message}</div>`:''}
+      ${c.displLabel?`<div class="r-cc">🏍 ${c.displLabel}</div>`:''}
       <div class="r-chips">
         ${c.styles.map(chip).join('')}
         ${c.pace.map(chip).join('')}
-        ${c.cc?chip(c.cc):''}
       </div>
       <button class="r-cta" aria-label="합류 신청">👥 ${attendees}/${capacity} · 합류 신청</button>
       ${showImmin?`<div class="imminent">🚦 출발 임박</div>`:''}
@@ -410,53 +441,4 @@ function composeText(crew, profile){
   return (
 `[✅ 합류 신청] ${crew.title}
 📍 출발 → 도착
-${crew.from} → ${crew.to}
-
-⏰ ${crew.timeLabel}
-👤 라이더 : ${profile.name || '이름 미입력'} ${profile.icon || ''}
-🏍️ 바이크 : ${profile.bike || '미입력'}
-👥 탠덤 : ${profile.tandem ? '탠덤 ' + profile.tandem : '-'}
-
-🎯 스타일/페이스
-${styles} · ${paces}`
-  );
-}
-async function copyText(txt){
-  try{ await navigator.clipboard.writeText(txt); return true; }
-  catch(_){ const ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta);
-            ta.select(); document.execCommand('copy'); ta.remove(); return true; }
-}
-function openJoinModal(crew){
-  const profile=loadProfile();
-  const text=composeText(crew, profile);
-  preview.textContent=text;
-  try{ awaitCopy(text); }catch(_){}
-  modal.style.display='flex';
-  document.body.classList.add('modal-open');
-  document.getElementById('goAdmin').onclick=()=>{ location.href=ADMIN_DM; };
-  document.getElementById('editProfile').onclick=()=>{ location.href='rimo_profile.html'; };
-  document.getElementById('copyProfileBtn').onclick=()=> copyText(text);
-}
-function awaitCopy(t){ return copyText(t); }
-modal.addEventListener('click', e=>{
-  if(e.target===modal) { modal.style.display='none'; document.body.classList.remove('modal-open'); }
-});
-
-/* ===== init ===== */
-(async function init(){
-  initMap();
-  try{
-    const rows = await loadCrews();
-    renderAll(rows);
-  }catch(err){
-    const list=document.getElementById('list');
-    const msg=document.createElement('div');
-    msg.className='r-card';
-    msg.innerHTML=`<div class="r-msg">데이터를 불러오지 못했습니다. (오프라인이거나 웹앱 응답 없음)</div>`;
-    list.appendChild(msg);
-    console.warn(err);
-  }
-})();
-</script>
-</body>
-</html>
+${crew.from}
