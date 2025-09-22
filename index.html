@@ -14,7 +14,7 @@
     --imminent-bg: rgba(255,199,94,.16);
     --imminent-bd: rgba(255,199,94,.45);
 
-    /* 테마 보더색 (rimo_crew와 동일) */
+    /* 테마 보더색 */
     --t-red-br:rgba(255,93,93,.35);
     --t-blue-br:rgba(122,167,255,.35);
     --t-yellow-br:rgba(255,216,93,.38);
@@ -44,7 +44,7 @@
   #map{height:360px;border-radius:14px;outline:1px solid var(--border-1)}
   .leaflet-container{z-index:1}
 
-  /* 캐러셀 패딩 대칭 */
+  /* 캐러셀 */
   .carousel{
     display:flex; gap:12px; overflow-x:auto;
     padding:8px 12px 12px;
@@ -52,7 +52,7 @@
   }
   .carousel::-webkit-scrollbar{display:none}
 
-  /* 카드: 세로 리듬 정렬 */
+  /* 카드 */
   .r-card{
     position:relative; flex:0 0 304px; width:304px; scroll-snap-align:start; scroll-snap-stop:always;
     background:#121428; border:1px solid rgba(255,255,255,.14);
@@ -65,7 +65,6 @@
 
   .r-card h3{margin:0;font-size:16px;font-weight:700}
   .r-meta{display:flex;align-items:center;gap:4px;color:#cfd2ff;font-size:14px;margin:0;flex-wrap:wrap}
-  .r-meta .sep{opacity:.5}
   .r-route{display:flex;align-items:center;gap:8px;color:#ced2f9;font-size:14px;margin:0}
   .r-msg{color:#e6e8ff;font-size:14px;margin:0}
   .r-chips{display:flex;flex-wrap:wrap;gap:8px;margin:0}
@@ -93,15 +92,13 @@
   .r-card[data-theme="green"] { border-color:var(--t-green-br) }
   .r-card[data-theme="purple"]{ border-color:var(--t-purple-br) }
 
-  /* 선택(활성) 스타일 */
+  /* 선택(활성) */
   .r-card.selected{
     transform:none;
     --sel-bd: rgba(122,167,255,.60);
     --sel-bg: rgba(122,167,255,.06);
     border-color: var(--sel-bd);
-    box-shadow:
-      0 0 0 1px var(--sel-bd) inset,
-      0 10px 26px rgba(0,0,0,.44);
+    box-shadow: 0 0 0 1px var(--sel-bd) inset, 0 10px 26px rgba(0,0,0,.44);
     background: linear-gradient(180deg, var(--sel-bg), #121428 42%);
   }
   .r-card[data-theme="red"].selected    { --sel-bd: rgba(255, 93, 93,.60);  --sel-bg: rgba(255, 93, 93,.06); }
@@ -129,7 +126,6 @@
                padding:12px 18px;border-radius:22px;font-weight:800;text-decoration:none;font-size:14px}
   .tabbar .tab.primary{background:#26346d;border-color:#3b53a8}
 
-  /* 힌트 */
   .hint{color:#cfd2ff99;font-size:14px;padding:12px}
 </style>
 </head>
@@ -172,16 +168,16 @@
 /* ===== 설정 & 상수 ===== */
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw4BXsdN6GEkqKyto0Yxwc3G1b6gn1p8YLOrW2PMOSRpbIZcKKZpjF0GlDcJuCPB7jiTw/exec";
 const SHARED_TOKEN = "";
-const CACHE_KEY   = "rimo_published_cards_server_cache";
+const CACHE_KEY   = "rimo_index_main_cards_cache_v2";
 const PROFILE_KEY = "rimo_profile_v1";
 const ADMIN_DM    = "http://pf.kakao.com/_ceUDn/chat";
 const DEBUG = true;
 
 /* 시간 정책 */
-const IMMINENT_MS = 30*60*1000;   // 출발 30분 전
-const GRACE_MS    = 8*60*1000;    // 출발 8분 후까지 노출
+const IMMINENT_MS = 30*60*1000;
+const GRACE_MS    = 8*60*1000;
 
-/* 테마별 색 (지도 핀/라인과 일치) */
+/* 테마 */
 const THEMES = {
   red:    { base:'#ff4d4d', border:'var(--t-red-br)'   },
   yellow: { base:'#ffd24d', border:'var(--t-yellow-br)'},
@@ -204,9 +200,9 @@ function formatTimeKOR(d){
   return `${Y}/${M}/${D}/${ampm} ${hh}:${m}`;
 }
 function toList(v){
-  // 문자열/배열/JSON 문자열 모두 안전하게 배열로
   if(v==null) return [];
   if(Array.isArray(v)) return v.map(x=>String(x).trim()).filter(Boolean);
+  if(typeof v==='object'){ return Object.values(v).map(x=>String(x).trim()).filter(Boolean); }
   let s=String(v).trim();
   try{ const j=JSON.parse(s); if(Array.isArray(j)) return j.map(x=>String(x).trim()).filter(Boolean); }catch(_){}
   return s.split(/[,\|/·]/).map(x=>x.trim()).filter(Boolean);
@@ -221,17 +217,18 @@ function normalizeRow(it){
     timeLabel: it.datetime_display || (dt ? formatTimeKOR(dt) : ''),
     from: it.from||'-', to: it.to||'-',
     from_lat:+it.from_lat||null, from_lng:+it.from_lng||null, to_lat:+it.to_lat||null, to_lng:+it.to_lng||null,
-    cc: it.cc ?? '', // ''도 유지
+    cc: it.cc ?? '',
     styles: toList(it.styles),
     pace: toList(it.pace),
     message: it.message||'',
-    remaining: Number.isFinite(+it.remaining)? +it.remaining : 0, // remaining=잔여? 참석? (여기선 참석자 수로 사용하던 값 호환)
+    remaining: Number.isFinite(+it.remaining)? +it.remaining : 0,
     capacity:  Number.isFinite(+it.capacity)?  +it.capacity  : 0,
-    theme: it.theme||'blue'
+    theme: it.theme||'blue',
+    main: !!(it.main ?? it.is_main ?? it.main_on)
   };
 }
 
-/* ======== 강화 파서 (GAS 302 + HTML 응답 대응) ======== */
+/* ===== 강화 파서 (GAS 302 + HTML) ===== */
 function htmlDecodeEntities(str){
   const map = { '&quot;':'"', '&#34;':'"', '&#39;':"'", '&amp;':'&', '&lt;':'<', '&gt;':'>' };
   return String(str).replace(/(&quot;|&#34;|&#39;|&amp;|&lt;|&gt;)/g, m => map[m] || m);
@@ -282,9 +279,10 @@ function buildCandidateURLs(){
   const base = WEB_APP_URL + (WEB_APP_URL.includes('?') ? '&' : '?');
   const tok  = SHARED_TOKEN ? `&token=${encodeURIComponent(SHARED_TOKEN)}` : '';
   const ts   = `&_=${Date.now()}`;
+  // 메인 우선
   return [
-    `${base}op=list&scope=published${tok}${ts}`,
     `${base}op=list&scope=main${tok}${ts}`,
+    `${base}op=list&scope=published${tok}${ts}`,
     `${base}op=list&scope=all${tok}${ts}`,
   ];
 }
@@ -300,34 +298,41 @@ function fetchJSONP(url, timeoutMs=9000){
   });
 }
 
-/* ===== 데이터 로드 (fetch → 강제파싱 → JSONP, 캐시 폴백) ===== */
+/* ===== 데이터 로드 ===== */
 async function loadCrews(){
+  // 캐시 선표시
   let cached=[]; try{ cached=JSON.parse(localStorage.getItem(CACHE_KEY)||'[]'); }catch(_){}
   if(cached.length) renderAll(cached.map(normalizeRow));
 
   const urls = buildCandidateURLs();
   for(const url of urls){
+    // fetch
     try{
       const r=await fetch(url,{cache:'no-store',redirect:'follow'});
       if(r.ok){
         const payload=await tryParseResponse(r);
-        const rows=extractRows(payload);
+        let rows=extractRows(payload);
         if(rows.length){
-          localStorage.setItem(CACHE_KEY, JSON.stringify(rows));
-          return rows.map(normalizeRow);
-        }else if(DEBUG){ console.warn('[index] fetch parsed but no rows', payload); }
+          // main 필터(혹시 전체가 내려오면 main=true만 남김)
+          const filtered = rows.filter(x => (x.main ?? x.is_main ?? x.main_on) ? true : url.includes('scope=main'));
+          // 성공 시 캐시 교체(merge 안 함)
+          localStorage.setItem(CACHE_KEY, JSON.stringify(filtered.length?filtered:rows));
+          return (filtered.length?filtered:rows).map(normalizeRow);
+        }
       }
     }catch(e){ if(DEBUG) console.warn('[index] fetch fail',e); }
-
+    // JSONP
     try{
       const j=await fetchJSONP(url);
-      const rows=extractRows(j);
+      let rows=extractRows(j);
       if(rows.length){
-        localStorage.setItem(CACHE_KEY, JSON.stringify(rows));
-        return rows.map(normalizeRow);
-      }else if(DEBUG){ console.warn('[index] jsonp parsed but no rows', j); }
+        const filtered = rows.filter(x => (x.main ?? x.is_main ?? x.main_on) ? true : url.includes('scope=main'));
+        localStorage.setItem(CACHE_KEY, JSON.stringify(filtered.length?filtered:rows));
+        return (filtered.length?filtered:rows).map(normalizeRow);
+      }
     }catch(e){ if(DEBUG) console.warn('[index] jsonp fail',e); }
   }
+  // 마지막: 캐시
   return cached.map(normalizeRow);
 }
 
@@ -389,9 +394,6 @@ function selectCardAndZoom(id){
   }
 }
 
-/* 안전 배열 변환 (styles/pace 보호) */
-function safeList(v){ return toList(v); }
-
 function renderCards(crews){
   const list=document.getElementById('list'); list.innerHTML='';
 
@@ -405,16 +407,13 @@ function renderCards(crews){
 
   crews.forEach(c=>{
     const capacity  = Math.max(0, c.capacity||0);
-    // remaining 필드는 "참석자 수"로 쓰던 값을 최대한 호환 (데이터에 맞게 조정)
     const attendees = Math.max(0, c.remaining||0);
 
     const immin  = (c.datetime? (new Date(c.datetime).getTime()-Date.now()) : 0);
     const showImmin = (immin<=IMMINENT_MS && immin>=-GRACE_MS);
 
-    const styles = safeList(c.styles);
-    const pace   = safeList(c.pace);
-
-    // 배기량 라벨: '' 또는 null이면 '관계없음'
+    const styles = toList(c.styles);
+    const pace   = toList(c.pace);
     const ccLabel = (c.cc==='' || c.cc==null) ? '관계없음' : String(c.cc);
 
     const el=document.createElement('article');
@@ -427,14 +426,14 @@ function renderCards(crews){
       <div class="r-meta">⏰ <span>${c.timeLabel || ''}</span></div>
       <div class="r-route">📌  ${c.from} - ${c.to}</div>
 
-      <!-- 배기량/인원 문구 줄 -->
-      <div class="r-meta">🏍 ${ccLabel} <span class="sep">·</span> 👥 ${attendees}/${capacity}</div>
-
       ${c.message?`<div class="r-msg">💬  ${c.message}</div>`:''}
+      <div class="r-meta">🏍 ${ccLabel}</div>
+
       <div class="r-chips">
         ${styles.map(chip).join('')}
         ${pace.map(chip).join('')}
       </div>
+
       <button class="r-cta" aria-label="합류 신청">👥 ${attendees}/${capacity} · 합류 신청</button>
       ${showImmin?`<div class="imminent">🚦 출발 임박</div>`:''}
     `;
@@ -450,7 +449,7 @@ function renderCards(crews){
   if(first && !currentSelectedId) selectCardAndZoom(first.dataset.id);
 }
 
-/* ===== 전체 렌더: 시간 필터(+8분 유예) + 시간순 정렬 ===== */
+/* ===== 전체 렌더: 시간 필터 + 정렬 ===== */
 function renderAll(rows){
   const now=Date.now();
   const live=rows.filter(r=>{
@@ -467,7 +466,7 @@ function renderAll(rows){
   renderCards(live);
 }
 
-/* ===== 합류 신청 모달 ===== */
+/* ===== 모달 ===== */
 const modal=document.getElementById('joinModal');
 const preview=document.getElementById('joinPreview');
 function loadProfile(){ try{ return JSON.parse(localStorage.getItem(PROFILE_KEY)||'{}'); }catch(_){ return {}; } }
