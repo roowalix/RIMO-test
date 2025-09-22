@@ -9,128 +9,59 @@
 <style>
   :root{
     --bg:#0b0b0f; --fg:#e8e8ef; --muted:#b9b9cc; --border-1:#232333;
-
-    /* 임박 배지 */
     --imminent-bg: rgba(255,199,94,.16);
     --imminent-bd: rgba(255,199,94,.45);
-
-    /* 테마 보더색 (rimo_crew와 동일) */
     --t-red-br:rgba(255,93,93,.35);
     --t-blue-br:rgba(122,167,255,.35);
     --t-yellow-br:rgba(255,216,93,.38);
     --t-green-br:rgba(86,211,100,.42);
     --t-purple-br:rgba(167,139,250,.42);
   }
-
   *{box-sizing:border-box}
-  body{
-    margin:0; background:var(--bg); color:var(--fg);
-    font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Arial,sans-serif;
-  }
-
-  /* 헤더 */
-  header{
-    position:sticky; top:0; z-index:5;
-    background:rgba(11,11,15,.9); backdrop-filter:blur(8px);
-    border-bottom:1px solid var(--border-1)
-  }
+  body{margin:0;background:var(--bg);color:var(--fg);
+    font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Arial,sans-serif;}
+  header{position:sticky;top:0;z-index:5;background:rgba(11,11,15,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--border-1)}
   .bar{display:flex;gap:10px;align-items:center;padding:12px 16px}
-  .logo{font-weight:900}
-  .title{font-weight:900;font-size:16px}
+  .logo{font-weight:900}.title{font-weight:900;font-size:16px}
   .pill{margin-left:auto;padding:6px 10px;border-radius:999px;background:#151525;color:#b9b9cc;font-size:12px}
-
-  /* 본문 */
   main{padding:16px;max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:14px;padding-bottom:120px}
   #map{height:360px;border-radius:14px;outline:1px solid var(--border-1)}
   .leaflet-container{z-index:1}
-
-  /* 캐러셀 */
-  .carousel{
-    display:flex; gap:12px; overflow-x:auto;
-    padding:8px 12px 12px;
-    scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; overscroll-behavior-x:contain;
-  }
+  .carousel{display:flex;gap:12px;overflow-x:auto;padding:8px 12px 12px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
   .carousel::-webkit-scrollbar{display:none}
-
-  /* 카드 */
-  .r-card{
-    position:relative; flex:0 0 304px; width:304px; scroll-snap-align:start; scroll-snap-stop:always;
-    background:#121428; border:1px solid rgba(255,255,255,.14);
-    border-radius:16px; padding:14px; box-shadow:0 2px 14px rgba(0,0,0,.28);
-    display:flex; flex-direction:column; gap:10px; cursor:pointer;
-    transition:box-shadow .18s, transform .12s, border-color .18s, background-color .18s;
-  }
-  .r-card *{ line-height:1.35 }
-  .r-card:hover{ transform:translateY(-1px); box-shadow:0 6px 18px rgba(0,0,0,.34) }
-
+  .r-card{position:relative;flex:0 0 304px;width:304px;scroll-snap-align:start;scroll-snap-stop:always;background:#121428;border:1px solid rgba(255,255,255,.14);border-radius:16px;padding:14px;box-shadow:0 2px 14px rgba(0,0,0,.28);display:flex;flex-direction:column;gap:10px;cursor:pointer;transition:box-shadow .18s,transform .12s,border-color .18s,background-color .18s}
+  .r-card *{line-height:1.35}
+  .r-card:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,0,0,.34)}
   .r-card h3{margin:0;font-size:16px;font-weight:700}
   .r-meta{display:flex;align-items:center;gap:4px;color:#cfd2ff;font-size:14px;margin:0}
   .r-route{display:flex;align-items:center;gap:8px;color:#ced2f9;font-size:14px;margin:0}
   .r-msg{color:#e6e8ff;font-size:14px;margin:0}
-
-  /* 배기량 라인 */
-  .r-cc{
-    margin:-2px 0 2px 0;
-    color:#cfd2ff; font-size:13px;
-    display:flex; align-items:center; gap:8px; opacity:.95;
-  }
-
-  /* 칩 */
+  .r-cc{margin:-2px 0 2px 0;color:#cfd2ff;font-size:13px;display:flex;align-items:center;gap:8px;opacity:.95}
   .r-chips{display:flex;flex-wrap:wrap;gap:8px;margin:0}
-  .r-chip{
-    padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700;
-    background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);color:#e6e8ef
-  }
+  .r-chip{padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);color:#e6e8ef}
   .r-chip.is-urban{background:#1e2d55;border-color:#2c4484}
   .r-chip.is-curve{background:#2a1f56;border-color:#40307a}
   .r-chip.is-tour{background:#1e3b3a;border-color:#2f5f5d}
   .r-chip.is-easy{background:#1f3a1f;border-color:#2f5a2f}
   .r-chip.is-balanced{background:#3a341e;border-color:#5a4f2f}
   .r-chip.is-dynamic{background:#3a1f1f;border-color:#5a2f2f}
-
-  .r-cta{
-    margin-top:2px; width:100%; padding:12px; border-radius:12px; border:none;
-    background:rgba(255,255,255,.06); color:#dfe3ff; font-weight:800; cursor:pointer;
-  }
-  .r-cta:focus{outline:2px solid rgba(255,255,255,.25); outline-offset:2px}
-
-  /* 카드 테마 보더 */
-  .r-card[data-theme="red"]   { border-color:var(--t-red-br) }
-  .r-card[data-theme="blue"]  { border-color:var(--t-blue-br) }
-  .r-card[data-theme="yellow"]{ border-color:var(--t-yellow-br) }
-  .r-card[data-theme="green"] { border-color:var(--t-green-br) }
-  .r-card[data-theme="purple"]{ border-color:var(--t-purple-br) }
-
-  /* 선택 */
-  .r-card.selected{
-    transform:none;
-    --sel-bd: rgba(122,167,255,.60);
-    --sel-bg: rgba(122,167,255,.06);
-    border-color: var(--sel-bd);
-    box-shadow:0 0 0 1px var(--sel-bd) inset, 0 10px 26px rgba(0,0,0,.44);
-    background: linear-gradient(180deg, var(--sel-bg), #121428 42%);
-  }
-  .r-card[data-theme="red"].selected    { --sel-bd: rgba(255, 93, 93,.60);  --sel-bg: rgba(255, 93, 93,.06); }
-  .r-card[data-theme="yellow"].selected { --sel-bd: rgba(255,216, 93,.60);  --sel-bg: rgba(255,216, 93,.06); }
-  .r-card[data-theme="green"].selected  { --sel-bd: rgba( 86,211,100,.60);  --sel-bg: rgba( 86,211,100,.06); }
-  .r-card[data-theme="purple"].selected { --sel-bd: rgba(167,139,250,.60);  --sel-bg: rgba(167,139,250,.06); }
-
-  /* 출발 임박 */
-  .imminent{
-    position:absolute; top:10px; right:10px;
-    display:inline-flex; align-items:center; gap:6px;
-    padding:8px 10px; border-radius:10px; font-size:12px; font-weight:800;
-    background:var(--imminent-bg); border:1px solid var(--imminent-bd); color:#ffe7a6;
-    animation:pulse 2.2s ease-in-out infinite;
-  }
-  @keyframes pulse{ 0%{box-shadow:0 0 0 0 rgba(255,199,94,.35)} 70%{box-shadow:0 0 0 8px rgba(255,199,94,0)} 100%{box-shadow:0 0 0 0 rgba(255,199,94,0)} }
-
-  /* 하단 탭 */
+  .r-cta{margin-top:2px;width:100%;padding:12px;border-radius:12px;border:none;background:rgba(255,255,255,.06);color:#dfe3ff;font-weight:800;cursor:pointer}
+  .r-cta:focus{outline:2px solid rgba(255,255,255,.25);outline-offset:2px}
+  .r-card[data-theme="red"]{border-color:var(--t-red-br)}
+  .r-card[data-theme="blue"]{border-color:var(--t-blue-br)}
+  .r-card[data-theme="yellow"]{border-color:var(--t-yellow-br)}
+  .r-card[data-theme="green"]{border-color:var(--t-green-br)}
+  .r-card[data-theme="purple"]{border-color:var(--t-purple-br)}
+  .r-card.selected{transform:none;--sel-bd:rgba(122,167,255,.60);--sel-bg:rgba(122,167,255,.06);border-color:var(--sel-bd);box-shadow:0 0 0 1px var(--sel-bd) inset,0 10px 26px rgba(0,0,0,.44);background:linear-gradient(180deg,var(--sel-bg),#121428 42%)}
+  .r-card[data-theme="red"].selected{--sel-bd:rgba(255,93,93,.6);--sel-bg:rgba(255,93,93,.06)}
+  .r-card[data-theme="yellow"].selected{--sel-bd:rgba(255,216,93,.6);--sel-bg:rgba(255,216,93,.06)}
+  .r-card[data-theme="green"].selected{--sel-bd:rgba(86,211,100,.6);--sel-bg:rgba(86,211,100,.06)}
+  .r-card[data-theme="purple"].selected{--sel-bd:rgba(167,139,250,.6);--sel-bg:rgba(167,139,250,.06)}
+  .imminent{position:absolute;top:10px;right:10px;display:inline-flex;align-items:center;gap:6px;padding:8px 10px;border-radius:10px;font-size:12px;font-weight:800;background:var(--imminent-bg);border:1px solid var(--imminent-bd);color:#ffe7a6;animation:pulse 2.2s ease-in-out infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,199,94,.35)}70%{box-shadow:0 0 0 8px rgba(255,199,94,0)}100%{box-shadow:0 0 0 0 rgba(255,199,94,0)}}
   .tabbar{position:fixed;left:0;right:0;bottom:16px;z-index:1500;display:flex;gap:12px;justify-content:center}
-  .tabbar .tab{background:#182039;border:1px solid #2d3559;color:#e6e8ef;
-               padding:12px 18px;border-radius:22px;font-weight:800;text-decoration:none;font-size:14px}
+  .tabbar .tab{background:#182039;border:1px solid #2d3559;color:#e6e8ef;padding:12px 18px;border-radius:22px;font-weight:800;text-decoration:none;font-size:14px}
   .tabbar .tab.primary{background:#26346d;border-color:#3b53a8}
-
   .hint{color:#cfd2ff99;font-size:14px;padding:12px}
 </style>
 </head>
@@ -182,99 +113,78 @@ const PROFILE_KEY = "rimo_profile_v1";
 const ADMIN_DM    = "http://pf.kakao.com/_ceUDn/chat";
 
 /* 시간 정책 */
-const IMMINENT_MS = 30*60*1000;   // 출발 30분 전
-const GRACE_MS    = 8*60*1000;    // 출발 8분 후까지 노출
+const IMMINENT_MS = 30*60*1000;
+const GRACE_MS    = 8*60*1000;
 
 /* 테마 */
 const THEMES = {
-  red:    { base:'#ff4d4d', border:'var(--t-red-br)'   },
-  yellow: { base:'#ffd24d', border:'var(--t-yellow-br)'},
-  blue:   { base:'#5b8cff', border:'var(--t-blue-br)'  },
-  green:  { base:'#46d37d', border:'var(--t-green-br)' },
-  purple: { base:'#a78bfa', border:'var(--t-purple-br)'}
+  red:{base:'#ff4d4d'}, yellow:{base:'#ffd24d'}, blue:{base:'#5b8cff'}, green:{base:'#46d37d'}, purple:{base:'#a78bfa'}
 };
 
-/* 오늘 표시 */
+/* 오늘 */
 document.getElementById('today').textContent =
   new Date().toLocaleDateString('ko-KR',{month:'long',day:'numeric',weekday:'short'});
 
 /* ===== 유틸 ===== */
 const pad = n => String(n).padStart(2,'0');
-
 function parseKoreanDate(s){
   if(!s) return null;
-  const src = String(s).trim();
-  const m = src.match(/(\d{4})[\/\-\.](\d{1,2})[\/\-\.](\d{1,2}).*?(오전|오후)?\s*(\d{1,2}):(\d{2})/);
-  if(!m){ const d=new Date(src); return isNaN(d)?null:d; }
-  let [_,Y,Mo,D,ap,hh,mm]=m;
-  Y=+Y; Mo=+Mo; D=+D; hh=+hh; mm=+mm;
-  if(ap==='오후' && hh<12) hh+=12;
-  if(ap==='오전' && hh===12) hh=0;
-  const d = new Date(Y, Mo-1, D, hh, mm);
-  return isNaN(d)?null:d;
+  const m = String(s).trim().match(/(\d{4})[\/\-\.](\d{1,2})[\/\-\.](\d{1,2}).*?(오전|오후)?\s*(\d{1,2}):(\d{2})/);
+  if(!m){ const d=new Date(s); return isNaN(d)?null:d; }
+  let [_,Y,Mo,D,ap,hh,mm]=m; Y=+Y;Mo=+Mo;D=+D;hh=+hh;mm=+mm;
+  if(ap==='오후' && hh<12) hh+=12; if(ap==='오전' && hh===12) hh=0;
+  const d=new Date(Y,Mo-1,D,hh,mm); return isNaN(d)?null:d;
 }
 function formatTimeKOR(d){
   const Y=d.getFullYear(), M=pad(d.getMonth()+1), D=pad(d.getDate());
-  const h=d.getHours(), m=pad(d.getMinutes());
-  const ampm = h>=12 ? '오후' : '오전';
-  const hh = String((h%12)||12).padStart(2,'0');
+  const h=d.getHours(), m=pad(d.getMinutes()); const ampm=h>=12?'오후':'오전'; const hh=String((h%12)||12).padStart(2,'0');
   return `${Y}/${M}/${D}/${ampm} ${hh}:${m}`;
 }
 function toList(v){
   if(v==null) return [];
   if(Array.isArray(v)) return v.map(x=>String(x).trim()).filter(Boolean);
   const s=String(v).trim(); if(!s) return [];
-  if(/Ljava\.lang\.Object/i.test(s)) return [];
-  try{ const j=JSON.parse(s); if(Array.isArray(j)) return j.map(x=>String(x).trim()).filter(Boolean); }catch(_){}
+  try{ const j=JSON.parse(s); if(Array.isArray(j)) return j.map(x=>String(x).trim()).filter(Boolean);}catch(_){}
   return s.split(/[,\|/·]/).map(x=>x.trim()).filter(Boolean);
 }
 function parseCcRange(ccStr){
-  const s = String(ccStr||'').replace(/[^\d~\-\/–]/g,'');
-  const m = s.match(/(\d{2,4})\s*[~\-\/–]\s*(\d{2,4})/);
-  if(m){ const a=+m[1], b=+m[2]; if(a && b){ return {min:Math.min(a,b), max:Math.max(a,b)}; } }
+  const s=String(ccStr||'').replace(/[^\d~\-\/–]/g,'');
+  const m=s.match(/(\d{2,4})\s*[~\-\/–]\s*(\d{2,4})/);
+  if(m){ const a=+m[1], b=+m[2]; if(a&&b) return {min:Math.min(a,b), max:Math.max(a,b)};}
   return null;
 }
 function normalizeRow(it){
-  if(DEBUG) console.log('RAW:', it);
-
   const dtStr = it.datetime || it.date || it.datetime_display || it.datetimeText || '';
-  const dt    = parseKoreanDate(dtStr);
+  const dt = parseKoreanDate(dtStr);
   const timeLabel = it.datetime_display || (dt ? formatTimeKOR(dt) : (dtStr || ''));
-
   let displMin = Number.isFinite(+it.displacement_min) ? +it.displacement_min : null;
   let displMax = Number.isFinite(+it.displacement_max) ? +it.displacement_max : null;
   if(displMin==null || displMax==null){
-    const parsed = parseCcRange(it.cc || it.displacement || '');
-    if(parsed){ displMin = parsed.min; displMax = parsed.max; }
+    const parsed=parseCcRange(it.cc || it.displacement || '');
+    if(parsed){displMin=parsed.min;displMax=parsed.max;}
   }
   const displLabel = (displMin!=null && displMax!=null) ? `${displMin}cc~${displMax}cc` : '';
-
-  const row = {
+  return {
     id: it.id || `id_${Math.random().toString(36).slice(2,8)}`,
     title: it.title||'(제목 없음)',
-    datetime: dt ? dt.toISOString() : '',
+    datetime: dt?dt.toISOString():'',
     timeLabel,
     from: it.from||it.start||'-',
-    to:   it.to||it.end||'-',
+    to: it.to||it.end||'-',
     from_lat:+it.from_lat||null, from_lng:+it.from_lng||null,
-    to_lat:+it.to_lat||null,     to_lng:+it.to_lng||null,
-
+    to_lat:+it.to_lat||null, to_lng:+it.to_lng||null,
     styles: toList(it.styles),
-    pace:   toList(it.pace),
-
+    pace: toList(it.pace),
     message: it.message||'',
-    capacity:  Number.isFinite(+it.capacity)?  +it.capacity  : 0,
-    remaining: Number.isFinite(+it.remaining)? +it.remaining : 0, // 참석자 수
+    capacity: Number.isFinite(+it.capacity)?+it.capacity:0,
+    remaining: Number.isFinite(+it.remaining)?+it.remaining:0,
     theme: it.theme||'blue',
-
     displLabel
   };
-  if(DEBUG) console.log('ROW:', row);
-  return row;
 }
 
 /* ===== 데이터 로드: fetch(강제 파싱) → JSONP → 캐시 ===== */
-function buildCandidateURLs() {
+function buildCandidateURLs(){
   const base = WEB_APP_URL + (WEB_APP_URL.includes('?') ? '&' : '?');
   const token = SHARED_TOKEN ? `&token=${encodeURIComponent(SHARED_TOKEN)}` : '';
   const ts = `&_=${Date.now()}`;
@@ -284,22 +194,22 @@ function buildCandidateURLs() {
     `${base}op=list&scope=all${token}${ts}`,
   ];
 }
-function extractRows(payload) {
-  if (Array.isArray(payload)) return payload;
-  if (!payload || typeof payload !== 'object') return [];
-  if (Array.isArray(payload.rows))      return payload.rows;
-  if (Array.isArray(payload.data))      return payload.data;
-  if (Array.isArray(payload.items))     return payload.items;
-  if (Array.isArray(payload.result))    return payload.result;
-  if (Array.isArray(payload.published)) return payload.published;
-  if (Array.isArray(payload.list))      return payload.list;
-  if (Array.isArray(payload.cards))     return payload.cards;
-  if (payload.data && Array.isArray(payload.data.rows)) return payload.data.rows;
+function extractRows(payload){
+  if(Array.isArray(payload)) return payload;
+  if(!payload || typeof payload!=='object') return [];
+  if(Array.isArray(payload.rows)) return payload.rows;
+  if(Array.isArray(payload.data)) return payload.data;
+  if(Array.isArray(payload.items)) return payload.items;
+  if(Array.isArray(payload.result)) return payload.result;
+  if(Array.isArray(payload.published)) return payload.published;
+  if(Array.isArray(payload.list)) return payload.list;
+  if(Array.isArray(payload.cards)) return payload.cards;
+  if(payload.data && Array.isArray(payload.data.rows)) return payload.data.rows;
   return [];
 }
 function fetchJSONP(url, timeoutMs=9000){
   return new Promise((resolve,reject)=>{
-    const cb='__rimo_cb_'+Date.now(), s=document.createElement('script');
+    const cb='__rimo_cb_'+Date.now(); const s=document.createElement('script');
     const t=setTimeout(()=>{cleanup();reject(new Error('JSONP timeout'));},timeoutMs);
     function cleanup(){ delete window[cb]; s.remove(); clearTimeout(t); }
     window[cb]=data=>{ cleanup(); resolve(data); };
@@ -308,74 +218,87 @@ function fetchJSONP(url, timeoutMs=9000){
     document.body.appendChild(s);
   });
 }
-async function tryParseResponse(r) {
+function extractJSONFromText(txt){
+  // echo 페이지가 <pre>JSON</pre> 또는 HTML 섞임으로 내려올 때 JSON만 추출
+  const pre = txt.match(/<pre[^>]*>([\s\S]*?)<\/pre>/i);
+  const raw = pre ? pre[1] : txt;
+  const start = raw.indexOf('{'); const end = raw.lastIndexOf('}');
+  if(start !== -1 && end !== -1 && end > start){
+    const slice = raw.slice(start, end+1);
+    try { return JSON.parse(slice); } catch(_){}
+  }
+  // 배열 형태일 수도
+  const aStart = raw.indexOf('['); const aEnd = raw.lastIndexOf(']');
+  if(aStart !== -1 && aEnd !== -1 && aEnd > aStart){
+    const slice = raw.slice(aStart, aEnd+1);
+    try { return JSON.parse(slice); } catch(_){}
+  }
+  return null;
+}
+async function tryParseResponse(r){
   try { return await r.json(); } catch(_){}
-  try { const txt = await r.text(); return JSON.parse(txt); } catch(_){}
+  try {
+    const txt = await r.text();
+    const j = extractJSONFromText(txt);
+    if(j) return j;
+    return JSON.parse(txt); // 혹시 순수 JSON 텍스트면
+  } catch(_){}
   return null;
 }
 async function loadCrews(){
-  // 캐시 먼저 보여주기
+  // 캐시 선표시
   let cached=[]; try{ cached=JSON.parse(localStorage.getItem(CACHE_KEY)||'[]'); }catch(_){}
   if(cached.length){ if(DEBUG) console.log('[rimo] cache pre-render:', cached.length); renderAll(cached.map(normalizeRow)); }
 
-  const urls = buildCandidateURLs();
-
-  for (const url of urls) {
-    // 1) fetch: content-type 무시하고 강제 파싱
-    try {
-      const r = await fetch(url, { cache:'no-store' });
-      if (r.ok) {
-        const payload = await tryParseResponse(r);
-        const rows = extractRows(payload);
-        if (rows.length) {
-          if (DEBUG) console.log('[rimo] fetch OK:', url, rows.length);
+  const urls=buildCandidateURLs();
+  for(const url of urls){
+    // fetch (헤더 상관 없이 강제 파싱)
+    try{
+      const r=await fetch(url,{cache:'no-store',redirect:'follow'});
+      if(r.ok){
+        const payload=await tryParseResponse(r);
+        const rows=extractRows(payload);
+        if(rows.length){
+          if(DEBUG) console.log('[rimo] fetch OK:', url, rows.length);
           localStorage.setItem(CACHE_KEY, JSON.stringify(rows));
           return rows.map(normalizeRow);
-        } else if (DEBUG) {
+        }else if(DEBUG){
           console.warn('[rimo] fetch parsed but no rows:', url, payload);
         }
-      } else if (DEBUG) {
+      }else if(DEBUG){
         console.warn('[rimo] fetch not ok:', url, r.status);
       }
-    } catch(e) {
-      if (DEBUG) console.warn('[rimo] fetch error:', url, e.message);
-    }
+    }catch(e){ if(DEBUG) console.warn('[rimo] fetch error:', url, e.message); }
 
-    // 2) JSONP 폴백
-    try {
-      const j = await fetchJSONP(url);
-      const rows = extractRows(j);
-      if (rows.length) {
-        if (DEBUG) console.log('[rimo] JSONP OK:', url, rows.length);
+    // JSONP 폴백
+    try{
+      const j=await fetchJSONP(url);
+      const rows=extractRows(j);
+      if(rows.length){
+        if(DEBUG) console.log('[rimo] JSONP OK:', url, rows.length);
         localStorage.setItem(CACHE_KEY, JSON.stringify(rows));
         return rows.map(normalizeRow);
-      } else if (DEBUG) {
+      }else if(DEBUG){
         console.warn('[rimo] jsonp parsed but no rows:', url, j);
       }
-    } catch(e) {
-      if (DEBUG) console.warn('[rimo] jsonp error:', url, e.message);
-    }
+    }catch(e){ if(DEBUG) console.warn('[rimo] jsonp error:', url, e.message); }
   }
-
-  // 3) 최종 캐시
-  if (DEBUG) console.log('[rimo] fallback to cache');
+  if(DEBUG) console.log('[rimo] fallback to cache');
   return cached.map(normalizeRow);
 }
 
 /* ===== 지도 ===== */
 let map, group, arcs;
-const boundsById = new Map();
+const boundsById=new Map();
 function initMap(){
   map=L.map('map',{scrollWheelZoom:true});
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
-  group=L.featureGroup().addTo(map);
-  arcs=L.layerGroup().addTo(map);
+  group=L.featureGroup().addTo(map); arcs=L.layerGroup().addTo(map);
 }
 function makePin(color,label){
   return L.divIcon({className:'pin',
     html:`<div style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;color:#0b0b0f;border:2px solid rgba(255,255,255,.9);box-shadow:0 1px 6px rgba(0,0,0,.35);background:${color}">${label}</div>`,
-    iconSize:[28,28],iconAnchor:[14,14]
-  });
+    iconSize:[28,28],iconAnchor:[14,14]});
 }
 function arcCoords(aLat,aLng,bLat,bLng,k=.18){
   const x1=aLng,y1=aLat,x2=bLng,y2=bLat,mx=(x1+x2)/2,my=(y1+y2)/2;
@@ -385,65 +308,51 @@ function arcCoords(aLat,aLng,bLat,bLng,k=.18){
 }
 function renderMap(crews){
   group.clearLayers(); arcs.clearLayers(); boundsById.clear();
-  const allBounds=L.latLngBounds([]);
+  const all=L.latLngBounds([]);
   crews.forEach(c=>{
     if(!(c.from_lat&&c.from_lng&&c.to_lat&&c.to_lng)) return;
     const t=THEMES[c.theme]||THEMES.blue;
     const ms=L.marker([c.from_lat,c.from_lng],{icon:makePin(t.base,'S')}).addTo(group);
     const md=L.marker([c.to_lat,c.to_lng],{icon:makePin(t.base,'D')}).addTo(group);
     const a=L.polyline(arcCoords(c.from_lat,c.from_lng,c.to_lat,c.to_lng),{color:t.base,weight:2.5,dashArray:"6 8",opacity:.9}).addTo(arcs);
-
     const b=L.latLngBounds([ms.getLatLng(), md.getLatLng(), ...a.getLatLngs()]);
-    boundsById.set(c.id, b);
-    allBounds.extend(b);
+    boundsById.set(c.id,b); all.extend(b);
   });
-  if(allBounds.isValid()) map.fitBounds(allBounds.pad(0.25));
+  if(all.isValid()) map.fitBounds(all.pad(0.25));
 }
 
 /* ===== 칩 ===== */
-function chipClass(v){ switch(String(v).toLowerCase()){
-  case 'urban':return 'is-urban'; case 'curve':return 'is-curve'; case 'tour':return 'is-tour';
-  case 'easy':return 'is-easy'; case 'balanced':return 'is-balanced'; case 'dynamic':return 'is-dynamic';
-  default:return ''; } }
-const chip = v => `<span class="r-chip ${chipClass(v)}">${v}</span>`;
+function chipClass(v){switch(String(v).toLowerCase()){
+  case'urban':return'is-urban';case'curve':return'is-curve';case'tour':return'is-tour';
+  case'easy':return'is-easy';case'balanced':return'is-balanced';case'dynamic':return'is-dynamic';
+  default:return'';}}
+const chip=v=>`<span class="r-chip ${chipClass(v)}">${v}</span>`;
 
-/* ===== 카드 렌더 & 선택 ===== */
-let currentSelectedId = null;
+/* ===== 카드 렌더 ===== */
+let currentSelectedId=null;
 function selectCardAndZoom(id){
-  currentSelectedId = id;
-  document.querySelectorAll('.r-card').forEach($c=>{
-    $c.classList.toggle('selected', $c.dataset.id===id);
-  });
-  const b = boundsById.get(id);
-  if(b && b.isValid()){
-    map.fitBounds(b.pad(0.25), { animate:true, duration:.6 });
-  }
+  currentSelectedId=id;
+  document.querySelectorAll('.r-card').forEach($c=>$c.classList.toggle('selected',$c.dataset.id===id));
+  const b=boundsById.get(id); if(b && b.isValid()) map.fitBounds(b.pad(0.25),{animate:true,duration:.6});
 }
 function renderCards(crews){
   const list=document.getElementById('list'); list.innerHTML='';
-
   if(!crews.length){
-    const empty=document.createElement('div');
-    empty.className='r-card';
-    empty.innerHTML='<div class="r-msg">표시할 라이딩이 없습니다.</div>';
-    list.appendChild(empty);
-    return;
+    const empty=document.createElement('div'); empty.className='r-card';
+    empty.innerHTML='<div class="r-msg">표시할 라이딩이 없습니다.</div>'; list.appendChild(empty); return;
   }
-
   crews.forEach(c=>{
-    const capacity  = Math.max(0, c.capacity||0);
-    const attendees = Math.max(0, c.remaining||0); // remaining = 참석자 수
-    const immin  = (c.datetime? (new Date(c.datetime).getTime()-Date.now()) : 0);
-    const showImmin = (immin<=IMMINENT_MS && immin>=-GRACE_MS);
-
+    const capacity=Math.max(0,c.capacity||0);
+    const attendees=Math.max(0,c.remaining||0);
+    const immin=(c.datetime? (new Date(c.datetime).getTime()-Date.now()) : 0);
+    const showImmin=(immin<=IMMINENT_MS && immin>=-GRACE_MS);
     const el=document.createElement('article');
     el.className='r-card'; el.dataset.theme=c.theme; el.dataset.id=c.id;
     el.setAttribute('role','button'); el.setAttribute('tabindex','0');
-    el.setAttribute('aria-label', `${c.title} 상세 보기 및 지도 이동`);
-
+    el.setAttribute('aria-label',`${c.title} 상세 보기 및 지도 이동`);
     el.innerHTML=`
       <h3>${c.title}</h3>
-      <div class="r-meta">⏰ <span>${c.timeLabel || ''}</span></div>
+      <div class="r-meta">⏰ <span>${c.timeLabel||''}</span></div>
       <div class="r-route">📌  ${c.from} - ${c.to}</div>
       ${c.message?`<div class="r-msg">💬  ${c.message}</div>`:''}
       ${c.displLabel?`<div class="r-cc">🏍 ${c.displLabel}</div>`:''}
@@ -452,18 +361,13 @@ function renderCards(crews){
         ${c.pace.map(chip).join('')}
       </div>
       <button class="r-cta" aria-label="합류 신청">👥 ${attendees}/${capacity} · 합류 신청</button>
-      ${showImmin?`<div class="imminent">🚦 출발 임박</div>`:''}
-    `;
-
-    el.addEventListener('click', ()=> selectCardAndZoom(c.id));
-    el.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); selectCardAndZoom(c.id); } });
-    el.querySelector('.r-cta').addEventListener('click',(ev)=>{ ev.stopPropagation(); openJoinModal(c); });
-
+      ${showImmin?`<div class="imminent">🚦 출발 임박</div>`:''}`;
+    el.addEventListener('click',()=>selectCardAndZoom(c.id));
+    el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();selectCardAndZoom(c.id);}});
+    el.querySelector('.r-cta').addEventListener('click',ev=>{ev.stopPropagation();openJoinModal(c);});
     list.appendChild(el);
   });
-
-  const first = list.querySelector('.r-card');
-  if(first && !currentSelectedId) selectCardAndZoom(first.dataset.id);
+  const first=list.querySelector('.r-card'); if(first && !currentSelectedId) selectCardAndZoom(first.dataset.id);
 }
 
 /* ===== 전체 렌더 ===== */
@@ -472,26 +376,23 @@ function renderAll(rows){
   const live=rows.filter(r=>{
     if(!r.datetime) return true;
     const t=new Date(r.datetime).getTime();
-    return (t + GRACE_MS) >= now;
+    return (t+GRACE_MS)>=now;
   }).sort((a,b)=>{
     const ta=a.datetime?new Date(a.datetime).getTime():Infinity;
     const tb=b.datetime?new Date(b.datetime).getTime():Infinity;
     return ta-tb;
   });
-
-  renderMap(live);
-  renderCards(live);
+  renderMap(live); renderCards(live);
 }
 
-/* ===== 합류 신청 모달 ===== */
+/* ===== 모달 ===== */
 const modal=document.getElementById('joinModal');
 const preview=document.getElementById('joinPreview');
-function loadProfile(){ try{ return JSON.parse(localStorage.getItem(PROFILE_KEY)||'{}'); }catch(_){ return {}; } }
-function composeText(crew, profile){
-  const styles=(profile.styles||[]).join(' · ') || '-';
-  const paces =(profile.pace  ||[]).join(' · ') || '-';
-  return (
-`[✅ 합류 신청] ${crew.title}
+function loadProfile(){ try{return JSON.parse(localStorage.getItem(PROFILE_KEY)||'{}');}catch(_){return{};} }
+function composeText(crew,profile){
+  const styles=(profile.styles||[]).join(' · ')||'-';
+  const paces=(profile.pace||[]).join(' · ')||'-';
+  return `[✅ 합류 신청] ${crew.title}
 📍 출발 → 도착
 ${crew.from} → ${crew.to}
 
@@ -501,8 +402,7 @@ ${crew.from} → ${crew.to}
 👥 탠덤 : ${profile.tandem ? '탠덤 ' + profile.tandem : '-'}
 
 🎯 스타일/페이스
-${styles} · ${paces}`
-  );
+${styles} · ${paces}`;
 }
 async function copyText(txt){
   try{ await navigator.clipboard.writeText(txt); return true; }
@@ -510,26 +410,20 @@ async function copyText(txt){
             ta.select(); document.execCommand('copy'); ta.remove(); return true; }
 }
 function openJoinModal(crew){
-  const profile=loadProfile();
-  const text=composeText(crew, profile);
-  preview.textContent=text;
-  try{ awaitCopy(text); }catch(_){}
-  modal.style.display='flex';
-  document.body.classList.add('modal-open');
+  const profile=loadProfile(); const text=composeText(crew,profile);
+  preview.textContent=text; copyText(text).catch(()=>{});
+  modal.style.display='flex'; document.body.classList.add('modal-open');
   document.getElementById('goAdmin').onclick=()=>{ location.href=ADMIN_DM; };
   document.getElementById('editProfile').onclick=()=>{ location.href='rimo_profile.html'; };
   document.getElementById('copyProfileBtn').onclick=()=> copyText(text);
 }
-function awaitCopy(t){ return copyText(t); }
-modal.addEventListener('click', e=>{
-  if(e.target===modal) { modal.style.display='none'; document.body.classList.remove('modal-open'); }
-});
+modal.addEventListener('click',e=>{ if(e.target===modal){ modal.style.display='none'; document.body.classList.remove('modal-open'); }});
 
 /* ===== init ===== */
 (async function init(){
   initMap();
   try{
-    const rows = await loadCrews();
+    const rows=await loadCrews();
     if(DEBUG) console.log('LOADED rows:', rows.length);
     renderAll(rows);
   }catch(err){
