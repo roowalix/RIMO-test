@@ -4,436 +4,192 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>RIMO — 오늘의 라이딩 크루</title>
-
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 <style>
   :root{
-    --bg:#0b0b0f; --fg:#e8e8ef; --muted:#b9b9cc; --border-1:#232333;
-    --imminent-bg: rgba(255,199,94,.16);
-    --imminent-bd: rgba(255,199,94,.45);
-    --t-red-br:rgba(255,93,93,.35);
-    --t-blue-br:rgba(122,167,255,.35);
-    --t-yellow-br:rgba(255,216,93,.38);
-    --t-green-br:rgba(86,211,100,.42);
-    --t-purple-br:rgba(167,139,250,.42);
+    --bg:#0b0b0f; --fg:#e8e8ef; --muted:#b9b9cc; --line:#1f1f2a;
+    --chip:#171822; --chipOn:#23243a;
   }
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--fg);
-    font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Arial,sans-serif;}
-  header{position:sticky;top:0;z-index:5;background:rgba(11,11,15,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--border-1)}
-  .bar{display:flex;gap:10px;align-items:center;padding:12px 16px}
-  .logo{font-weight:900}.title{font-weight:900;font-size:16px}
-  .pill{margin-left:auto;padding:6px 10px;border-radius:999px;background:#151525;color:#b9b9cc;font-size:12px}
-  main{padding:16px;max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:14px;padding-bottom:120px}
-  #map{height:360px;border-radius:14px;outline:1px solid var(--border-1)}
-  .leaflet-container{z-index:1}
-  .carousel{display:flex;gap:12px;overflow-x:auto;padding:8px 12px 12px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
-  .carousel::-webkit-scrollbar{display:none}
-  .r-card{position:relative;flex:0 0 304px;width:304px;scroll-snap-align:start;scroll-snap-stop:always;background:#121428;border:1px solid rgba(255,255,255,.14);border-radius:16px;padding:14px;box-shadow:0 2px 14px rgba(0,0,0,.28);display:flex;flex-direction:column;gap:10px;cursor:pointer;transition:box-shadow .18s,transform .12s,border-color .18s,background-color .18s}
-  .r-card *{line-height:1.35}
-  .r-card:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,0,0,.34)}
-  .r-card h3{margin:0;font-size:16px;font-weight:700}
-  .r-meta{display:flex;align-items:center;gap:4px;color:#cfd2ff;font-size:14px;margin:0}
-  .r-route{display:flex;align-items:center;gap:8px;color:#ced2f9;font-size:14px;margin:0}
-  .r-msg{color:#e6e8ff;font-size:14px;margin:0}
-  .r-cc{margin:-2px 0 2px 0;color:#cfd2ff;font-size:13px;display:flex;align-items:center;gap:8px;opacity:.95}
-  .r-chips{display:flex;flex-wrap:wrap;gap:8px;margin:0}
+  body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Roboto,Arial,sans-serif}
+  header{padding:12px 16px;font-weight:900;font-size:16px;border-bottom:1px solid var(--line);background:#111}
+  main{padding:16px;max-width:860px;margin:0 auto;display:grid;gap:16px}
+  .r-card{background:#141627;border:1px solid #2b2e48;border-radius:16px;padding:14px;box-shadow:0 2px 12px rgba(0,0,0,.28)}
+  .r-card h3{margin:0 0 6px;font-size:16px;font-weight:700}
+  .r-meta{display:flex;align-items:center;gap:6px;font-size:14px;color:#cfd2ff;flex-wrap:wrap;margin-bottom:4px}
+  .r-meta .sep{opacity:.5}
+  .r-route{display:flex;align-items:center;gap:6px;font-size:14px;margin-bottom:6px;color:#ced2f9}
+  .r-msg{font-size:14px;margin:6px 0;color:#e6e8ff}
+  .r-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
   .r-chip{padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);color:#e6e8ef}
-  .r-chip.is-urban{background:#1e2d55;border-color:#2c4484}
-  .r-chip.is-curve{background:#2a1f56;border-color:#40307a}
-  .r-chip.is-tour{background:#1e3b3a;border-color:#2f5f5d}
-  .r-chip.is-easy{background:#1f3a1f;border-color:#2f5a2f}
-  .r-chip.is-balanced{background:#3a341e;border-color:#5a4f2f}
-  .r-chip.is-dynamic{background:#3a1f1f;border-color:#5a2f2f}
-  .r-cta{margin-top:2px;width:100%;padding:12px;border-radius:12px;border:none;background:rgba(255,255,255,.06);color:#dfe3ff;font-weight:800;cursor:pointer}
-  .r-cta:focus{outline:2px solid rgba(255,255,255,.25);outline-offset:2px}
-  .r-card[data-theme="red"]{border-color:var(--t-red-br)}
-  .r-card[data-theme="blue"]{border-color:var(--t-blue-br)}
-  .r-card[data-theme="yellow"]{border-color:var(--t-yellow-br)}
-  .r-card[data-theme="green"]{border-color:var(--t-green-br)}
-  .r-card[data-theme="purple"]{border-color:var(--t-purple-br)}
-  .r-card.selected{transform:none;--sel-bd:rgba(122,167,255,.60);--sel-bg:rgba(122,167,255,.06);border-color:var(--sel-bd);box-shadow:0 0 0 1px var(--sel-bd) inset,0 10px 26px rgba(0,0,0,.44);background:linear-gradient(180deg,var(--sel-bg),#121428 42%)}
-  .r-card[data-theme="red"].selected{--sel-bd:rgba(255,93,93,.6);--sel-bg:rgba(255,93,93,.06)}
-  .r-card[data-theme="yellow"].selected{--sel-bd:rgba(255,216,93,.6);--sel-bg:rgba(255,216,93,.06)}
-  .r-card[data-theme="green"].selected{--sel-bd:rgba(86,211,100,.6);--sel-bg:rgba(86,211,100,.06)}
-  .r-card[data-theme="purple"].selected{--sel-bd:rgba(167,139,250,.6);--sel-bg:rgba(167,139,250,.06)}
-  .imminent{position:absolute;top:10px;right:10px;display:inline-flex;align-items:center;gap:6px;padding:8px 10px;border-radius:10px;font-size:12px;font-weight:800;background:var(--imminent-bg);border:1px solid var(--imminent-bd);color:#ffe7a6;animation:pulse 2.2s ease-in-out infinite}
-  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,199,94,.35)}70%{box-shadow:0 0 0 8px rgba(255,199,94,0)}100%{box-shadow:0 0 0 0 rgba(255,199,94,0)}}
-  .tabbar{position:fixed;left:0;right:0;bottom:16px;z-index:1500;display:flex;gap:12px;justify-content:center}
-  .tabbar .tab{background:#182039;border:1px solid #2d3559;color:#e6e8ef;padding:12px 18px;border-radius:22px;font-weight:800;text-decoration:none;font-size:14px}
-  .tabbar .tab.primary{background:#26346d;border-color:#3b53a8}
+  .is-urban{background:#1e2d55;border-color:#2c4484}
+  .is-curve{background:#2a1f56;border-color:#40307a}
+  .is-tour{background:#1e3b3a;border-color:#2f5f5d}
+  .is-easy{background:#1f3a1f;border-color:#2f5a2f}
+  .is-balanced{background:#3a341e;border-color:#5a4f2f}
+  .is-dynamic{background:#3a1f1f;border-color:#5a2f2f}
   .hint{color:#cfd2ff99;font-size:14px;padding:12px}
 </style>
 </head>
 <body>
-<header>
-  <div class="bar">
-    <div class="logo">🏍️ RIMO</div>
-    <div class="title">오늘의 라이딩 크루</div>
-    <div class="pill" id="today"></div>
-  </div>
-</header>
+<header>🏍️ RIMO — 오늘의 라이딩 크루</header>
+<main id="cards"></main>
 
-<main>
-  <div id="map" aria-label="라이딩 경로 지도"></div>
-  <section id="list" class="carousel" aria-label="라이딩 목록"></section>
-</main>
-
-<nav class="tabbar" aria-label="하단 네비게이션">
-  <a href="index.html" class="tab primary">메인</a>
-  <a href="rimo_profile.html" class="tab">프로필</a>
-  <a href="rimo_ambassadors.html" class="tab">엠버서더</a>
-</nav>
-
-<!-- 합류 안내 모달 -->
-<div class="modal" id="joinModal" role="dialog" aria-modal="true" aria-labelledby="joinTitle" style="display:none;align-items:center;justify-content:center;z-index:4000;background:rgba(0,0,0,.45);padding:22px 12px;position:fixed;inset:0;">
-  <div class="sheet" style="width:min(680px, 92vw);background:#0e1222;border:1px solid #2b304f;border-radius:16px;box-shadow:0 14px 40px rgba(0,0,0,.55);padding:12px;">
-    <h4 id="joinTitle" style="margin:0 0 8px;font-size:16px">✅ 합류 신청하기</h4>
-    <div class="hint">아래 내용을 <b>운영자 1:1 채팅</b>에 붙여넣어 주세요. 승인되면 크루 채팅방으로 초대됩니다.</div>
-    <div id="joinPreview" class="pre" style="background:#0b1020;border:1px solid #293059;border-radius:12px;padding:10px;white-space:pre-wrap;line-height:1.35;min-height:84px;max-height:38vh;overflow:auto;color:#e6e9ff;font-size:13px"></div>
-    <div class="modal-actions" style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px">
-      <button id="goAdmin" style="flex:1;min-width:110px;max-width:160px;padding:10px;border-radius:10px;border:none;background:#2A2F4F;color:#fff;font-size:14px;font-weight:800;cursor:pointer">이대로 신청</button>
-      <button id="editProfile" style="flex:1;min-width:110px;max-width:160px;padding:10px;border-radius:10px;border:none;background:#2A2F4F;color:#fff;font-size:14px;font-weight:800;cursor:pointer">프로필 수정</button>
-      <button id="copyProfileBtn" style="flex:1;min-width:110px;max-width:160px;padding:10px;border-radius:10px;border:none;background:#2A2F4F;color:#fff;font-size:14px;font-weight:800;cursor:pointer">복사</button>
-    </div>
-  </div>
-</div>
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin></script>
 <script>
-/* ===== 설정 & 상수 ===== */
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw4BXsdN6GEkqKyto0Yxwc3G1b6gn1p8YLOrW2PMOSRpbIZcKKZpjF0GlDcJuCPB7jiTw/exec";
+const SHARED_TOKEN = "";
+const CACHE_KEY = "rimo_index_cards_cache_v1";
 const DEBUG = true;
 
-/* 새 Apps Script 주소 */
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw4BXsdN6GEkqKyto0Yxwc3G1b6gn1p8YLOrW2PMOSRpbIZcKKZpjF0GlDcJuCPB7jiTw/exec";
-
-const SHARED_TOKEN = ""; // (옵션)
-const CACHE_KEY   = "rimo_published_cards_server_cache";
-const PROFILE_KEY = "rimo_profile_v1";
-const ADMIN_DM    = "http://pf.kakao.com/_ceUDn/chat";
-
-/* 시간 정책 */
-const IMMINENT_MS = 30*60*1000;
-const GRACE_MS    = 8*60*1000;
-
-/* 테마 */
-const THEMES = {
-  red:{base:'#ff4d4d'}, yellow:{base:'#ffd24d'}, blue:{base:'#5b8cff'}, green:{base:'#46d37d'}, purple:{base:'#a78bfa'}
-};
-
-/* 오늘 */
-document.getElementById('today').textContent =
-  new Date().toLocaleDateString('ko-KR',{month:'long',day:'numeric',weekday:'short'});
-
-/* ===== 유틸 ===== */
-const pad = n => String(n).padStart(2,'0');
-function parseKoreanDate(s){
-  if(!s) return null;
-  const m = String(s).trim().match(/(\d{4})[\/\-\.](\d{1,2})[\/\-\.](\d{1,2}).*?(오전|오후)?\s*(\d{1,2}):(\d{2})/);
-  if(!m){ const d=new Date(s); return isNaN(d)?null:d; }
-  let [_,Y,Mo,D,ap,hh,mm]=m; Y=+Y;Mo=+Mo;D=+D;hh=+hh;mm=+mm;
-  if(ap==='오후' && hh<12) hh+=12; if(ap==='오전' && hh===12) hh=0;
-  const d=new Date(Y,Mo-1,D,hh,mm); return isNaN(d)?null:d;
+/* ===== JSON 파서 보강 ===== */
+function htmlDecodeEntities(str){
+  const map = { '&quot;':'"', '&#34;':'"', '&#39;':"'", '&amp;':'&', '&lt;':'<', '&gt;':'>' };
+  return String(str).replace(/(&quot;|&#34;|&#39;|&amp;|&lt;|&gt;)/g, m => map[m] || m);
 }
-function formatTimeKOR(d){
-  const Y=d.getFullYear(), M=pad(d.getMonth()+1), D=pad(d.getDate());
-  const h=d.getHours(), m=pad(d.getMinutes()); const ampm=h>=12?'오후':'오전'; const hh=String((h%12)||12).padStart(2,'0');
-  return `${Y}/${M}/${D}/${ampm} ${hh}:${m}`;
-}
-function toList(v){
-  if(v==null) return [];
-  if(Array.isArray(v)) return v.map(x=>String(x).trim()).filter(Boolean);
-  const s=String(v).trim(); if(!s) return [];
-  try{ const j=JSON.parse(s); if(Array.isArray(j)) return j.map(x=>String(x).trim()).filter(Boolean);}catch(_){}
-  return s.split(/[,\|/·]/).map(x=>x.trim()).filter(Boolean);
-}
-function parseCcRange(ccStr){
-  const s=String(ccStr||'').replace(/[^\d~\-\/–]/g,'');
-  const m=s.match(/(\d{2,4})\s*[~\-\/–]\s*(\d{2,4})/);
-  if(m){ const a=+m[1], b=+m[2]; if(a&&b) return {min:Math.min(a,b), max:Math.max(a,b)};}
-  return null;
-}
-function normalizeRow(it){
-  const dtStr = it.datetime || it.date || it.datetime_display || it.datetimeText || '';
-  const dt = parseKoreanDate(dtStr);
-  const timeLabel = it.datetime_display || (dt ? formatTimeKOR(dt) : (dtStr || ''));
-  let displMin = Number.isFinite(+it.displacement_min) ? +it.displacement_min : null;
-  let displMax = Number.isFinite(+it.displacement_max) ? +it.displacement_max : null;
-  if(displMin==null || displMax==null){
-    const parsed=parseCcRange(it.cc || it.displacement || '');
-    if(parsed){displMin=parsed.min;displMax=parsed.max;}
+function safeJSONParse(maybe){ try { return JSON.parse(maybe); } catch { return null; } }
+function deepParseJSON(maybe){
+  let v = safeJSONParse(maybe);
+  if (typeof v === 'string') {
+    const v2 = safeJSONParse(v);
+    if (v2 !== null) return v2;
   }
-  const displLabel = (displMin!=null && displMax!=null) ? `${displMin}cc~${displMax}cc` : '';
-  return {
-    id: it.id || `id_${Math.random().toString(36).slice(2,8)}`,
-    title: it.title||'(제목 없음)',
-    datetime: dt?dt.toISOString():'',
-    timeLabel,
-    from: it.from||it.start||'-',
-    to: it.to||it.end||'-',
-    from_lat:+it.from_lat||null, from_lng:+it.from_lng||null,
-    to_lat:+it.to_lat||null, to_lng:+it.to_lng||null,
-    styles: toList(it.styles),
-    pace: toList(it.pace),
-    message: it.message||'',
-    capacity: Number.isFinite(+it.capacity)?+it.capacity:0,
-    remaining: Number.isFinite(+it.remaining)?+it.remaining:0,
-    theme: it.theme||'blue',
-    displLabel
-  };
-}
-
-/* ===== 데이터 로드: fetch(강제 파싱) → JSONP → 캐시 ===== */
-function buildCandidateURLs(){
-  const base = WEB_APP_URL + (WEB_APP_URL.includes('?') ? '&' : '?');
-  const token = SHARED_TOKEN ? `&token=${encodeURIComponent(SHARED_TOKEN)}` : '';
-  const ts = `&_=${Date.now()}`;
-  return [
-    `${base}op=list&scope=published${token}${ts}`,
-    `${base}op=list&scope=main${token}${ts}`,
-    `${base}op=list&scope=all${token}${ts}`,
-  ];
-}
-function extractRows(payload){
-  if(Array.isArray(payload)) return payload;
-  if(!payload || typeof payload!=='object') return [];
-  if(Array.isArray(payload.rows)) return payload.rows;
-  if(Array.isArray(payload.data)) return payload.data;
-  if(Array.isArray(payload.items)) return payload.items;
-  if(Array.isArray(payload.result)) return payload.result;
-  if(Array.isArray(payload.published)) return payload.published;
-  if(Array.isArray(payload.list)) return payload.list;
-  if(Array.isArray(payload.cards)) return payload.cards;
-  if(payload.data && Array.isArray(payload.data.rows)) return payload.data.rows;
-  return [];
-}
-function fetchJSONP(url, timeoutMs=9000){
-  return new Promise((resolve,reject)=>{
-    const cb='__rimo_cb_'+Date.now(); const s=document.createElement('script');
-    const t=setTimeout(()=>{cleanup();reject(new Error('JSONP timeout'));},timeoutMs);
-    function cleanup(){ delete window[cb]; s.remove(); clearTimeout(t); }
-    window[cb]=data=>{ cleanup(); resolve(data); };
-    s.src=url + (url.includes('?')?'&':'?') + 'callback=' + cb;
-    s.onerror=()=>{ cleanup(); reject(new Error('JSONP error')); };
-    document.body.appendChild(s);
-  });
+  return v;
 }
 function extractJSONFromText(txt){
-  // echo 페이지가 <pre>JSON</pre> 또는 HTML 섞임으로 내려올 때 JSON만 추출
-  const pre = txt.match(/<pre[^>]*>([\s\S]*?)<\/pre>/i);
-  const raw = pre ? pre[1] : txt;
-  const start = raw.indexOf('{'); const end = raw.lastIndexOf('}');
-  if(start !== -1 && end !== -1 && end > start){
-    const slice = raw.slice(start, end+1);
-    try { return JSON.parse(slice); } catch(_){}
-  }
-  // 배열 형태일 수도
-  const aStart = raw.indexOf('['); const aEnd = raw.lastIndexOf(']');
-  if(aStart !== -1 && aEnd !== -1 && aEnd > aStart){
-    const slice = raw.slice(aStart, aEnd+1);
-    try { return JSON.parse(slice); } catch(_){}
-  }
-  return null;
+  const pre = String(txt).match(/<pre[^>]*>([\s\S]*?)<\/pre>/i);
+  let raw = pre ? pre[1] : String(txt);
+  raw = htmlDecodeEntities(raw.trim());
+  let s = raw.indexOf('{'), e = raw.lastIndexOf('}');
+  if(s!==-1 && e>s){ const obj = deepParseJSON(raw.slice(s,e+1)); if(obj!=null) return obj; }
+  s = raw.indexOf('['); e = raw.lastIndexOf(']');
+  if(s!==-1 && e>s){ const arr = deepParseJSON(raw.slice(s,e+1)); if(arr!=null) return arr; }
+  return deepParseJSON(raw);
 }
 async function tryParseResponse(r){
   try { return await r.json(); } catch(_){}
   try {
     const txt = await r.text();
     const j = extractJSONFromText(txt);
-    if(j) return j;
-    return JSON.parse(txt); // 혹시 순수 JSON 텍스트면
+    if (j != null) return j;
+    return JSON.parse(txt);
   } catch(_){}
   return null;
 }
-async function loadCrews(){
-  // 캐시 선표시
-  let cached=[]; try{ cached=JSON.parse(localStorage.getItem(CACHE_KEY)||'[]'); }catch(_){}
-  if(cached.length){ if(DEBUG) console.log('[rimo] cache pre-render:', cached.length); renderAll(cached.map(normalizeRow)); }
+function extractRows(payload){
+  if(Array.isArray(payload)) return payload;
+  if(!payload || typeof payload!=='object') return [];
+  if(Array.isArray(payload.rows))      return payload.rows;
+  if(Array.isArray(payload.data))      return payload.data;
+  if(Array.isArray(payload.items))     return payload.items;
+  if(Array.isArray(payload.result))    return payload.result;
+  if(Array.isArray(payload.published)) return payload.published;
+  if(Array.isArray(payload.list))      return payload.list;
+  if(Array.isArray(payload.cards))     return payload.cards;
+  if(payload.data && Array.isArray(payload.data.rows)) return payload.data.rows;
+  return [];
+}
+function buildCandidateURLs(){
+  const base = WEB_APP_URL + (WEB_APP_URL.includes('?') ? '&' : '?');
+  const tok  = SHARED_TOKEN ? `&token=${encodeURIComponent(SHARED_TOKEN)}` : '';
+  const ts   = `&_=${Date.now()}`;
+  return [
+    `${base}op=list&scope=published${tok}${ts}`,
+    `${base}op=list&scope=main${tok}${ts}`,
+    `${base}op=list&scope=all${tok}${ts}`,
+  ];
+}
+function fetchJSONP(url, timeoutMs=9000){
+  return new Promise((resolve,reject)=>{
+    const cb='__rimo_cb_'+Date.now(), s=document.createElement('script');
+    const t=setTimeout(()=>{cleanup();reject(new Error('JSONP timeout'));},timeoutMs);
+    function cleanup(){ delete window[cb]; s.remove(); clearTimeout(t); }
+    window[cb]=data=>{ cleanup(); resolve(data); };
+    s.src=url + (url.includes('?')?'&':'?') + 'callback=' + cb + '&_=' + Date.now();
+    s.onerror=()=>{ cleanup(); reject(new Error('JSONP error')); };
+    document.body.appendChild(s);
+  });
+}
 
-  const urls=buildCandidateURLs();
+/* ===== 데이터 불러오기 ===== */
+async function loadCrews(){
+  let cached=[]; try{ cached=JSON.parse(localStorage.getItem(CACHE_KEY)||'[]'); }catch(_){}
+  if(cached.length) renderAll(cached);
+
+  const urls = buildCandidateURLs();
   for(const url of urls){
-    // fetch (헤더 상관 없이 강제 파싱)
     try{
       const r=await fetch(url,{cache:'no-store',redirect:'follow'});
       if(r.ok){
         const payload=await tryParseResponse(r);
         const rows=extractRows(payload);
         if(rows.length){
-          if(DEBUG) console.log('[rimo] fetch OK:', url, rows.length);
           localStorage.setItem(CACHE_KEY, JSON.stringify(rows));
-          return rows.map(normalizeRow);
-        }else if(DEBUG){
-          console.warn('[rimo] fetch parsed but no rows:', url, payload);
+          return rows;
         }
-      }else if(DEBUG){
-        console.warn('[rimo] fetch not ok:', url, r.status);
       }
-    }catch(e){ if(DEBUG) console.warn('[rimo] fetch error:', url, e.message); }
-
-    // JSONP 폴백
+    }catch(e){ if(DEBUG) console.warn('fetch fail',e); }
     try{
       const j=await fetchJSONP(url);
       const rows=extractRows(j);
       if(rows.length){
-        if(DEBUG) console.log('[rimo] JSONP OK:', url, rows.length);
         localStorage.setItem(CACHE_KEY, JSON.stringify(rows));
-        return rows.map(normalizeRow);
-      }else if(DEBUG){
-        console.warn('[rimo] jsonp parsed but no rows:', url, j);
+        return rows;
       }
-    }catch(e){ if(DEBUG) console.warn('[rimo] jsonp error:', url, e.message); }
+    }catch(e){ if(DEBUG) console.warn('jsonp fail',e); }
   }
-  if(DEBUG) console.log('[rimo] fallback to cache');
-  return cached.map(normalizeRow);
+  return cached;
 }
 
-/* ===== 지도 ===== */
-let map, group, arcs;
-const boundsById=new Map();
-function initMap(){
-  map=L.map('map',{scrollWheelZoom:true});
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
-  group=L.featureGroup().addTo(map); arcs=L.layerGroup().addTo(map);
-}
-function makePin(color,label){
-  return L.divIcon({className:'pin',
-    html:`<div style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;color:#0b0b0f;border:2px solid rgba(255,255,255,.9);box-shadow:0 1px 6px rgba(0,0,0,.35);background:${color}">${label}</div>`,
-    iconSize:[28,28],iconAnchor:[14,14]});
-}
-function arcCoords(aLat,aLng,bLat,bLng,k=.18){
-  const x1=aLng,y1=aLat,x2=bLng,y2=bLat,mx=(x1+x2)/2,my=(y1+y2)/2;
-  const vx=x2-x1,vy=y2-y1,len=Math.hypot(vx,vy)||1;
-  const nx=-vy/len,ny=vx/len,off=Math.max(len*k,0.01);
-  const cx=mx+nx*off,cy=my+ny*off; return [[y1,x1],[cy,cx],[y2,x2]];
-}
-function renderMap(crews){
-  group.clearLayers(); arcs.clearLayers(); boundsById.clear();
-  const all=L.latLngBounds([]);
-  crews.forEach(c=>{
-    if(!(c.from_lat&&c.from_lng&&c.to_lat&&c.to_lng)) return;
-    const t=THEMES[c.theme]||THEMES.blue;
-    const ms=L.marker([c.from_lat,c.from_lng],{icon:makePin(t.base,'S')}).addTo(group);
-    const md=L.marker([c.to_lat,c.to_lng],{icon:makePin(t.base,'D')}).addTo(group);
-    const a=L.polyline(arcCoords(c.from_lat,c.from_lng,c.to_lat,c.to_lng),{color:t.base,weight:2.5,dashArray:"6 8",opacity:.9}).addTo(arcs);
-    const b=L.latLngBounds([ms.getLatLng(), md.getLatLng(), ...a.getLatLngs()]);
-    boundsById.set(c.id,b); all.extend(b);
-  });
-  if(all.isValid()) map.fitBounds(all.pad(0.25));
-}
-
-/* ===== 칩 ===== */
-function chipClass(v){switch(String(v).toLowerCase()){
-  case'urban':return'is-urban';case'curve':return'is-curve';case'tour':return'is-tour';
-  case'easy':return'is-easy';case'balanced':return'is-balanced';case'dynamic':return'is-dynamic';
-  default:return'';}}
-const chip=v=>`<span class="r-chip ${chipClass(v)}">${v}</span>`;
-
-/* ===== 카드 렌더 ===== */
-let currentSelectedId=null;
-function selectCardAndZoom(id){
-  currentSelectedId=id;
-  document.querySelectorAll('.r-card').forEach($c=>$c.classList.toggle('selected',$c.dataset.id===id));
-  const b=boundsById.get(id); if(b && b.isValid()) map.fitBounds(b.pad(0.25),{animate:true,duration:.6});
-}
-function renderCards(crews){
-  const list=document.getElementById('list'); list.innerHTML='';
-  if(!crews.length){
-    const empty=document.createElement('div'); empty.className='r-card';
-    empty.innerHTML='<div class="r-msg">표시할 라이딩이 없습니다.</div>'; list.appendChild(empty); return;
+/* ===== 렌더 ===== */
+function cls(label){
+  switch(String(label).toLowerCase()){
+    case 'urban': return 'is-urban';
+    case 'curve': return 'is-curve';
+    case 'tour': return 'is-tour';
+    case 'easy': return 'is-easy';
+    case 'balanced': return 'is-balanced';
+    case 'dynamic': return 'is-dynamic';
+    default: return '';
   }
-  crews.forEach(c=>{
-    const capacity=Math.max(0,c.capacity||0);
-    const attendees=Math.max(0,c.remaining||0);
-    const immin=(c.datetime? (new Date(c.datetime).getTime()-Date.now()) : 0);
-    const showImmin=(immin<=IMMINENT_MS && immin>=-GRACE_MS);
+}
+function chip(label){ return `<span class="r-chip ${cls(label)}">${label}</span>`; }
+function escapeHtml(s){
+  return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')
+    .replaceAll('"','&quot;').replaceAll("'","&#39;");
+}
+function renderAll(list){
+  const box=document.getElementById('cards'); box.innerHTML='';
+  if(!list||!list.length){ box.innerHTML='<div class="hint">아직 카드가 없습니다.</div>'; return; }
+  list.forEach(it=>{
+    const dt=new Date(it.datetime||Date.now());
+    const when=it.datetime_display || dt.toLocaleString();
+    const styles=(it.styles||[]), pace=(it.pace||[]);
+    const ccLabel = (it.cc===''||it.cc==null)?'관계없음':String(it.cc);
+    const capacity=Number(it.capacity)||0;
+    const remaining=Number(it.remaining)||0;
+    const attended=Math.max(0, capacity-remaining);
+
     const el=document.createElement('article');
-    el.className='r-card'; el.dataset.theme=c.theme; el.dataset.id=c.id;
-    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
-    el.setAttribute('aria-label',`${c.title} 상세 보기 및 지도 이동`);
+    el.className='r-card';
     el.innerHTML=`
-      <h3>${c.title}</h3>
-      <div class="r-meta">⏰ <span>${c.timeLabel||''}</span></div>
-      <div class="r-route">📌  ${c.from} - ${c.to}</div>
-      ${c.message?`<div class="r-msg">💬  ${c.message}</div>`:''}
-      ${c.displLabel?`<div class="r-cc">🏍 ${c.displLabel}</div>`:''}
+      <h3>${escapeHtml(it.title||'(제목없음)')}</h3>
+      <div class="r-meta">⏰ ${when}</div>
+      <div class="r-route">📌 ${escapeHtml(it.from||'-')} - ${escapeHtml(it.to||'-')}</div>
+      <div class="r-meta">🏍 ${escapeHtml(ccLabel)} <span class="sep">·</span> 👥 참석 ${attended}/${capacity} <span class="sep">·</span> 잔여 ${remaining}</div>
+      <div class="r-msg">💬 ${escapeHtml(it.message||'-')}</div>
       <div class="r-chips">
-        ${c.styles.map(chip).join('')}
-        ${c.pace.map(chip).join('')}
+        ${styles.map(chip).join('')}
+        ${pace.map(chip).join('')}
       </div>
-      <button class="r-cta" aria-label="합류 신청">👥 ${attendees}/${capacity} · 합류 신청</button>
-      ${showImmin?`<div class="imminent">🚦 출발 임박</div>`:''}`;
-    el.addEventListener('click',()=>selectCardAndZoom(c.id));
-    el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();selectCardAndZoom(c.id);}});
-    el.querySelector('.r-cta').addEventListener('click',ev=>{ev.stopPropagation();openJoinModal(c);});
-    list.appendChild(el);
+    `;
+    box.appendChild(el);
   });
-  const first=list.querySelector('.r-card'); if(first && !currentSelectedId) selectCardAndZoom(first.dataset.id);
 }
 
-/* ===== 전체 렌더 ===== */
-function renderAll(rows){
-  const now=Date.now();
-  const live=rows.filter(r=>{
-    if(!r.datetime) return true;
-    const t=new Date(r.datetime).getTime();
-    return (t+GRACE_MS)>=now;
-  }).sort((a,b)=>{
-    const ta=a.datetime?new Date(a.datetime).getTime():Infinity;
-    const tb=b.datetime?new Date(b.datetime).getTime():Infinity;
-    return ta-tb;
-  });
-  renderMap(live); renderCards(live);
-}
-
-/* ===== 모달 ===== */
-const modal=document.getElementById('joinModal');
-const preview=document.getElementById('joinPreview');
-function loadProfile(){ try{return JSON.parse(localStorage.getItem(PROFILE_KEY)||'{}');}catch(_){return{};} }
-function composeText(crew,profile){
-  const styles=(profile.styles||[]).join(' · ')||'-';
-  const paces=(profile.pace||[]).join(' · ')||'-';
-  return `[✅ 합류 신청] ${crew.title}
-📍 출발 → 도착
-${crew.from} → ${crew.to}
-
-⏰ ${crew.timeLabel}
-👤 라이더 : ${profile.name || '이름 미입력'} ${profile.icon || ''}
-🏍️ 바이크 : ${profile.bike || '미입력'}
-👥 탠덤 : ${profile.tandem ? '탠덤 ' + profile.tandem : '-'}
-
-🎯 스타일/페이스
-${styles} · ${paces}`;
-}
-async function copyText(txt){
-  try{ await navigator.clipboard.writeText(txt); return true; }
-  catch(_){ const ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta);
-            ta.select(); document.execCommand('copy'); ta.remove(); return true; }
-}
-function openJoinModal(crew){
-  const profile=loadProfile(); const text=composeText(crew,profile);
-  preview.textContent=text; copyText(text).catch(()=>{});
-  modal.style.display='flex'; document.body.classList.add('modal-open');
-  document.getElementById('goAdmin').onclick=()=>{ location.href=ADMIN_DM; };
-  document.getElementById('editProfile').onclick=()=>{ location.href='rimo_profile.html'; };
-  document.getElementById('copyProfileBtn').onclick=()=> copyText(text);
-}
-modal.addEventListener('click',e=>{ if(e.target===modal){ modal.style.display='none'; document.body.classList.remove('modal-open'); }});
-
-/* ===== init ===== */
-(async function init(){
-  initMap();
-  try{
-    const rows=await loadCrews();
-    if(DEBUG) console.log('LOADED rows:', rows.length);
-    renderAll(rows);
-  }catch(err){
-    const list=document.getElementById('list');
-    const msg=document.createElement('div');
-    msg.className='r-card';
-    msg.innerHTML=`<div class="r-msg">데이터를 불러오지 못했습니다. (오프라인이거나 웹앱 응답 없음)</div>`;
-    list.appendChild(msg);
-    console.warn(err);
-  }
+/* ===== 초기 실행 ===== */
+(async function(){
+  const rows=await loadCrews();
+  renderAll(rows);
 })();
 </script>
 </body>
